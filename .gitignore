@@ -1,0 +1,110 @@
+# =============================================================================
+# HisabKitab — .gitignore
+# =============================================================================
+
+# --- Environment variables (NEVER commit secrets) ---
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+!.env.example
+
+# --- Node ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+lerna-debug.log*
+
+# --- Build outputs ---
+dist/
+build/
+out/
+.output/
+
+# --- Next.js ---
+apps/web/.next/
+apps/web/out/
+apps/web/.vercel/
+
+# --- Expo / React Native ---
+apps/mobile/.expo/
+apps/mobile/dist/
+apps/mobile/web-build/
+apps/mobile/android/
+apps/mobile/ios/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# --- Turbo ---
+.turbo/
+
+# --- TypeScript ---
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# --- Testing ---
+coverage/
+.nyc_output/
+*.lcov
+
+# --- IDE / Editor ---
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*.DS_Store
+.DS_Store
+Thumbs.db
+
+# --- macOS ---
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# --- Logs ---
+logs/
+*.log
+
+# --- Supabase local ---
+supabase/.branches/
+supabase/.temp/
+
+# --- MCP config (contains secrets) ---
+.mcp.json
+
+# --- Playwright MCP logs/screenshots ---
+.playwright-mcp/
+
+# --- Claude local settings (user-specific) ---
+.claude/settings.local.json
+
+# --- Misc ---
+*.pem
+.vercel
+.cache/
+tmp/
+temp/
+.env*.local
+
+# Mobile build credentials
+apps/mobile/credentials/
+apps/mobile/credentials.json
+apps/mobile/*.apk
+
+# APK output directory
+apps/mobile/appbundles/

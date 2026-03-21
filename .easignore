@@ -1,0 +1,11 @@
+# EAS Build ignore file
+# NOTE: Do NOT exclude *.png here — assets are needed for the build
+
+expo-env.d.ts
+.vercel
+build-*.apk
+node_modules/
+.expo/
+android/
+ios/
+.git/

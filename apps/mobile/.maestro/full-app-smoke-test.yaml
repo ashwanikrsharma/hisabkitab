@@ -1,0 +1,181 @@
+appId: com.hisabkitab.app
+name: "Full app smoke test — navigate every page without crashes"
+---
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 1: Launch & handle onboarding
+# ═══════════════════════════════════════════════════════════════════════════════
+
+- launchApp:
+    clearState: true
+
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 10000
+
+# Skip onboarding if shown (clearState wipes AsyncStorage)
+- runFlow:
+    when:
+      visible: "Skip"
+    commands:
+      - takeScreenshot: "screenshots/00-onboarding"
+      - tapOn: "Skip"
+
+- runFlow:
+    when:
+      visible: "Get Started"
+    commands:
+      - tapOn: "Get Started"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 2: Login screen — verify Google OAuth + Test Account
+# ═══════════════════════════════════════════════════════════════════════════════
+
+- extendedWaitUntil:
+    visible: "Use Test Account"
+    timeout: 15000
+
+# Verify login page elements
+- assertVisible: "HisabKitab"
+- assertVisible: "Continue with Google"
+- assertVisible: "Use Test Account"
+- takeScreenshot: "screenshots/01-login-page"
+
+# Login with test account
+- tapOn: "Use Test Account"
+- extendedWaitUntil:
+    visible: "Home"
+    timeout: 15000
+- takeScreenshot: "screenshots/03-login-complete"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 3: Home Tab (Dashboard)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+- assertVisible: "HisabKitab"
+- assertVisible:
+    text: "You are owed"
+    optional: true
+- assertVisible:
+    text: "You owe"
+    optional: true
+- assertVisible:
+    text: "Your Groups"
+    optional: true
+- assertVisible:
+    text: "Recent Activity"
+    optional: true
+- takeScreenshot: "screenshots/04-home-tab"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 4: Groups Tab — list, new group form
+# ═══════════════════════════════════════════════════════════════════════════════
+
+- tapOn: "Groups"
+- extendedWaitUntil:
+    visible: "Groups"
+    timeout: 10000
+- takeScreenshot: "screenshots/05-groups-list"
+
+# ─── New Group Form ───────────────────────────────────────────────────────────
+- tapOn: "+ New"
+- extendedWaitUntil:
+    visible: "New Group"
+    timeout: 5000
+- assertVisible: "INR"
+- assertVisible: "Create Group"
+- takeScreenshot: "screenshots/06-new-group-form"
+
+# Go back to groups list without creating (avoid duplicate test groups)
+- back
+- extendedWaitUntil:
+    visible: "Groups"
+    timeout: 5000
+
+# ─── Open first group to test group detail ────────────────────────────────────
+- tapOn:
+    text: "0 members"
+    index: 0
+- extendedWaitUntil:
+    visible: "+ Add Expense"
+    timeout: 10000
+- takeScreenshot: "screenshots/07-group-detail"
+
+# ─── Add Expense form ────────────────────────────────────────────────────────
+- tapOn: "+ Add Expense"
+- extendedWaitUntil:
+    visible: "Add Expense"
+    timeout: 5000
+- takeScreenshot: "screenshots/08-add-expense-form"
+- back
+- extendedWaitUntil:
+    visible: "+ Add Expense"
+    timeout: 5000
+
+# ─── Settle Up screen ────────────────────────────────────────────────────────
+- tapOn: "Settle"
+- extendedWaitUntil:
+    visible: "Mark as paid|All settled"
+    timeout: 10000
+- takeScreenshot: "screenshots/09-settle-up"
+- back
+- extendedWaitUntil:
+    visible: "+ Add Expense"
+    timeout: 5000
+
+# Back to groups list
+- back
+- extendedWaitUntil:
+    visible: "Groups"
+    timeout: 5000
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 5: Activity Tab
+# ═══════════════════════════════════════════════════════════════════════════════
+
+- tapOn: "Activity"
+- extendedWaitUntil:
+    visible: "Activity"
+    timeout: 10000
+- takeScreenshot: "screenshots/12-activity-tab"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 6: Profile Tab — verify all sections
+# ═══════════════════════════════════════════════════════════════════════════════
+
+- tapOn: "Profile"
+- extendedWaitUntil:
+    visible: "Profile"
+    timeout: 10000
+- assertVisible: "Name"
+- assertVisible: "UPI ID"
+- assertVisible: "Default Currency"
+- assertVisible: "Appearance"
+- assertVisible: "Sign Out"
+- takeScreenshot: "screenshots/13-profile-tab"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 7: Full tab round-trip (stability check)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+- tapOn: "Home"
+- extendedWaitUntil:
+    visible: "HisabKitab"
+    timeout: 5000
+- tapOn: "Groups"
+- extendedWaitUntil:
+    visible: "Groups"
+    timeout: 5000
+- tapOn: "Activity"
+- extendedWaitUntil:
+    visible: "Activity"
+    timeout: 5000
+- tapOn: "Profile"
+- extendedWaitUntil:
+    visible: "Profile"
+    timeout: 5000
+- tapOn: "Home"
+- extendedWaitUntil:
+    visible: "HisabKitab"
+    timeout: 5000
+- takeScreenshot: "screenshots/14-final-round-trip"

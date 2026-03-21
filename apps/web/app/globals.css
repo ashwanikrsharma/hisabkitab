@@ -1,0 +1,128 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply bg-surface text-ink antialiased font-body;
+  }
+
+  ::selection {
+    background-color: rgba(232, 101, 26, 0.15);
+    color: #1A1A1A;
+  }
+
+  /* Respect reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-surface-raised rounded-2xl border border-gray-200/60 shadow-warm;
+    contain: paint;
+  }
+
+  .card-hover {
+    @apply card transition-all duration-200 ease-out-expo;
+  }
+  .card-hover:hover {
+    @apply shadow-warm-lg border-accent/20 -translate-y-0.5;
+  }
+  .card-hover:active {
+    @apply scale-[0.99] translate-y-0;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200 ease-out-expo active:scale-[0.97] active:translate-y-px;
+    will-change: transform;
+  }
+  .btn-primary:hover {
+    @apply bg-accent-hover shadow-warm-lg;
+  }
+  .btn-primary:focus-visible {
+    @apply outline-none ring-2 ring-accent ring-offset-2;
+  }
+  .btn-primary:disabled {
+    @apply opacity-50 cursor-not-allowed hover:shadow-warm hover:bg-accent active:scale-100 active:translate-y-0;
+  }
+
+  /* Small variant — use instead of !important overrides */
+  .btn-primary-sm {
+    @apply btn-primary px-3 py-1 text-xs;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-xl border border-gray-200 bg-surface-raised px-5 py-2.5 text-sm font-semibold text-ink transition-all duration-200 ease-out-expo active:scale-[0.97] active:translate-y-px;
+    will-change: transform;
+  }
+  .btn-secondary:hover {
+    @apply bg-surface-sunken border-gray-300;
+  }
+  .btn-secondary:focus-visible {
+    @apply outline-none ring-2 ring-accent ring-offset-2;
+  }
+  .btn-secondary:disabled {
+    @apply opacity-50 cursor-not-allowed active:scale-100 active:translate-y-0;
+  }
+
+  .input-field {
+    @apply w-full rounded-xl border border-gray-200 bg-surface-raised px-4 py-2.5 text-ink placeholder-ink-muted transition-all duration-200 ease-out-expo;
+  }
+  .input-field:focus {
+    @apply border-accent outline-none ring-2 ring-accent-glow;
+  }
+  .input-field:disabled {
+    @apply bg-surface-sunken text-ink-muted cursor-not-allowed;
+  }
+
+  .badge-owe {
+    @apply inline-flex items-center rounded-full bg-danger-light text-danger text-xs font-semibold px-2.5 py-0.5;
+  }
+  .badge-owed {
+    @apply inline-flex items-center rounded-full bg-success-light text-success text-xs font-semibold px-2.5 py-0.5;
+  }
+
+  .glass-header {
+    @apply sticky top-0 z-50 border-b border-white/10 bg-ink/95 backdrop-blur-lg;
+  }
+
+  .stagger-1 { animation-delay: 0.05s; }
+  .stagger-2 { animation-delay: 0.1s; }
+  .stagger-3 { animation-delay: 0.15s; }
+  .stagger-4 { animation-delay: 0.2s; }
+  .stagger-5 { animation-delay: 0.25s; }
+
+  /* Summary card with subtle gradient border for visual weight */
+  .summary-card-owe {
+    @apply card p-5 relative overflow-hidden;
+    background: linear-gradient(135deg, #FFF1F2 0%, #FFFFFF 40%);
+  }
+  .summary-card-owed {
+    @apply card p-5 relative overflow-hidden;
+    background: linear-gradient(135deg, #ECFDF5 0%, #FFFFFF 40%);
+  }
+}
+
+@layer utilities {
+  .text-currency {
+    @apply font-mono tabular-nums tracking-tight;
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .pb-nav {
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px));
+  }
+}

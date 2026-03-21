@@ -1,0 +1,55 @@
+appId: com.hisabkitab.app
+name: "Login with test account and navigate all tabs without crashes"
+---
+
+# ─── Launch app ───────────────────────────────────────────────────────────────
+- launchApp
+
+# ─── Login with test account ──────────────────────────────────────────────────
+- assertVisible: "HisabKitab"
+- assertVisible: "Use Test Account"
+- tapOn: "Use Test Account"
+
+# Wait for login to complete and home tab to load
+- extendedWaitUntil:
+    visible: "Home"
+    timeout: 15000
+
+# ─── Home Tab ─────────────────────────────────────────────────────────────────
+- assertVisible: "HisabKitab"
+- assertVisible:
+    text: "You are owed"
+    optional: true
+- assertVisible:
+    text: "You owe"
+    optional: true
+- takeScreenshot: "screenshots/01-home-tab"
+
+# ─── Groups Tab ───────────────────────────────────────────────────────────────
+- tapOn: "Groups"
+- extendedWaitUntil:
+    visible: "Groups"
+    timeout: 10000
+- takeScreenshot: "screenshots/02-groups-tab"
+
+# ─── Activity Tab ─────────────────────────────────────────────────────────────
+- tapOn: "Activity"
+- extendedWaitUntil:
+    visible: "Activity"
+    timeout: 10000
+- takeScreenshot: "screenshots/03-activity-tab"
+
+# ─── Profile Tab ──────────────────────────────────────────────────────────────
+- tapOn: "Profile"
+- extendedWaitUntil:
+    visible: "Profile"
+    timeout: 10000
+- assertVisible: "Appearance"
+- takeScreenshot: "screenshots/04-profile-tab"
+
+# ─── Navigate back to Home to confirm round-trip works ────────────────────────
+- tapOn: "Home"
+- extendedWaitUntil:
+    visible: "HisabKitab"
+    timeout: 10000
+- takeScreenshot: "screenshots/05-home-tab-return"
