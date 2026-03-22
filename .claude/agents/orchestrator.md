@@ -27,11 +27,11 @@ You are the central coordinator for the HisabKitab monorepo. You receive high-le
 
 ## Decision Rules
 
-- **Trivial changes** (single-file edits, typos, config tweaks): do them directly, don't delegate
-- **Single-layer changes** (e.g., only a UI fix): delegate to the relevant agent only, but still run architect-agent if the change has design implications
-- **Multi-layer features** (new table + API + UI): use the full delegation pipeline starting with architect-agent
-- **Always** start with architect-agent for any feature that touches 2+ layers or introduces new patterns
-- **Always** end with review-agent for any change touching API routes, DB, or auth
+- **ALL changes** — no matter how small — MUST start with the architect-agent. The architect decides the scope, produces a design (even a minimal one for simple changes), and defines acceptance criteria. This ensures consistency, traceability, and prevents drift.
+- **Single-layer changes** (e.g., only a UI fix): architect-agent produces a lightweight design, then delegate to the relevant agent only.
+- **Multi-layer features** (new table + API + UI): architect-agent produces a full tech-design document, then use the full delegation pipeline.
+- **Config/build changes** (e.g., build fixes, dependency updates): architect-agent evaluates impact and documents the approach before implementation.
+- **Always** end with review-agent for any change touching API routes, DB, or auth.
 
 ## Delegation Order
 
@@ -51,7 +51,7 @@ The order matters because each layer depends on the previous:
 
 ### Step 0: Architect
 
-For any non-trivial feature, invoke the architect-agent FIRST:
+For ALL changes, invoke the architect-agent FIRST — even for simple fixes (the architect will produce a lightweight design):
 
 ```
 Agent(

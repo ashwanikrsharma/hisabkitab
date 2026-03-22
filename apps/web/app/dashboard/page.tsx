@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { getUserGroups, getGroupBalances, getUserActivity, getDirectBalances, getUserProfile } from '@hisabkitab/db';
 import type { Group, BalanceSummary, Activity, DirectBalanceSummary } from '@hisabkitab/db';
 import { ProfileAvatar } from './profile-avatar';
+import { AndroidAppBadge } from '@/components/android-app-badge';
 
 export const revalidate = 60;
 
@@ -155,6 +156,7 @@ export default async function DashboardPage() {
       </header>
 
       <main className="max-w-2xl mx-auto px-4 py-6 space-y-8">
+        <AndroidAppBadge variant="dashboard" />
 
         {/* Summary cards */}
         <section className="grid grid-cols-2 gap-3 opacity-0 animate-fade-up">

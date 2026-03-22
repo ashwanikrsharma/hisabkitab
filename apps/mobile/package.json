@@ -13,9 +13,14 @@
     "lint": "eslint . --ext .ts,.tsx",
     "type-check": "tsc --noEmit",
     "postinstall": "node scripts/eas-link-plugins.js",
-    "eas-build-pre-install": "cd ../.. && echo 'install-strategy=nested' > .npmrc && npm install"
+    "eas-build-pre-install": "cd ../.. && npm install"
   },
   "dependencies": {
+    "@babel/generator": "^7.29.1",
+    "@babel/parser": "^7.29.2",
+    "@babel/template": "^7.28.6",
+    "@babel/traverse": "^7.29.0",
+    "@babel/types": "^7.29.0",
     "@expo/vector-icons": "~14.0.4",
     "@gorhom/bottom-sheet": "^5.2.8",
     "@hisabkitab/db": "*",

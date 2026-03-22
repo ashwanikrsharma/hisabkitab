@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { AndroidAppBadge } from '@/components/android-app-badge';
 
 export default async function LandingPage() {
   const cookieStore = cookies();
@@ -43,14 +44,7 @@ export default async function LandingPage() {
             </div>
             <span className="text-lg font-display font-bold text-ink tracking-tight">HisabKitab</span>
           </div>
-          <div className="flex items-center gap-3">
-            <Link href="/login" className="text-sm font-semibold text-ink-secondary hover:text-ink transition-colors px-4 py-2">
-              Log in
-            </Link>
-            <Link href="/login" className="btn-primary px-5 py-2 text-sm">
-              Get Started
-            </Link>
-          </div>
+          <AndroidAppBadge variant="landing" />
         </div>
       </nav>
 
@@ -90,9 +84,10 @@ export default async function LandingPage() {
                 Start for free
               </Link>
               <Link href="/login" className="btn-secondary px-8 py-3.5 text-base w-full sm:w-auto">
-                I have an account
+                Log in
               </Link>
             </div>
+
           </div>
         </div>
       </section>

@@ -235,7 +235,7 @@ Invoke it via the `/manager` slash command (defined in `.claude/commands/manager
 
 ### When to use the orchestrator
 - **ALWAYS** — for every task, regardless of size or scope
-- The orchestrator will determine the right level of effort (e.g., skip architect-agent for a trivial fix, or engage the full pipeline for a feature)
+- The orchestrator ALWAYS invokes the architect-agent first — even for small changes. The architect produces a lightweight or full design depending on scope. No change bypasses the architect.
 
 ### Parallel execution — MANDATORY
 The orchestrator **MUST run independent agents in parallel** to maximize speed and efficiency:
@@ -263,6 +263,6 @@ The orchestrator decomposes work and delegates in order (parallelizing where pos
 - The orchestrator verifies all agents' outputs are consistent before considering the task complete.
 
 ### Tech design documents
-Every non-trivial feature gets a design document in `tech-design/` before implementation begins. See `tech-design/architecture-principles.md` for the foundational rules that all agents must follow.
+Every change gets a design document in `tech-design/` before implementation begins — lightweight for small fixes, full design for features. See `tech-design/architecture-principles.md` for the foundational rules that all agents must follow.
 
 See `.claude/agents/` for each agent's full specification.

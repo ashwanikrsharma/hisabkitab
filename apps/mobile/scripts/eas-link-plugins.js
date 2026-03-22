@@ -26,6 +26,24 @@ const required = [
   'expo-build-properties',
   '@expo/env',
   '@expo/fingerprint',
+  // Metro bundler packages (needed for JS bundling during EAS build)
+  'metro',
+  'metro-core',
+  'metro-config',
+  // Expo modules core (needed for native autolinking)
+  'expo-modules-core',
+  'expo-modules-autolinking',
+  // Dev client sub-dependencies
+  'expo-dev-launcher',
+  'expo-dev-menu',
+  'expo-dev-menu-interface',
+  'expo-manifests',
+  'expo-updates-interface',
+  // Other expo packages that may be nested
+  'expo-asset',
+  'expo-file-system',
+  'expo-keep-awake',
+  'expo-application',
 ];
 
 fs.mkdirSync(localNm, { recursive: true });
