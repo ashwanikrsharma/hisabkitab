@@ -1,17 +1,30 @@
 import { ExpoConfig, ConfigContext } from 'expo/config';
 import path from 'path';
+import fs from 'fs';
 
 // Resolve a plugin name to its absolute path. In monorepo setups, plugins may
 // be hoisted to the root node_modules and not resolvable from apps/mobile/.
 function resolvePlugin(name: string): string {
+  // Debug: log resolution paths on EAS
+  const localNm = path.resolve(__dirname, 'node_modules', name);
+  const rootNm = path.resolve(__dirname, '..', '..', 'node_modules', name);
+  console.log(`[resolvePlugin] ${name}:`);
+  console.log(`  __dirname: ${__dirname}`);
+  console.log(`  local exists: ${fs.existsSync(localNm)} (${localNm})`);
+  console.log(`  root exists: ${fs.existsSync(rootNm)} (${rootNm})`);
+
   try {
-    // Try normal resolution first (works locally and when not hoisted)
-    require.resolve(name);
+    const resolved = require.resolve(name);
+    console.log(`  require.resolve OK: ${resolved}`);
     return name;
-  } catch {
-    // Fallback: resolve from the monorepo root node_modules
-    const rootPath = path.resolve(__dirname, '..', '..', 'node_modules', name);
-    return rootPath;
+  } catch (e: any) {
+    console.log(`  require.resolve FAILED: ${e.message}`);
+    if (fs.existsSync(rootNm)) {
+      console.log(`  Using root fallback: ${rootNm}`);
+      return rootNm;
+    }
+    // Last resort: return name and let Expo fail with a clear error
+    return name;
   }
 }
 
