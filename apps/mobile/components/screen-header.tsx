@@ -7,17 +7,18 @@ import type { ColorTokens } from '../lib/theme';
 type ScreenHeaderProps = {
   title: string;
   showBack?: boolean;
+  onBack?: () => void;
   rightElement?: React.ReactNode;
 };
 
-export function ScreenHeader({ title, showBack = true, rightElement }: ScreenHeaderProps) {
+export function ScreenHeader({ title, showBack = true, onBack, rightElement }: ScreenHeaderProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
   return (
     <View style={styles.header}>
       {showBack ? (
-        <TouchableOpacity onPress={() => router.back()} hitSlop={8}>
+        <TouchableOpacity onPress={onBack ?? (() => router.back())} hitSlop={8}>
           <Text style={styles.backButton}>{'<'} Back</Text>
         </TouchableOpacity>
       ) : (

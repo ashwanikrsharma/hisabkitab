@@ -5,6 +5,7 @@ import {
   StyleSheet,
   SafeAreaView,
   Alert,
+  TouchableOpacity,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useGroupDetail, useAddMember } from '../../../../hooks/use-api';
@@ -41,9 +42,11 @@ export default function AddMemberScreen() {
     );
   };
 
+  const goBack = () => router.push(`/(tabs)/groups/${id}`);
+
   return (
     <SafeAreaView style={styles.safeArea}>
-      <ScreenHeader title="Add Member" />
+      <ScreenHeader title="Add Member" onBack={goBack} />
       <View style={styles.content}>
         <UserSearch
           onSelect={handleSelect}
@@ -62,6 +65,10 @@ export default function AddMemberScreen() {
             ))}
           </View>
         )}
+
+        <TouchableOpacity style={styles.doneButton} onPress={goBack}>
+          <Text style={styles.doneButtonText}>Done adding members</Text>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
@@ -98,5 +105,15 @@ const createStyles = (colors: ColorTokens) =>
       fontSize: 15,
       fontWeight: '500',
       color: colors.text,
+    },
+    doneButton: {
+      marginTop: 'auto' as const,
+      paddingVertical: 14,
+      alignItems: 'center' as const,
+    },
+    doneButtonText: {
+      fontSize: 15,
+      fontWeight: '600',
+      color: colors.primary,
     },
   });
