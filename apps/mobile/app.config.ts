@@ -1,32 +1,4 @@
 import { ExpoConfig, ConfigContext } from 'expo/config';
-import path from 'path';
-import fs from 'fs';
-
-// Resolve a plugin name to its absolute path. In monorepo setups, plugins may
-// be hoisted to the root node_modules and not resolvable from apps/mobile/.
-function resolvePlugin(name: string): string {
-  // Debug: log resolution paths on EAS
-  const localNm = path.resolve(__dirname, 'node_modules', name);
-  const rootNm = path.resolve(__dirname, '..', '..', 'node_modules', name);
-  console.log(`[resolvePlugin] ${name}:`);
-  console.log(`  __dirname: ${__dirname}`);
-  console.log(`  local exists: ${fs.existsSync(localNm)} (${localNm})`);
-  console.log(`  root exists: ${fs.existsSync(rootNm)} (${rootNm})`);
-
-  try {
-    const resolved = require.resolve(name);
-    console.log(`  require.resolve OK: ${resolved}`);
-    return name;
-  } catch (e: any) {
-    console.log(`  require.resolve FAILED: ${e.message}`);
-    if (fs.existsSync(rootNm)) {
-      console.log(`  Using root fallback: ${rootNm}`);
-      return rootNm;
-    }
-    // Last resort: return name and let Expo fail with a clear error
-    return name;
-  }
-}
 
 // Environment variables are injected at build time.
 // On mobile, access these via Constants.expoConfig.extra — NEVER hardcode.
@@ -76,17 +48,17 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     bundler: 'metro',
   },
   plugins: [
-    resolvePlugin('expo-router'),
-    resolvePlugin('expo-secure-store'),
+    'expo-router',
+    'expo-secure-store',
     [
-      resolvePlugin('expo-notifications'),
+      'expo-notifications',
       {
         icon: './assets/notification-icon.png',
         color: '#E8651A',
       },
     ],
     [
-      resolvePlugin('expo-build-properties'),
+      'expo-build-properties',
       {
         android: {
           // Only include arm64 (real devices) + x86_64 (emulators).

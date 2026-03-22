@@ -34,7 +34,5 @@
   "engines": {
     "node": "20.x"
   },
-  "dependencies": {
-    "expo-build-properties": "^55.0.10"
-  }
+  "dependencies": {}
 }

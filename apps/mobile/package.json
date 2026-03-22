@@ -12,8 +12,7 @@
     "build": "expo export",
     "lint": "eslint . --ext .ts,.tsx",
     "type-check": "tsc --noEmit",
-    "eas-build-pre-install": "cd ../.. && npm install",
-    "eas-build-post-install": "bash scripts/eas-symlink-plugins.sh"
+    "eas-build-pre-install": "cd ../.. && npm install"
   },
   "dependencies": {
     "@expo/vector-icons": "~14.0.4",
