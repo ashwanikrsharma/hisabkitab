@@ -1,4 +1,19 @@
 import { ExpoConfig, ConfigContext } from 'expo/config';
+import path from 'path';
+
+// Resolve a plugin name to its absolute path. In monorepo setups, plugins may
+// be hoisted to the root node_modules and not resolvable from apps/mobile/.
+function resolvePlugin(name: string): string {
+  try {
+    // Try normal resolution first (works locally and when not hoisted)
+    require.resolve(name);
+    return name;
+  } catch {
+    // Fallback: resolve from the monorepo root node_modules
+    const rootPath = path.resolve(__dirname, '..', '..', 'node_modules', name);
+    return rootPath;
+  }
+}
 
 // Environment variables are injected at build time.
 // On mobile, access these via Constants.expoConfig.extra — NEVER hardcode.
@@ -48,17 +63,17 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     bundler: 'metro',
   },
   plugins: [
-    'expo-router',
-    'expo-secure-store',
+    resolvePlugin('expo-router'),
+    resolvePlugin('expo-secure-store'),
     [
-      'expo-notifications',
+      resolvePlugin('expo-notifications'),
       {
         icon: './assets/notification-icon.png',
         color: '#E8651A',
       },
     ],
     [
-      'expo-build-properties',
+      resolvePlugin('expo-build-properties'),
       {
         android: {
           // Only include arm64 (real devices) + x86_64 (emulators).
