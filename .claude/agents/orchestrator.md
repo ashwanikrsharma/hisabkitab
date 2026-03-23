@@ -168,9 +168,12 @@ By default, verify on **all three platforms** after every change — regardless 
 
 ### 5. Regression Test Requirements for New Code
 - Every new API route MUST have at least: auth test (401), validation test (400), success test (200)
-- Every bug fix MUST include a test that reproduces the bug and verifies the fix
+- Every bug fix MUST include a regression test on the affected platform:
+  - **Web/API/shared bugs** → web-test-agent writes Vitest unit test or Playwright E2E test
+  - **Mobile bugs** → mobile-test-agent writes a Maestro regression flow (`bugfix-*.yaml`)
+  - **Cross-platform bugs** (e.g., shared package) → both agents write platform-specific regression tests
 - Every new UI component MUST have a render test
-- Test-web-agent creates these tests; review-agent verifies they exist
+- The orchestrator routes bug-fix test work to the correct agent based on which platform is affected
 
 ### 6. Pre-Deployment Gate
 Before ANY deployment (preview or production):

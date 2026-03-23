@@ -107,7 +107,7 @@ All security checks and conventions verified.
 - [ ] No layer violations (raw Supabase in API routes, DB imports in frontend)
 - [ ] All client-side mutations call `router.refresh()` after success
 - [ ] Authorization checks present on resource-access routes
-- [ ] Regression tests exist for all new code and bug fixes
+- [ ] Regression tests exist for all new code and bug fixes (Playwright/Vitest for web, Maestro for mobile)
 - [ ] No tests were deleted or skipped to pass the suite
 - [ ] Web-test-agent reported all tests passing
 - [ ] `specification/SPEC.md` updated to reflect the implemented changes (spec-agent responsibility)

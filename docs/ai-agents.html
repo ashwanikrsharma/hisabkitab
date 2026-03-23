@@ -368,18 +368,80 @@ backend-agent &#x25C4;&#x2500;&#x25BA; frontend-agent
           <li>If agents discover conflicts, they report back to the orchestrator rather than overwriting each other's work</li>
         </ul>
 
-        <h3>Tool Access</h3>
-        <ul>
-          <li>All implementation agents have access to: <code>Read</code>, <code>Write</code>, <code>Edit</code>, <code>Bash</code>, <code>Grep</code>, <code>Glob</code></li>
-          <li>The <code>review-agent</code> is restricted to: <code>Read</code>, <code>Bash</code>, <code>Grep</code>, <code>Glob</code> (no writes)</li>
-        </ul>
-
-        <h3>External Services</h3>
-        <ul>
-          <li><strong>Supabase MCP</strong>: Direct database access for schema inspection during development</li>
-          <li><strong>Vercel CLI</strong>: Deployment operations (web-build-deploy-agent only)</li>
-          <li><strong>EAS CLI</strong>: Mobile build operations (mobile-build-deploy-agent only)</li>
-        </ul>
+        <h3>Tools, CLIs &amp; MCPs per Agent</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Agent</th><th>Claude Tools</th><th>CLIs</th><th>MCP Servers</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><strong>orchestrator</strong></td>
+                <td>Read, Write, Edit, Bash, Grep, Glob, <strong>Agent</strong></td>
+                <td><code>npx turbo</code> (build, test, type-check), <code>npx next dev</code>, <code>npx expo run:android</code>, <code>npx expo run:ios</code></td>
+                <td>&mdash;</td>
+              </tr>
+              <tr>
+                <td><strong>architect-agent</strong></td>
+                <td>Read, Write, Edit, Bash, Grep, Glob</td>
+                <td>&mdash;</td>
+                <td>&mdash;</td>
+              </tr>
+              <tr>
+                <td><strong>db-agent</strong></td>
+                <td>Read, Write, Edit, Bash, Grep, Glob</td>
+                <td><code>npx tsc</code> (type-check)</td>
+                <td><strong>Supabase MCP</strong> (schema inspection, SQL execution)</td>
+              </tr>
+              <tr>
+                <td><strong>backend-agent</strong></td>
+                <td>Read, Write, Edit, Bash, Grep, Glob</td>
+                <td><code>npx tsc</code></td>
+                <td>&mdash;</td>
+              </tr>
+              <tr>
+                <td><strong>frontend-agent</strong></td>
+                <td>Read, Write, Edit, Bash, Grep, Glob</td>
+                <td><code>npx tsc</code></td>
+                <td>&mdash;</td>
+              </tr>
+              <tr>
+                <td><strong>spec-agent</strong></td>
+                <td>Read, Write, Edit, Bash, Grep, Glob</td>
+                <td>&mdash;</td>
+                <td>&mdash;</td>
+              </tr>
+              <tr>
+                <td><strong>web-test-agent</strong></td>
+                <td>Read, Write, Edit, Bash, Grep, Glob</td>
+                <td><code>npx playwright test</code>, <code>npx vitest run</code>, <code>npx turbo test</code></td>
+                <td>&mdash;</td>
+              </tr>
+              <tr>
+                <td><strong>mobile-test-agent</strong></td>
+                <td>Read, Write, Edit, Bash, Grep, Glob</td>
+                <td><code>maestro test</code></td>
+                <td>&mdash;</td>
+              </tr>
+              <tr>
+                <td><strong>review-agent</strong></td>
+                <td>Read, Bash, Grep, Glob <em>(no writes)</em></td>
+                <td><code>npx turbo test</code>, <code>npx turbo build</code></td>
+                <td>&mdash;</td>
+              </tr>
+              <tr>
+                <td><strong>web-build-deploy-agent</strong></td>
+                <td>Read, Bash, Glob, Grep</td>
+                <td><code>vercel</code> (deploy, build, env), <code>npx turbo build</code></td>
+                <td>&mdash;</td>
+              </tr>
+              <tr>
+                <td><strong>mobile-build-deploy-agent</strong></td>
+                <td>Read, Bash, Glob</td>
+                <td><code>eas build</code> (EAS CLI), <code>adb install</code>, <code>gradlew clean</code></td>
+                <td>&mdash;</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         <hr>
 

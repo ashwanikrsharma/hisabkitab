@@ -504,6 +504,25 @@
     </div>
 
     <details>
+      <summary>CLIs &amp; MCPs Used by Agents</summary>
+      <div class="details-body">
+        <table>
+          <thead><tr><th>Agent</th><th>CLIs</th><th>MCP</th></tr></thead>
+          <tbody>
+            <tr><td>orchestrator</td><td><code>npx turbo</code>, <code>npx next dev</code>, <code>npx expo run:android</code>, <code>npx expo run:ios</code></td><td>&mdash;</td></tr>
+            <tr><td>db-agent</td><td><code>npx tsc</code></td><td>Supabase MCP</td></tr>
+            <tr><td>web-test-agent</td><td><code>npx playwright test</code>, <code>npx vitest run</code>, <code>npx turbo test</code></td><td>&mdash;</td></tr>
+            <tr><td>mobile-test-agent</td><td><code>maestro test</code></td><td>&mdash;</td></tr>
+            <tr><td>review-agent</td><td><code>npx turbo test</code>, <code>npx turbo build</code></td><td>&mdash;</td></tr>
+            <tr><td>web-build-deploy-agent</td><td><code>vercel</code>, <code>npx turbo build</code></td><td>&mdash;</td></tr>
+            <tr><td>mobile-build-deploy-agent</td><td><code>eas build</code>, <code>adb install</code>, <code>gradlew clean</code></td><td>&mdash;</td></tr>
+          </tbody>
+        </table>
+        <p style="font-size:12px;color:var(--text-secondary);margin-top:4px;">Agents not listed (architect, backend, frontend, spec) use only Claude tools (Read/Write/Edit/Bash/Grep/Glob) with no external CLIs or MCPs.</p>
+      </div>
+    </details>
+
+    <details>
       <summary>Regression Gates (Mandatory Before Deploy)</summary>
       <div class="details-body">
         <ul class="checklist">

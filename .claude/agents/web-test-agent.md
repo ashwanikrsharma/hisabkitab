@@ -114,6 +114,34 @@ npx vitest run
 npx vitest run src/services/src/queries/expenses.test.ts
 ```
 
+## Bug Fix Regression Tests (MANDATORY)
+
+Every bug fix MUST include tests that:
+1. **Reproduce the bug** — a test that would have failed before the fix
+2. **Verify the fix** — the same test now passes after the fix
+3. **Use the right tool for the layer**:
+   - **API/backend bugs** → Vitest unit test in `src/services/` or `src/web/` (co-located `*.test.ts`)
+   - **UI rendering bugs** → Vitest component test (co-located `*.test.ts`)
+   - **User flow / integration bugs** → Playwright E2E test in `src/web/e2e/`
+   - **Cross-layer bugs** (e.g., form submission → API → DB) → Playwright E2E test
+4. **Name the test clearly**: `should not [bug behavior] when [trigger condition]`
+
+Example for a bug fix:
+```ts
+// src/web/e2e/settlements.spec.ts (Playwright — user flow bug)
+test('should not show 500 error when settling with zero balance', async ({ page }) => {
+  // Setup: navigate to settlement page with zero balance
+  // Action: click settle button
+  // Assert: no error, shows "already settled" message
+});
+
+// src/services/src/queries/balances.test.ts (Vitest — backend bug)
+it('should not return negative balance when all expenses are settled', () => {
+  // Reproduce: create scenario that triggered the bug
+  // Assert: balance is zero, not negative
+});
+```
+
 ## Regression Prevention (MANDATORY)
 
 Before completing your work, you MUST:
@@ -122,7 +150,7 @@ Before completing your work, you MUST:
 2. **Verify no regressions**: If any existing test fails, fix it or report to the orchestrator
 3. **Write tests for new code**:
    - Every new API route: auth test (401), validation test (400), success test (200/201), error test (500)
-   - Every bug fix: a test that reproduces the bug scenario and verifies the fix
+   - Every bug fix: regression tests as described above
    - Every new UI component: a render test verifying it mounts without errors
 4. **Report test results**: Include pass/fail counts in your completion summary
 

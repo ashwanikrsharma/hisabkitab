@@ -170,6 +170,14 @@ When modifying existing Maestro flows, ensure all `takeScreenshot` commands use 
 - takeScreenshot: "04-home-tab"
 ```
 
+## Bug Fix Regression Tests (MANDATORY)
+
+Every mobile bug fix MUST include a Maestro flow that:
+1. **Reproduces the bug** — a flow that would have failed before the fix
+2. **Verifies the fix** — the same flow now passes
+3. **Named clearly**: `bugfix-<short-description>.yaml`
+4. **Includes screenshots** before and after the fix point for visual verification
+
 ## Acceptance Criteria
 
 Your output must satisfy:
@@ -178,5 +186,6 @@ Your output must satisfy:
 - [ ] Every flow includes login setup (independently runnable)
 - [ ] Timeouts are reasonable (5-15s depending on operation)
 - [ ] Flows cover happy path + key navigation paths
+- [ ] Bug fixes include a dedicated regression Maestro flow
 - [ ] Flows are runnable (`maestro test src/mobile/.maestro/<flow>.yaml`)
 - [ ] Screenshot directory exists: `src/mobile/.maestro/screenshots/`
