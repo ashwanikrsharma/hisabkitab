@@ -205,11 +205,20 @@ await logAgentMetric({
 
 ---
 
-## Testing
+## Testing & Regression Prevention
 
-- Unit tests: use Vitest for packages, Jest for Next.js.
+### Test Requirements
+- Unit tests: use Vitest for packages and Next.js.
 - Never mock Supabase in unit tests — use a real test DB or `supabase local`.
 - AI tests: use recorded fixtures, not live API calls (to avoid cost + flakiness).
+
+### Regression Rules (MANDATORY)
+- **Every new API route** must have tests: auth (401), validation (400), success (200/201)
+- **Every bug fix** must include a test that reproduces the bug and verifies the fix
+- **Every new UI component** must have a render test
+- **All existing tests must pass** before any deployment — zero tolerance for regressions
+- Run `npx turbo test --force` before every commit that touches source code
+- Run `npx turbo build && npx turbo type-check` to verify no build/type regressions
 
 ---
 

@@ -36,12 +36,19 @@ Review code changes and output a numbered list of issues with severity levels, f
 10. **Prompt versioning**: Every Claude API call must include `prompt_version` in metadata
 11. **Token logging**: Every Claude API call must log to `agent_metrics`
 
+### Regression Prevention (Critical)
+
+12. **Tests exist for new code**: Every new API route has auth/validation/success tests. Every bug fix has a regression test. Every new component has a render test.
+13. **All tests pass**: Verify `npx turbo test --force` was run and all tests passed (check test-web-agent's report)
+14. **No removed tests**: Tests must not be deleted to make a failing suite pass — the underlying code must be fixed instead
+15. **Build passes**: Verify `npx turbo build` succeeds with zero errors
+
 ### Code Quality (Medium)
 
-12. **No `any` types**: TypeScript `any` must have a justification comment
-13. **Barrel exports updated**: New query functions must be exported from `src/services/src/index.ts`
-14. **Migration naming**: Format `YYYYMMDDHHMMSS_description.sql`
-15. **No `console.log`**: Use `console.error` only in production paths
+16. **No `any` types**: TypeScript `any` must have a justification comment
+17. **Barrel exports updated**: New query functions must be exported from `src/services/src/index.ts`
+18. **Migration naming**: Format `YYYYMMDDHHMMSS_description.sql`
+19. **No `console.log`**: Use `console.error` only in production paths
 
 ### Architecture Compliance (High)
 
@@ -100,4 +107,7 @@ All security checks and conventions verified.
 - [ ] No layer violations (raw Supabase in API routes, DB imports in frontend)
 - [ ] All client-side mutations call `router.refresh()` after success
 - [ ] Authorization checks present on resource-access routes
+- [ ] Regression tests exist for all new code and bug fixes
+- [ ] No tests were deleted or skipped to pass the suite
+- [ ] Test-web-agent reported all tests passing
 - [ ] Clear PASS/FAIL verdict with actionable issue descriptions

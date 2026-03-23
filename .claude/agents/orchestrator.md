@@ -117,20 +117,85 @@ After the architect-agent completes:
 2. Confirm the file change manifest covers all affected areas
 
 After each implementation agent completes:
-1. Run `cd /Users/asharma52/git/asharma52/hisabkitab && npx turbo build` to verify the build
+1. Run `cd /Users/asharma52/github/hisabkitab && npx turbo build` to verify the build
 2. If build fails, analyze errors and ask the responsible agent to fix them
 3. After all agents complete, run the full build one final time
+
+## Regression Prevention (MANDATORY)
+
+After all implementation agents complete and before review-agent, run a **full regression check**:
+
+### 1. Synthetic Tests (automated)
+- Run `npx turbo test --force` — ALL existing unit and integration tests must pass
+- If ANY test fails, route the failure back to the responsible agent for fixing
+- Do NOT proceed to review or deployment until all tests pass
+- New features/fixes MUST include tests covering the change (test-web-agent responsibility)
+
+### 2. Build Verification
+- Run `npx turbo build` — full build across all workspaces must succeed
+- Type-check: `npx turbo type-check` — zero TypeScript errors
+
+### 3. Platform Verification — ALL THREE PLATFORMS (MANDATORY)
+
+By default, verify on **all three platforms** after every change — regardless of which files were touched. Changes to shared packages (`src/services/`, `src/shared/`) or API routes affect all consumers. Only skip a platform if the user explicitly says to test on a specific platform only.
+
+#### 3a. Web Verification
+- Start `cd src/web && npx next dev -p 3000`
+- Check: landing page renders, login page accessible, dashboard loads for authenticated users
+- If any page returns 500/404 that wasn't 500/404 before, BLOCK and fix
+
+#### 3b. Android Verification
+- Build and launch on Android emulator: `export JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home && export ANDROID_HOME=$HOME/Library/Android/sdk && export PATH="$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/emulator:$PATH" && cd src/mobile && npx expo run:android`
+- Verify: app launches without crash, navigation works, key screens render
+- Check that the changed feature works on Android
+
+#### 3c. iOS Verification
+- Build and launch on iOS simulator: `cd src/mobile && npx expo run:ios --device "iPhone 17 Pro"`
+- Verify: app launches without crash, navigation works, key screens render
+- Check that the changed feature works on iOS
+
+#### Running in parallel
+- Launch Android and iOS builds **in parallel** (single message, two Agent calls) to save time
+- Web verification can run concurrently with mobile builds
+- Report results for all three platforms in the completion summary
+
+#### When to skip a platform
+- ONLY skip if the user explicitly says: "test only on web", "just check Android", "skip iOS", etc.
+- If the user doesn't specify, verify ALL THREE platforms
+
+### 5. Regression Test Requirements for New Code
+- Every new API route MUST have at least: auth test (401), validation test (400), success test (200)
+- Every bug fix MUST include a test that reproduces the bug and verifies the fix
+- Every new UI component MUST have a render test
+- Test-web-agent creates these tests; review-agent verifies they exist
+
+### 6. Pre-Deployment Gate
+Before ANY deployment (preview or production):
+- All synthetic tests pass (zero failures)
+- Build succeeds (zero errors)
+- Type-check passes (zero errors)
+- No regressions in existing functionality
+
+If any gate fails, the orchestrator MUST fix the issue before proceeding. Never deploy with failing tests.
 
 After review-agent completes:
 1. If FAIL — route specific issues back to the responsible agent
 2. If PASS — proceed to deployment
 
-After review passes, deploy in parallel as applicable:
-1. **Always** invoke **web-build-deploy-agent** to deploy `src/web/` to Vercel (preview by default, production only when explicitly requested). Report the deployment URL in the completion summary.
-2. If `src/mobile/` was touched, invoke **mobile-build-deploy-agent** in parallel with web-build-deploy-agent to build a preview APK. Report the APK path in the completion summary.
+After review passes, deploy and verify ALL platforms (unless user specifies otherwise):
+1. **Web**: Run locally (`cd src/web && npx next dev -p 3000`) + create Vercel preview (`vercel` without `--prod`). Production (`vercel --prod --yes`) only when user explicitly requests.
+2. **Android**: Build and launch on emulator (`npx expo run:android` from `src/mobile/`).
+3. **iOS**: Build and launch on simulator (`npx expo run:ios --device "iPhone 17 Pro"` from `src/mobile/`).
+4. Run Android + iOS builds **in parallel** for speed.
+5. EAS cloud builds only when user explicitly requests.
 
 After all deployments complete:
-1. Report completion with a summary of all changes, deployment URLs, and link to the tech-design document
+1. Report completion with:
+   - Summary of all changes
+   - Test results (pass/fail counts)
+   - Platform verification results (Web: OK/FAIL, Android: OK/FAIL, iOS: OK/FAIL)
+   - Deployment URLs (if deployed)
+   - Link to the tech-design document
 
 ## Project Structure Reference
 

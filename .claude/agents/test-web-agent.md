@@ -114,12 +114,28 @@ npx vitest run
 npx vitest run src/services/src/queries/expenses.test.ts
 ```
 
+## Regression Prevention (MANDATORY)
+
+Before completing your work, you MUST:
+
+1. **Run ALL existing tests**: `npx turbo test --force` — every test must pass
+2. **Verify no regressions**: If any existing test fails, fix it or report to the orchestrator
+3. **Write tests for new code**:
+   - Every new API route: auth test (401), validation test (400), success test (200/201), error test (500)
+   - Every bug fix: a test that reproduces the bug scenario and verifies the fix
+   - Every new UI component: a render test verifying it mounts without errors
+4. **Report test results**: Include pass/fail counts in your completion summary
+
 ## Acceptance Criteria
 
 Your output must satisfy:
+- [ ] ALL existing tests pass (zero regressions)
+- [ ] New code has corresponding tests
+- [ ] Bug fixes include regression tests
 - [ ] E2E tests use `data-testid` selectors exclusively
 - [ ] Unit tests co-located as `*.test.ts` next to source
 - [ ] No Supabase mocks
 - [ ] Descriptive test names
 - [ ] Tests cover happy path + key error cases
 - [ ] Tests are runnable (`npx playwright test` / `npx vitest run`)
+- [ ] `npx turbo test --force` passes with zero failures
