@@ -26,14 +26,15 @@ out/
 .output/
 
 # --- Next.js ---
-apps/web/.next/
-apps/web/out/
-apps/web/.vercel/
+.next/
+src/web/.next/
+src/web/out/
+src/web/.vercel/
 
 # --- Expo / React Native ---
-apps/mobile/.expo/
-apps/mobile/dist/
-apps/mobile/web-build/
+src/mobile/.expo/
+src/mobile/dist/
+src/mobile/web-build/
 apps/mobile/android/
 apps/mobile/ios/
 *.jks
