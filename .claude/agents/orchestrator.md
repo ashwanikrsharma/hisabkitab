@@ -33,7 +33,7 @@ You are the central coordinator for the HisabKitab monorepo. You receive high-le
 - **Config/build changes** (e.g., build fixes, dependency updates): architect-agent evaluates impact and documents the approach before implementation.
 - **Always** end with review-agent for any change touching API routes, DB, or auth.
 - **Always** invoke **spec-agent** after implementation to update `specification/SPEC.md` — the spec is the living source of truth for what the product can do. Features added, bugs fixed, and behaviors changed must be reflected in the spec.
-- **Always** ensure tests cover the spec — after the spec-agent updates the spec, the test-web-agent must verify that tests exist for all features described in the spec.
+- **Always** ensure tests cover the spec — after the spec-agent updates the spec, the web-test-agent must verify that tests exist for all features described in the spec.
 
 ## Delegation Order
 
@@ -44,8 +44,8 @@ The order matters because each layer depends on the previous:
 2. **backend-agent** — API routes that consume the new DB functions (following architect's §4.2 + §5)
 3. **frontend-agent** — UI that calls the new API routes (following architect's §4.3 + §5)
 4. **spec-agent** — Update `specification/SPEC.md` to reflect the implemented changes. See `.claude/agents/spec-agent.md`. Runs after implementation agents complete.
-5. **test-web-agent** — Write tests covering the change AND verify tests exist for all features in the updated spec. Run `npx turbo test --force` — zero failures. Runs in parallel with test-mobile-agent.
-6. **test-mobile-agent** (if `src/mobile/` was touched) — Mobile E2E tests with Maestro. Screenshots go to `src/mobile/.maestro/screenshots/`. Runs in parallel with test-web-agent.
+5. **web-test-agent** — Write tests covering the change AND verify tests exist for all features in the updated spec. Run `npx turbo test --force` — zero failures. Runs in parallel with mobile-test-agent.
+6. **mobile-test-agent** (if `src/mobile/` was touched) — Mobile E2E tests with Maestro. Screenshots go to `src/mobile/.maestro/screenshots/`. Runs in parallel with web-test-agent.
 7. **review-agent** — Final security, convention, architecture compliance, AND spec coverage check. Verifies: implementation matches spec, tests cover spec features, no regressions.
 8. **web-build-deploy-agent** — Build and deploy `src/web/` to Vercel via CLI (never via git push). See `.claude/agents/web-build-deploy-agent.md`. Defaults to preview deployment; only production when explicitly requested.
 9. **mobile-build-deploy-agent** (optional) — Build Android APK locally if the change touches `src/mobile/`. See `.claude/agents/mobile-build-deploy-agent.md`.
@@ -132,7 +132,7 @@ After all implementation agents complete and before review-agent, run a **full r
 - Run `npx turbo test --force` — ALL existing unit and integration tests must pass
 - If ANY test fails, route the failure back to the responsible agent for fixing
 - Do NOT proceed to review or deployment until all tests pass
-- New features/fixes MUST include tests covering the change (test-web-agent responsibility)
+- New features/fixes MUST include tests covering the change (web-test-agent responsibility)
 
 ### 2. Build Verification
 - Run `npx turbo build` — full build across all workspaces must succeed

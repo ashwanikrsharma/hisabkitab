@@ -180,9 +180,14 @@
             <div class="agent-card-desc">Keeps the living product spec in sync with implemented changes after every feature or fix.</div>
           </div>
           <div class="agent-card">
-            <div class="agent-card-name">test-agent <span class="badge-opus">opus</span></div>
-            <div class="agent-card-domain">Testing &rarr; <code>**/*.test.ts</code>, <code>src/web/e2e/</code></div>
+            <div class="agent-card-name">web-test-agent <span class="badge-opus">opus</span></div>
+            <div class="agent-card-domain">Web Testing &rarr; <code>**/*.test.ts</code>, <code>src/web/e2e/</code></div>
             <div class="agent-card-desc">Unit tests (Vitest), E2E tests (Playwright), fixture management.</div>
+          </div>
+          <div class="agent-card">
+            <div class="agent-card-name">mobile-test-agent <span class="badge-opus">opus</span></div>
+            <div class="agent-card-domain">Mobile Testing &rarr; <code>src/mobile/.maestro/</code></div>
+            <div class="agent-card-desc">Mobile E2E tests with Maestro. Screenshots to <code>.maestro/screenshots/</code>.</div>
           </div>
           <div class="agent-card">
             <div class="agent-card-name">review-agent <span class="badge-opus">opus</span></div>
@@ -245,7 +250,7 @@ backend-agent &#x25C4;&#x2500;&#x25BA; frontend-agent
                &#x25BC;
          spec-agent                     &#x2190; update SPEC.md
                &#x25BC;
-    test-agent  &#x2551;  review-agent    &#x2190; always in parallel
+    web-test-agent  &#x2551;  mobile-test-agent  &#x2551;  review-agent    &#x2190; always in parallel
                &#x25BC;
     web-build-deploy-agent  &#x2551;  mobile-build-deploy-agent  &#x2190; in parallel if both needed</code></pre>
 
@@ -253,7 +258,7 @@ backend-agent &#x25C4;&#x2500;&#x25BA; frontend-agent
         <ul>
           <li><code>db-agent</code> + <code>frontend-agent</code> can run in parallel when work is independent</li>
           <li><code>backend-agent</code> + <code>frontend-agent</code> can run in parallel when the API contract is defined by the architect</li>
-          <li><code>test-agent</code> + <code>review-agent</code> MUST always run in parallel after implementation</li>
+          <li><code>web-test-agent</code> + <code>mobile-test-agent</code> + <code>review-agent</code> MUST always run in parallel after implementation</li>
           <li><code>web-build-deploy-agent</code> + <code>mobile-build-deploy-agent</code> run in parallel when both apps were modified</li>
           <li>Agents serialize only when there is a true data dependency (e.g., backend needs db types)</li>
         </ul>
@@ -283,7 +288,8 @@ backend-agent &#x25C4;&#x2500;&#x25BA; frontend-agent
           <div class="scenario-steps">
             Orchestrator analysis: Single-layer (frontend only)<br>
             &rarr; <strong>frontend-agent</strong>: Add category display to group page<br>
-            &rarr; <strong>test-agent + review-agent</strong>: Verify and check conventions
+            &rarr; <strong>spec-agent</strong>: Update SPEC.md<br>
+            &rarr; <strong>web-test-agent + review-agent</strong>: Verify and check conventions
           </div>
         </div>
 
@@ -294,7 +300,8 @@ backend-agent &#x25C4;&#x2500;&#x25BA; frontend-agent
             &rarr; <strong>architect-agent</strong>: Design doc with DB schema, API contract, UI wireframe<br>
             &rarr; <strong>db-agent</strong>: Migration for dispute columns, query functions<br>
             &rarr; <strong>backend-agent + frontend-agent</strong>: (parallel, using architect's API contract)<br>
-            &rarr; <strong>test-agent + review-agent</strong>: (parallel)<br>
+            &rarr; <strong>spec-agent</strong>: Update SPEC.md<br>
+            &rarr; <strong>web-test-agent + mobile-test-agent + review-agent</strong>: (parallel)<br>
             &rarr; <strong>web-build-deploy-agent</strong>: Preview deploy
           </div>
         </div>
@@ -304,7 +311,8 @@ backend-agent &#x25C4;&#x2500;&#x25BA; frontend-agent
           <div class="scenario-steps">
             Orchestrator analysis: Targeted bug fix<br>
             &rarr; <strong>backend-agent</strong>: Investigate and fix the route handler<br>
-            &rarr; <strong>test-agent + review-agent</strong>: (parallel)
+            &rarr; <strong>spec-agent</strong>: Update SPEC.md<br>
+            &rarr; <strong>web-test-agent + review-agent</strong>: (parallel)
           </div>
         </div>
 
@@ -330,7 +338,9 @@ backend-agent &#x25C4;&#x2500;&#x25BA; frontend-agent
               <tr><td><strong>db-agent</strong></td><td>Never modify existing migrations; always create new ones. Every table needs RLS + indexes.</td></tr>
               <tr><td><strong>backend-agent</strong></td><td>Follow the exact handler pipeline (auth → validate → query → log → respond).</td></tr>
               <tr><td><strong>frontend-agent</strong></td><td>Server Components by default. Client Components only for interactivity. INR formatting with <code>en-IN</code> locale.</td></tr>
-              <tr><td><strong>test-agent</strong></td><td>Always use <code>data-testid</code> selectors. No Supabase mocks. AI tests use recorded fixtures.</td></tr>
+              <tr><td><strong>web-test-agent</strong></td><td>Always use <code>data-testid</code> selectors. No Supabase mocks. AI tests use recorded fixtures.</td></tr>
+              <tr><td><strong>mobile-test-agent</strong></td><td>Maestro E2E flows. Screenshots to <code>.maestro/screenshots/</code>. Runs in parallel with web-test-agent.</td></tr>
+              <tr><td><strong>spec-agent</strong></td><td>Updates <code>specification/SPEC.md</code> after every feature or fix. Spec must match reality.</td></tr>
               <tr><td><strong>review-agent</strong></td><td>Read-only. Cannot modify files. Reports issues with severity ratings.</td></tr>
               <tr><td><strong>web-build-deploy-agent</strong></td><td>Preview deploys by default. Production only when explicitly requested.</td></tr>
               <tr><td><strong>mobile-build-deploy-agent</strong></td><td>Must set <code>JAVA_HOME</code> and <code>ANDROID_HOME</code> before building. 10-minute timeout.</td></tr>

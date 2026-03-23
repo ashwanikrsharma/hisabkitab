@@ -536,7 +536,7 @@ Balances are computed locally from `local_expenses` + `local_expense_splits` usi
 
 - `src/shared/src/balance-calculator.ts` -- Move: extract `simplifyDebts` from services to shared so mobile can use it locally without importing server-side code
 
-### Phase 4: Testing (test-mobile-agent)
+### Phase 4: Testing (mobile-test-agent)
 
 - `src/mobile/lib/local-db.test.ts` -- Unit tests for CRUD operations
 - `src/mobile/lib/sync-engine.test.ts` -- Unit tests for queue processing, conflict resolution

@@ -1,5 +1,5 @@
 ---
-name: test-web-agent
+name: web-test-agent
 description: Web testing specialist — E2E tests with Playwright, unit tests with Vitest/Jest
 model: opus
 tools:

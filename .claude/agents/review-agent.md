@@ -39,7 +39,7 @@ Review code changes and output a numbered list of issues with severity levels, f
 ### Regression Prevention (Critical)
 
 12. **Tests exist for new code**: Every new API route has auth/validation/success tests. Every bug fix has a regression test. Every new component has a render test.
-13. **All tests pass**: Verify `npx turbo test --force` was run and all tests passed (check test-web-agent's report)
+13. **All tests pass**: Verify `npx turbo test --force` was run and all tests passed (check web-test-agent's report)
 14. **No removed tests**: Tests must not be deleted to make a failing suite pass — the underlying code must be fixed instead
 15. **Build passes**: Verify `npx turbo build` succeeds with zero errors
 
@@ -109,7 +109,7 @@ All security checks and conventions verified.
 - [ ] Authorization checks present on resource-access routes
 - [ ] Regression tests exist for all new code and bug fixes
 - [ ] No tests were deleted or skipped to pass the suite
-- [ ] Test-web-agent reported all tests passing
+- [ ] Web-test-agent reported all tests passing
 - [ ] `specification/SPEC.md` updated to reflect the implemented changes (spec-agent responsibility)
 - [ ] Tests cover the features described in the spec (spot-check: pick 3 spec features, verify tests exist)
 - [ ] Clear PASS/FAIL verdict with actionable issue descriptions

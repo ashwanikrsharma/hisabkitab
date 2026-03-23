@@ -1,5 +1,5 @@
 ---
-name: test-mobile-agent
+name: mobile-test-agent
 description: Mobile testing specialist — E2E tests with Maestro for React Native/Expo
 model: opus
 tools:
