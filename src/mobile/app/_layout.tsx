@@ -16,6 +16,8 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from '../components/theme-provider';
 import { useTheme } from '../lib/theme';
+import { initLocalDb } from '../lib/local-db';
+import { startSyncEngine } from '../lib/sync-engine';
 
 // Prevent splash screen from auto-hiding before fonts are loaded
 SplashScreen.preventAutoHideAsync();
@@ -38,6 +40,20 @@ export default function RootLayout() {
   useEffect(() => {
     // Hide splash screen once layout is mounted
     SplashScreen.hideAsync();
+  }, []);
+
+  useEffect(() => {
+    let cleanup: (() => void) | undefined;
+
+    initLocalDb()
+      .then(() => {
+        cleanup = startSyncEngine();
+      })
+      .catch((err) =>
+        console.error('[layout] Failed to init local DB:', err),
+      );
+
+    return () => cleanup?.();
   }, []);
 
   return (
