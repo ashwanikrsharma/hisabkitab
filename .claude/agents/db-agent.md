@@ -17,10 +17,10 @@ You are the database specialist for the HisabKitab monorepo. You own all databas
 
 ## Your Owned Files
 
-- `supabase/migrations/` — SQL migration files
-- `packages/db/src/queries/` — TypeScript query functions
-- `packages/db/src/types.ts` — Shared database types
-- `packages/db/src/index.ts` — Barrel exports
+- `src/supabase/migrations/` — SQL migration files
+- `src/services/src/queries/` — TypeScript query functions
+- `src/services/src/types.ts` — Shared database types
+- `src/services/src/index.ts` — Barrel exports
 
 ## Migration Rules
 
@@ -37,27 +37,27 @@ You are the database specialist for the HisabKitab monorepo. You own all databas
 
 ### Reference Migration
 
-Read `supabase/migrations/20240101000000_initial_schema.sql` for the established pattern.
+Read `src/supabase/migrations/20240101000000_initial_schema.sql` for the established pattern.
 
 ## Query Function Rules
 
-1. **Use `getServerClient()`** from `packages/db/src/client.ts` for all queries
+1. **Use `getServerClient()`** from `src/services/src/client.ts` for all queries
 2. **Every function** must be typed — input params and return type
 3. **Throw descriptive errors** on failure (not raw Supabase errors)
-4. **One file per domain** in `packages/db/src/queries/` (e.g., `expenses.ts`, `groups.ts`)
+4. **One file per domain** in `src/services/src/queries/` (e.g., `expenses.ts`, `groups.ts`)
 
 ### Reference Query File
 
-Read `packages/db/src/queries/expenses.ts` for the established pattern.
+Read `src/services/src/queries/expenses.ts` for the established pattern.
 
 ## Barrel Export Rules
 
 After creating new query functions or types, you MUST update:
-1. `packages/db/src/index.ts` — add exports for new functions and types
+1. `src/services/src/index.ts` — add exports for new functions and types
 
 ### Reference Barrel
 
-Read `packages/db/src/index.ts` for the established pattern.
+Read `src/services/src/index.ts` for the established pattern.
 
 ## Acceptance Criteria
 
@@ -65,7 +65,7 @@ Your output must satisfy:
 - [ ] Migration file created with correct naming
 - [ ] RLS enabled with appropriate policies
 - [ ] Indexes on foreign keys
-- [ ] Query functions created in `packages/db/src/queries/`
-- [ ] Types added to `packages/db/src/types.ts` if needed
-- [ ] Barrel exports updated in `packages/db/src/index.ts`
-- [ ] `npx tsc --noEmit` passes in `packages/db/`
+- [ ] Query functions created in `src/services/src/queries/`
+- [ ] Types added to `src/services/src/types.ts` if needed
+- [ ] Barrel exports updated in `src/services/src/index.ts`
+- [ ] `npx tsc --noEmit` passes in `src/services/`

@@ -4,8 +4,7 @@
   "private": true,
   "description": "AI-first group expense splitter for the Indian market",
   "workspaces": [
-    "apps/*",
-    "packages/*"
+    "src/*"
   ],
   "scripts": {
     "build": "turbo run build",

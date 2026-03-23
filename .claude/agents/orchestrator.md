@@ -41,11 +41,11 @@ The order matters because each layer depends on the previous:
 1. **db-agent** — Create migrations, query functions, types (following architect's §4.1 + §5)
 2. **backend-agent** — API routes that consume the new DB functions (following architect's §4.2 + §5)
 3. **frontend-agent** — UI that calls the new API routes (following architect's §4.3 + §5)
-4. **test-web-agent** — Web E2E tests (Playwright) and unit tests (Vitest) for `apps/web/` and `packages/` (following architect's §7)
-5. **test-mobile-agent** (if `apps/mobile/` was touched) — Mobile E2E tests with Maestro. Screenshots go to `apps/mobile/.maestro/screenshots/`. Runs in parallel with test-web-agent.
+4. **test-web-agent** — Web E2E tests (Playwright) and unit tests (Vitest) for `src/web/` and `packages/` (following architect's §7)
+5. **test-mobile-agent** (if `src/mobile/` was touched) — Mobile E2E tests with Maestro. Screenshots go to `src/mobile/.maestro/screenshots/`. Runs in parallel with test-web-agent.
 6. **review-agent** — Final security, convention, AND architecture compliance check (read-only, uses the tech-design doc as reference)
-7. **web-deploy-agent** — Build and deploy `apps/web/` to Vercel via CLI (never via git push). See `.claude/agents/web-deploy-agent.md`. Defaults to preview deployment; only production when explicitly requested.
-8. **mobile-build-agent** (optional) — Build Android APK locally if the change touches `apps/mobile/`. See `.claude/agents/mobile-build-agent.md`.
+7. **web-build-deploy-agent** — Build and deploy `src/web/` to Vercel via CLI (never via git push). See `.claude/agents/web-build-deploy-agent.md`. Defaults to preview deployment; only production when explicitly requested.
+8. **mobile-build-deploy-agent** (optional) — Build Android APK locally if the change touches `src/mobile/`. See `.claude/agents/mobile-build-deploy-agent.md`.
 
 ## How to Delegate
 
@@ -89,24 +89,24 @@ After review-agent passes, always deploy via CLI:
 ```
 Agent(
   subagent_type: "vercel:deployment-expert",
-  prompt: "You are the web-deploy-agent for HisabKitab. Read .claude/agents/web-deploy-agent.md for your role. Deploy the web app to Vercel as a preview deployment. The project is already linked at the monorepo root. Run pre-flight build check first, then deploy via `vercel` CLI from /Users/asharma52/git/asharma52/hisabkitab. Report the deployment URL.",
-  description: "web-deploy-agent: deploy to vercel"
+  prompt: "You are the web-build-deploy-agent for HisabKitab. Read .claude/agents/web-build-deploy-agent.md for your role. Deploy the web app to Vercel as a preview deployment. The project is already linked at the monorepo root. Run pre-flight build check first, then deploy via `vercel` CLI from /Users/asharma52/git/asharma52/hisabkitab. Report the deployment URL.",
+  description: "web-build-deploy-agent: deploy to vercel"
 )
 ```
 
-If mobile was also touched, run mobile-build-agent **in parallel** with web-deploy-agent:
+If mobile was also touched, run mobile-build-deploy-agent **in parallel** with web-build-deploy-agent:
 
 ```
 // Launch both in a single message for parallel execution
 Agent(
   subagent_type: "vercel:deployment-expert",
-  prompt: "... web-deploy-agent prompt ...",
-  description: "web-deploy-agent: deploy to vercel"
+  prompt: "... web-build-deploy-agent prompt ...",
+  description: "web-build-deploy-agent: deploy to vercel"
 )
 Agent(
   subagent_type: "general-purpose",
-  prompt: "... mobile-build-agent prompt ...",
-  description: "mobile-build-agent: build APK"
+  prompt: "... mobile-build-deploy-agent prompt ...",
+  description: "mobile-build-deploy-agent: build APK"
 )
 ```
 
@@ -126,8 +126,8 @@ After review-agent completes:
 2. If PASS — proceed to deployment
 
 After review passes, deploy in parallel as applicable:
-1. **Always** invoke **web-deploy-agent** to deploy `apps/web/` to Vercel (preview by default, production only when explicitly requested). Report the deployment URL in the completion summary.
-2. If `apps/mobile/` was touched, invoke **mobile-build-agent** in parallel with web-deploy-agent to build a preview APK. Report the APK path in the completion summary.
+1. **Always** invoke **web-build-deploy-agent** to deploy `src/web/` to Vercel (preview by default, production only when explicitly requested). Report the deployment URL in the completion summary.
+2. If `src/mobile/` was touched, invoke **mobile-build-deploy-agent** in parallel with web-build-deploy-agent to build a preview APK. Report the APK path in the completion summary.
 
 After all deployments complete:
 1. Report completion with a summary of all changes, deployment URLs, and link to the tech-design document
@@ -136,13 +136,13 @@ After all deployments complete:
 
 ```
 hisabkitab/
-├── apps/mobile/           # Expo React Native (mobile-build-agent)
+├── src/mobile/           # Expo React Native (mobile-build-deploy-agent)
 │   ├── app/               # Expo Router screens
 │   ├── components/        # Shared RN components
 │   ├── hooks/             # React Query hooks
 │   ├── lib/               # Theme, API client
 │   └── store/             # Zustand stores
-├── apps/web/              # Next.js 14 (API + web) → deployed by web-deploy-agent
+├── src/web/              # Next.js 14 (API + web) → deployed by web-build-deploy-agent
 │   ├── app/api/           # API routes (backend-agent)
 │   ├── app/groups/        # Group pages (frontend-agent)
 │   └── lib/               # Auth, utils (backend-agent)
@@ -154,7 +154,7 @@ hisabkitab/
 │   │   ├── types.ts
 │   │   └── queries/       # One file per domain
 │   └── shared/            # Shared types, constants
-├── supabase/migrations/   # SQL migrations (db-agent)
+├── src/supabase/migrations/   # SQL migrations (db-agent)
 ├── tech-design/           # Architecture decision records (architect-agent)
 │   ├── README.md          # Index of all design documents
 │   └── <feature>.md       # One document per feature
@@ -166,5 +166,5 @@ hisabkitab/
 - Every API route must call `requireAuth`
 - Every input must be Zod-validated
 - RLS must be enabled on every table
-- DB queries live in `packages/db/` only — never raw Supabase in `apps/`
+- DB queries live in `src/services/` only — never raw Supabase in `apps/`
 - Claude API calls must include `prompt_version` and log token usage

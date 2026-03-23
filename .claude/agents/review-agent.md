@@ -21,16 +21,16 @@ Review code changes and output a numbered list of issues with severity levels, f
 
 ### Security (Critical)
 
-1. **Auth on every API route**: Every handler in `apps/web/app/api/` must call `requireAuth` as the first operation (except webhook routes)
+1. **Auth on every API route**: Every handler in `src/web/app/api/` must call `requireAuth` as the first operation (except webhook routes)
 2. **No hardcoded secrets**: Search for API keys, tokens, passwords in source code. Check for `.env` files in git
 3. **RLS on every table**: Every migration must include `ENABLE ROW LEVEL SECURITY` for new tables
-4. **No service_role on client**: `service_role` key must only appear in server-side code, never in `apps/web/app/` client components
+4. **No service_role on client**: `service_role` key must only appear in server-side code, never in `src/web/app/` client components
 5. **Prompt injection**: User input passed to Claude API must go through `sanitizeForPrompt` or be placed in the human turn only
 
 ### Conventions (High)
 
 6. **Zod validation**: Every API route input must be validated with Zod `safeParse`
-7. **DB queries in packages/db only**: No raw `supabase.from()` calls in `apps/web/app/api/`
+7. **DB queries in packages/db only**: No raw `supabase.from()` calls in `src/web/app/api/`
 8. **Sanitized errors**: API routes must not return raw database error messages
 9. **Activity logging**: State-changing API operations must call `createActivity`
 10. **Prompt versioning**: Every Claude API call must include `prompt_version` in metadata
@@ -39,14 +39,14 @@ Review code changes and output a numbered list of issues with severity levels, f
 ### Code Quality (Medium)
 
 12. **No `any` types**: TypeScript `any` must have a justification comment
-13. **Barrel exports updated**: New query functions must be exported from `packages/db/src/index.ts`
+13. **Barrel exports updated**: New query functions must be exported from `src/services/src/index.ts`
 14. **Migration naming**: Format `YYYYMMDDHHMMSS_description.sql`
 15. **No `console.log`**: Use `console.error` only in production paths
 
 ### Architecture Compliance (High)
 
 16. **Tech-design adherence**: If a `tech-design/<feature>.md` document exists for the feature, verify the implementation matches the design's file manifest, data model, API contracts, and acceptance criteria
-17. **Layer violations**: No raw Supabase queries in `apps/web/app/api/` (must use `@hisabkitab/db`). No DB imports in frontend components. No HTTP calls between internal services.
+17. **Layer violations**: No raw Supabase queries in `src/web/app/api/` (must use `@hisabkitab/services`). No DB imports in frontend components. No HTTP calls between internal services.
 18. **Cache invalidation**: Every client-side mutation (`fetch` with POST/PATCH/DELETE) must call `router.refresh()` after success
 19. **Authorization checks**: Every route that accesses a resource must verify the user has permission (group membership, resource ownership) — not just authentication
 
@@ -66,9 +66,9 @@ Review code changes and output a numbered list of issues with severity levels, f
 
 ### Issues Found
 
-1. **[CRITICAL]** `apps/web/app/api/comments/route.ts:15` — Missing `requireAuth` call
-2. **[HIGH]** `apps/web/app/api/comments/route.ts:22` — No Zod validation on request body
-3. **[MEDIUM]** `packages/db/src/queries/comments.ts:8` — Missing export in barrel file
+1. **[CRITICAL]** `src/web/app/api/comments/route.ts:15` — Missing `requireAuth` call
+2. **[HIGH]** `src/web/app/api/comments/route.ts:22` — No Zod validation on request body
+3. **[MEDIUM]** `src/services/src/queries/comments.ts:8` — Missing export in barrel file
 
 ### Verdict: FAIL
 

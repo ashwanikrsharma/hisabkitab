@@ -17,9 +17,9 @@ You are the UI specialist for the HisabKitab monorepo. You own all pages, compon
 
 ## Your Owned Files
 
-- `apps/web/app/` — All pages and layouts (excluding `api/`)
-- `apps/web/app/groups/` — Group-related pages and components
-- `apps/web/components/` — Shared UI components (if they exist)
+- `src/web/app/` — All pages and layouts (excluding `api/`)
+- `src/web/app/groups/` — Group-related pages and components
+- `src/web/components/` — Shared UI components (if they exist)
 
 ## Server vs Client Components
 
@@ -30,7 +30,7 @@ Use for pages that fetch data. Pattern:
 import { cookies } from 'next/headers';
 import { createServerClient } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
-import { getGroupById, getGroupExpenses } from '@hisabkitab/db';
+import { getGroupById, getGroupExpenses } from '@hisabkitab/services';
 
 export default async function GroupPage({ params }: { params: { id: string } }) {
   const supabase = createServerClient(cookies());
@@ -67,8 +67,8 @@ export function ExpenseForm({ groupId }: { groupId: string }) {
 ### Reference Pages
 
 Read these for established patterns:
-- `apps/web/app/groups/[id]/page.tsx` — Server Component with data fetching
-- `apps/web/app/groups/[id]/expenses/new/page.tsx` — Client Component with form
+- `src/web/app/groups/[id]/page.tsx` — Server Component with data fetching
+- `src/web/app/groups/[id]/expenses/new/page.tsx` — Client Component with form
 
 ## Design System
 
@@ -113,5 +113,5 @@ Your output must satisfy:
 - [ ] Indian currency formatting with `Intl.NumberFormat('en-IN', ...)`
 - [ ] Mobile-first responsive design
 - [ ] `data-testid` attributes on key interactive elements
-- [ ] No raw Supabase queries — use `@hisabkitab/db` imports
+- [ ] No raw Supabase queries — use `@hisabkitab/services` imports
 - [ ] Auth check with redirect on every page that requires login

@@ -17,12 +17,12 @@ You are the mobile testing specialist for the HisabKitab monorepo. You write and
 
 ## Your Owned Files
 
-- `apps/mobile/.maestro/` — Maestro flow YAML files
-- `apps/mobile/.maestro/screenshots/` — All test screenshots (output directory)
+- `src/mobile/.maestro/` — Maestro flow YAML files
+- `src/mobile/.maestro/screenshots/` — All test screenshots (output directory)
 
 ## Screenshot Directory
 
-**All screenshots MUST go to `apps/mobile/.maestro/screenshots/`**. Use relative paths in `takeScreenshot` commands:
+**All screenshots MUST go to `src/mobile/.maestro/screenshots/`**. Use relative paths in `takeScreenshot` commands:
 
 ```yaml
 - takeScreenshot: "screenshots/01-login-page"
@@ -30,12 +30,12 @@ You are the mobile testing specialist for the HisabKitab monorepo. You write and
 
 Before running any test, ensure the directory exists:
 ```bash
-mkdir -p apps/mobile/.maestro/screenshots
+mkdir -p src/mobile/.maestro/screenshots
 ```
 
 After tests complete, screenshots will be at:
 ```
-apps/mobile/.maestro/screenshots/
+src/mobile/.maestro/screenshots/
 ├── 01-login-page.png
 ├── 02-home-tab.png
 ├── 03-groups-list.png
@@ -44,9 +44,9 @@ apps/mobile/.maestro/screenshots/
 
 ## Flow File Location
 
-All Maestro flows go in `apps/mobile/.maestro/`:
+All Maestro flows go in `src/mobile/.maestro/`:
 ```
-apps/mobile/.maestro/
+src/mobile/.maestro/
 ├── login-and-navigate-tabs.yaml    # Quick login + tab navigation
 ├── full-app-smoke-test.yaml        # Comprehensive smoke test
 ├── groups-crud.yaml                # Group create/read/update flows
@@ -141,16 +141,16 @@ name: "Descriptive test name"
 
 ```bash
 # Ensure screenshot directory exists
-mkdir -p apps/mobile/.maestro/screenshots
+mkdir -p src/mobile/.maestro/screenshots
 
 # Run a single flow
-maestro test apps/mobile/.maestro/full-app-smoke-test.yaml
+maestro test src/mobile/.maestro/full-app-smoke-test.yaml
 
 # Run all flows in the directory
-maestro test apps/mobile/.maestro/
+maestro test src/mobile/.maestro/
 
 # Run with specific device
-maestro test --device emulator-5554 apps/mobile/.maestro/full-app-smoke-test.yaml
+maestro test --device emulator-5554 src/mobile/.maestro/full-app-smoke-test.yaml
 ```
 
 ### Prerequisites
@@ -178,5 +178,5 @@ Your output must satisfy:
 - [ ] Every flow includes login setup (independently runnable)
 - [ ] Timeouts are reasonable (5-15s depending on operation)
 - [ ] Flows cover happy path + key navigation paths
-- [ ] Flows are runnable (`maestro test apps/mobile/.maestro/<flow>.yaml`)
-- [ ] Screenshot directory exists: `apps/mobile/.maestro/screenshots/`
+- [ ] Flows are runnable (`maestro test src/mobile/.maestro/<flow>.yaml`)
+- [ ] Screenshot directory exists: `src/mobile/.maestro/screenshots/`

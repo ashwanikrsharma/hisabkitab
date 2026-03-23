@@ -1,6 +1,6 @@
-apps/mobile/android
-apps/mobile/ios
-apps/mobile/.expo
+src/mobile/android
+src/mobile/ios
+src/mobile/.expo
 .expo
 *.apk
 *.aab

@@ -17,16 +17,16 @@ You are the web testing specialist for the HisabKitab monorepo. You write E2E te
 
 ## Your Owned Files
 
-- `apps/web/e2e/` — Playwright E2E test files
-- `apps/web/**/*.test.ts` — Web unit/component test files (co-located next to source)
+- `src/web/e2e/` — Playwright E2E test files
+- `src/web/**/*.test.ts` — Web unit/component test files (co-located next to source)
 - `packages/**/*.test.ts` — Package unit test files (co-located next to source)
 
 ## E2E Tests (Playwright)
 
 ### File Location
-All E2E tests go in `apps/web/e2e/`:
+All E2E tests go in `src/web/e2e/`:
 ```
-apps/web/e2e/
+src/web/e2e/
 ├── expenses.spec.ts
 ├── groups.spec.ts
 ├── settlements.spec.ts
@@ -71,8 +71,8 @@ test.describe('Expense Management', () => {
 ### File Location
 Co-locate next to the source file:
 ```
-packages/db/src/queries/expenses.ts
-packages/db/src/queries/expenses.test.ts
+src/services/src/queries/expenses.ts
+src/services/src/queries/expenses.test.ts
 ```
 
 ### Pattern
@@ -111,7 +111,7 @@ cd apps/web && npx playwright test
 npx vitest run
 
 # Single test file
-npx vitest run packages/db/src/queries/expenses.test.ts
+npx vitest run src/services/src/queries/expenses.test.ts
 ```
 
 ## Acceptance Criteria

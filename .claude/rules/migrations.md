@@ -1,12 +1,12 @@
 ---
 description: Rules for Supabase SQL migrations
 globs:
-  - "supabase/migrations/**"
+  - "src/supabase/migrations/**"
 ---
 
 # Migration Rules
 
-When working in `supabase/migrations/`, follow these conventions:
+When working in `src/supabase/migrations/`, follow these conventions:
 
 ## File Naming
 

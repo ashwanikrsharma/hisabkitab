@@ -185,12 +185,12 @@
             <div class="agent-card-desc">Security, convention, and architecture compliance checks. Cannot modify files. Outputs PASS/FAIL.</div>
           </div>
           <div class="agent-card">
-            <div class="agent-card-name">web-deploy-agent <span class="badge-opus">opus</span></div>
+            <div class="agent-card-name">web-build-deploy-agent <span class="badge-opus">opus</span></div>
             <div class="agent-card-domain">Web Deployment</div>
             <div class="agent-card-desc">Vercel CLI operations. Preview by default; production only when explicitly requested.</div>
           </div>
           <div class="agent-card">
-            <div class="agent-card-name">mobile-build-agent <span class="badge-opus">opus</span></div>
+            <div class="agent-card-name">mobile-build-deploy-agent <span class="badge-opus">opus</span></div>
             <div class="agent-card-domain">Mobile Builds</div>
             <div class="agent-card-desc">EAS CLI for Android APK builds. Sets JAVA_HOME and ANDROID_HOME. 10-minute timeout.</div>
           </div>
@@ -240,14 +240,14 @@ backend-agent &#x25C4;&#x2500;&#x25BA; frontend-agent
                &#x25BC;
     test-agent  &#x2551;  review-agent    &#x2190; always in parallel
                &#x25BC;
-    web-deploy-agent  &#x2551;  mobile-build-agent  &#x2190; in parallel if both needed</code></pre>
+    web-build-deploy-agent  &#x2551;  mobile-build-deploy-agent  &#x2190; in parallel if both needed</code></pre>
 
         <p><strong>Parallelization rules:</strong></p>
         <ul>
           <li><code>db-agent</code> + <code>frontend-agent</code> can run in parallel when work is independent</li>
           <li><code>backend-agent</code> + <code>frontend-agent</code> can run in parallel when the API contract is defined by the architect</li>
           <li><code>test-agent</code> + <code>review-agent</code> MUST always run in parallel after implementation</li>
-          <li><code>web-deploy-agent</code> + <code>mobile-build-agent</code> run in parallel when both apps were modified</li>
+          <li><code>web-build-deploy-agent</code> + <code>mobile-build-deploy-agent</code> run in parallel when both apps were modified</li>
           <li>Agents serialize only when there is a true data dependency (e.g., backend needs db types)</li>
         </ul>
 
@@ -263,8 +263,8 @@ backend-agent &#x25C4;&#x2500;&#x25BA; frontend-agent
 
         <h3>6. Deployment</h3>
         <ul>
-          <li><strong>web-deploy-agent</strong>: Runs <code>turbo build --filter=web</code>, then <code>vercel</code> (preview) or <code>vercel --prod</code> (production)</li>
-          <li><strong>mobile-build-agent</strong>: Runs <code>eas build --platform android --local</code> with appropriate Java/Android SDK env</li>
+          <li><strong>web-build-deploy-agent</strong>: Runs <code>turbo build --filter=web</code>, then <code>vercel</code> (preview) or <code>vercel --prod</code> (production)</li>
+          <li><strong>mobile-build-deploy-agent</strong>: Runs <code>eas build --platform android --local</code> with appropriate Java/Android SDK env</li>
         </ul>
 
         <hr>
@@ -288,7 +288,7 @@ backend-agent &#x25C4;&#x2500;&#x25BA; frontend-agent
             &rarr; <strong>db-agent</strong>: Migration for dispute columns, query functions<br>
             &rarr; <strong>backend-agent + frontend-agent</strong>: (parallel, using architect's API contract)<br>
             &rarr; <strong>test-agent + review-agent</strong>: (parallel)<br>
-            &rarr; <strong>web-deploy-agent</strong>: Preview deploy
+            &rarr; <strong>web-build-deploy-agent</strong>: Preview deploy
           </div>
         </div>
 
@@ -325,8 +325,8 @@ backend-agent &#x25C4;&#x2500;&#x25BA; frontend-agent
               <tr><td><strong>frontend-agent</strong></td><td>Server Components by default. Client Components only for interactivity. INR formatting with <code>en-IN</code> locale.</td></tr>
               <tr><td><strong>test-agent</strong></td><td>Always use <code>data-testid</code> selectors. No Supabase mocks. AI tests use recorded fixtures.</td></tr>
               <tr><td><strong>review-agent</strong></td><td>Read-only. Cannot modify files. Reports issues with severity ratings.</td></tr>
-              <tr><td><strong>web-deploy-agent</strong></td><td>Preview deploys by default. Production only when explicitly requested.</td></tr>
-              <tr><td><strong>mobile-build-agent</strong></td><td>Must set <code>JAVA_HOME</code> and <code>ANDROID_HOME</code> before building. 10-minute timeout.</td></tr>
+              <tr><td><strong>web-build-deploy-agent</strong></td><td>Preview deploys by default. Production only when explicitly requested.</td></tr>
+              <tr><td><strong>mobile-build-deploy-agent</strong></td><td>Must set <code>JAVA_HOME</code> and <code>ANDROID_HOME</code> before building. 10-minute timeout.</td></tr>
             </tbody>
           </table>
         </div>
@@ -360,8 +360,8 @@ backend-agent &#x25C4;&#x2500;&#x25BA; frontend-agent
         <h3>External Services</h3>
         <ul>
           <li><strong>Supabase MCP</strong>: Direct database access for schema inspection during development</li>
-          <li><strong>Vercel CLI</strong>: Deployment operations (web-deploy-agent only)</li>
-          <li><strong>EAS CLI</strong>: Mobile build operations (mobile-build-agent only)</li>
+          <li><strong>Vercel CLI</strong>: Deployment operations (web-build-deploy-agent only)</li>
+          <li><strong>EAS CLI</strong>: Mobile build operations (mobile-build-deploy-agent only)</li>
         </ul>
 
         <hr>

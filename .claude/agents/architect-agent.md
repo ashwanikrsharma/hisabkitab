@@ -85,20 +85,20 @@ Bullet list of functional and non-functional requirements derived from the task.
 Ordered list of files to create or modify, grouped by agent:
 
 ### db-agent
-- `supabase/migrations/YYYYMMDDHHMMSS_xxx.sql` — CREATE/ALTER
-- `packages/db/src/queries/xxx.ts` — new functions
-- `packages/db/src/types.ts` — new types
-- `packages/db/src/index.ts` — new exports
+- `src/supabase/migrations/YYYYMMDDHHMMSS_xxx.sql` — CREATE/ALTER
+- `src/services/src/queries/xxx.ts` — new functions
+- `src/services/src/types.ts` — new types
+- `src/services/src/index.ts` — new exports
 
 ### backend-agent
-- `apps/web/app/api/xxx/route.ts` — new route
+- `src/web/app/api/xxx/route.ts` — new route
 
 ### frontend-agent
-- `apps/web/app/xxx/page.tsx` — new page
+- `src/web/app/xxx/page.tsx` — new page
 
 ### test-agent
-- `apps/web/app/xxx/page.test.tsx` — component tests
-- `apps/web/app/api/xxx/route.test.ts` — API tests
+- `src/web/app/xxx/page.test.tsx` — component tests
+- `src/web/app/api/xxx/route.test.ts` — API tests
 
 ## 6. Risks & Mitigations
 
@@ -117,7 +117,7 @@ These are the non-negotiable rules you enforce. Reference `CLAUDE.md` for the fu
 
 ### Data Layer
 1. **RLS everywhere** — Every table has Row-Level Security. No exceptions.
-2. **Queries in `packages/db/` only** — No raw Supabase calls in `apps/`. This is the single data access layer.
+2. **Queries in `src/services/` only** — No raw Supabase calls in `apps/`. This is the single data access layer.
 3. **Typed inputs and outputs** — Every DB function has explicit TS types. No `any`.
 4. **Indexes on FKs** — Every foreign key column gets an index.
 5. **Immutable migrations** — Never modify an existing migration file.
@@ -177,7 +177,7 @@ You produce a design document. The orchestrator passes relevant sections to each
 
 ```
 hisabkitab/
-├── apps/web/                    # Next.js 14 App Router
+├── src/web/                    # Next.js 14 App Router
 │   ├── app/api/                 # REST API routes
 │   ├── app/(pages)/             # UI pages (Server + Client Components)
 │   ├── lib/auth.ts              # requireAuth helper
@@ -190,7 +190,7 @@ hisabkitab/
 │   │   └── index.ts             # Barrel exports
 │   ├── shared/src/              # Client-safe types, utils, constants
 │   └── ai/                      # Claude API client (not yet implemented)
-├── supabase/migrations/         # Immutable SQL migrations
+├── src/supabase/migrations/         # Immutable SQL migrations
 ├── tech-design/                 # Architecture decision records
 └── CLAUDE.md                    # Project conventions (source of truth)
 ```

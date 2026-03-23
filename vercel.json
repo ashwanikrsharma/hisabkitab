@@ -1,9 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
-  "buildCommand": "cd apps/web && npx next build",
-  "installCommand": "node -e \"const p=JSON.parse(require('fs').readFileSync('package.json','utf8')); p.workspaces=['apps/web','packages/*']; require('fs').writeFileSync('package.json', JSON.stringify(p,null,2));\" && rm package-lock.json && npm install --legacy-peer-deps",
-  "outputDirectory": "apps/web/.next",
+  "buildCommand": "cd src/web && npx next build",
+  "installCommand": "node -e \"const p=JSON.parse(require('fs').readFileSync('package.json','utf8')); p.workspaces=['src/web','src/services','src/shared']; require('fs').writeFileSync('package.json', JSON.stringify(p,null,2));\" && rm package-lock.json && npm install --legacy-peer-deps",
+  "outputDirectory": "src/web/.next",
   "headers": [
     {
       "source": "/(.*)\\.(js|css|woff2|png|jpg|svg|ico)",

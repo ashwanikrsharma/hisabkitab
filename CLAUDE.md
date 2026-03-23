@@ -8,11 +8,11 @@ Read this file in full before making any changes.
 ## Project Overview
 
 HisabKitab is an AI-first group expense splitter for the Indian market.
-- **Mobile**: React Native + Expo (`apps/mobile/`)
-- **Web/API**: Next.js 14 App Router on Vercel (`apps/web/`)
+- **Mobile**: React Native + Expo (`src/mobile/`)
+- **Web/API**: Next.js 14 App Router on Vercel (`src/web/`)
 - **DB**: Supabase (Postgres + Auth + Storage + Realtime)
 - **AI**: Anthropic Claude API (`packages/ai/`)
-- **Shared**: Types, utils, constants (`packages/shared/`, `packages/db/`)
+- **Shared**: Types, utils, constants (`src/shared/`, `src/services/`)
 
 ---
 
@@ -35,7 +35,7 @@ HisabKitab is an AI-first group expense splitter for the Indian market.
 
 ### 3. Every Protected API Route Must Call `requireAuth`
 ```ts
-// apps/web/app/api/some-route/route.ts
+// src/web/app/api/some-route/route.ts
 import { requireAuth } from '@/lib/auth';
 
 export async function POST(req: Request) {
@@ -120,10 +120,10 @@ if (!parsed.success) {
 }
 ```
 
-### 10. Database Queries Live in `packages/db/`
-Never write raw Supabase queries in `apps/`. Import from `@hisabkitab/db`:
+### 10. Database Queries Live in `src/services/`
+Never write raw Supabase queries in `apps/`. Import from `@hisabkitab/services`:
 ```ts
-import { getGroupById, createExpense } from '@hisabkitab/db';
+import { getGroupById, createExpense } from '@hisabkitab/services';
 ```
 
 ---
@@ -155,15 +155,13 @@ import { getGroupById, createExpense } from '@hisabkitab/db';
 
 ```
 hisabkitab/
-├── apps/
+├── src/
+│   ├── web/             # Next.js 14 app (API + web)
 │   ├── mobile/          # Expo React Native app
-│   └── web/             # Next.js 14 app (API + web)
-├── packages/
-│   ├── ai/              # Claude API client, prompts, schemas
-│   ├── db/              # Supabase client, types, queries
-│   └── shared/          # Types, constants, utilities
-├── supabase/
-│   └── migrations/      # SQL migration files (never edit manually)
+│   ├── services/        # Supabase client, types, queries (was packages/db)
+│   ├── shared/          # Types, constants, utilities
+│   └── supabase/        # SQL migration files (never edit manually)
+│       └── migrations/
 ├── tech-design/         # Architecture decision records (architect-agent)
 ├── turbo.json
 ├── package.json
@@ -171,8 +169,7 @@ hisabkitab/
 ```
 
 ### Package Names
-- `@hisabkitab/db`
-- `@hisabkitab/ai`
+- `@hisabkitab/services` (was `@hisabkitab/services`)
 - `@hisabkitab/shared`
 
 ---
@@ -182,7 +179,7 @@ hisabkitab/
 ### Agent Metrics Table
 Every AI operation must be tracked. Use the helper:
 ```ts
-import { logAgentMetric } from '@hisabkitab/db';
+import { logAgentMetric } from '@hisabkitab/services';
 
 await logAgentMetric({
   agent_name: 'expense-parser' | 'chat-assistant' | 'reminder',
@@ -201,7 +198,7 @@ await logAgentMetric({
 
 ## Migrations
 
-- All schema changes go through `supabase/migrations/` as numbered SQL files.
+- All schema changes go through `src/supabase/migrations/` as numbered SQL files.
 - Format: `YYYYMMDDHHMMSS_description.sql`
 - Never modify an existing migration — always create a new one.
 - Every new table needs: `ENABLE ROW LEVEL SECURITY` + appropriate policies.
@@ -247,14 +244,14 @@ The orchestrator **MUST run independent agents in parallel** to maximize speed a
 ### Delegation pipeline
 The orchestrator decomposes work and delegates in order (parallelizing where possible):
 0. **architect-agent** — produces a tech-design document (`tech-design/`) with design decisions, file manifest, and acceptance criteria. All downstream agents MUST follow the architect's design. Defines API contracts so downstream agents can run in parallel.
-1. **db-agent** — migrations, query functions, types (`packages/db/`, `supabase/migrations/`)
-2. **backend-agent** — API routes (`apps/web/app/api/`) — can run in parallel with frontend-agent when API contract is defined
-3. **frontend-agent** — UI pages and components (`apps/web/app/`) — can run in parallel with backend-agent
+1. **db-agent** — migrations, query functions, types (`src/services/`, `src/supabase/migrations/`)
+2. **backend-agent** — API routes (`src/web/app/api/`) — can run in parallel with frontend-agent when API contract is defined
+3. **frontend-agent** — UI pages and components (`src/web/app/`) — can run in parallel with backend-agent
 4. **test-web-agent** — Web E2E tests (Playwright) and unit tests (Vitest) — runs in parallel with review-agent and test-mobile-agent
-5. **test-mobile-agent** (if `apps/mobile/` touched) — Mobile E2E tests with Maestro, screenshots to `apps/mobile/.maestro/screenshots/` — runs in parallel with test-web-agent and review-agent
+5. **test-mobile-agent** (if `src/mobile/` touched) — Mobile E2E tests with Maestro, screenshots to `src/mobile/.maestro/screenshots/` — runs in parallel with test-web-agent and review-agent
 6. **review-agent** — security, convention, AND architecture compliance check (read-only) — runs in parallel with test agents
-7. **web-deploy-agent** — builds and deploys `apps/web/` to Vercel via CLI (never via git push). Defaults to preview; production only when explicitly requested. Runs in parallel with mobile-build-agent when both are needed.
-8. **mobile-build-agent** (optional) — builds Android APK locally if `apps/mobile/` was touched. Runs in parallel with web-deploy-agent.
+7. **web-build-deploy-agent** — builds and deploys `src/web/` to Vercel via CLI (never via git push). Defaults to preview; production only when explicitly requested. Runs in parallel with mobile-build-deploy-agent when both are needed.
+8. **mobile-build-deploy-agent** (optional) — builds Android APK locally if `src/mobile/` was touched. Runs in parallel with web-build-deploy-agent.
 
 ### Coordination rules
 - The architect-agent's design doc is the **single source of truth** — all agents read it before starting work.

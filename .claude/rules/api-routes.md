@@ -1,12 +1,12 @@
 ---
 description: Rules for API route handlers
 globs:
-  - "apps/web/app/api/**"
+  - "src/web/app/api/**"
 ---
 
 # API Route Rules
 
-When working in `apps/web/app/api/`, follow this checklist for every route handler:
+When working in `src/web/app/api/`, follow this checklist for every route handler:
 
 ## Required Pattern
 
@@ -26,9 +26,9 @@ Every route handler must follow this exact order:
    }
    ```
 
-3. **Use `@hisabkitab/db`** — Never write raw Supabase queries in API routes
+3. **Use `@hisabkitab/services`** — Never write raw Supabase queries in API routes
    ```ts
-   import { createExpense } from '@hisabkitab/db';
+   import { createExpense } from '@hisabkitab/services';
    const result = await createExpense(parsed.data);
    ```
 
