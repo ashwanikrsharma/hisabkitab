@@ -63,7 +63,7 @@ export default function RootLayout() {
   useEffect(() => {
     if (session) {
       triggerSync().catch((err) =>
-        console.error('[layout] Post-login sync failed:', err),
+        console.warn('[layout] Post-login sync failed:', err),
       );
     }
   }, [session]);

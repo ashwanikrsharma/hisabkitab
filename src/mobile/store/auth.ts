@@ -3,6 +3,7 @@ import { createClient, type Session } from '@supabase/supabase-js';
 import Constants from 'expo-constants';
 import 'react-native-url-polyfill/auto';
 import { SecureStoreAdapter } from '../lib/secure-store-adapter';
+import { stopSyncEngine } from '../lib/sync-engine';
 import { resetLocalDb } from '../lib/local-db';
 
 // EXPO_PUBLIC_ vars are inlined at build time by Metro (Expo SDK 49+).
@@ -58,9 +59,11 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   signOut: async () => {
     try {
+      // Stop sync engine first to prevent post-signout network calls
+      stopSyncEngine();
       // Wipe local DB before clearing session to prevent stale data across accounts
       await resetLocalDb().catch((err) =>
-        console.error('[auth] resetLocalDb failed during sign-out:', err),
+        console.warn('[auth] resetLocalDb failed during sign-out:', err),
       );
       await supabase.auth.signOut();
       set({ session: null });

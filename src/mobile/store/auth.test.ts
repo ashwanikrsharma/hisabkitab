@@ -25,6 +25,11 @@ jest.mock('../lib/local-db', () => ({
   resetLocalDb: (...args: any[]) => mockResetLocalDb(...args),
 }));
 
+const mockStopSyncEngine = jest.fn();
+jest.mock('../lib/sync-engine', () => ({
+  stopSyncEngine: (...args: any[]) => mockStopSyncEngine(...args),
+}));
+
 // Use module-level variables that jest.mock factory can close over
 const mockGetSession = jest.fn();
 const mockSignOut = jest.fn();

@@ -61,6 +61,10 @@ export function getSyncStatus(): SyncStatus {
 export async function triggerSync(): Promise<void> {
   if (_syncInProgress || !isOnline()) return;
 
+  // Check for valid session before syncing — skip silently if not logged in
+  const { data: sessionData } = await supabase.auth.getSession();
+  if (!sessionData?.session) return;
+
   _syncInProgress = true;
   _status = 'syncing';
 
@@ -69,11 +73,24 @@ export async function triggerSync(): Promise<void> {
     await pullChanges();
     _status = 'idle';
   } catch (err) {
-    console.error('[sync-engine] sync failed:', err);
+    // Use console.warn to avoid red error screen in dev for non-critical sync failures
+    console.warn('[sync-engine] sync failed:', err);
     _status = 'error';
   } finally {
     _syncInProgress = false;
   }
+}
+
+/**
+ * Stop the sync engine. Called on sign-out to prevent post-logout network calls.
+ */
+export function stopSyncEngine(): void {
+  if (_timer) {
+    clearInterval(_timer);
+    _timer = null;
+  }
+  _syncInProgress = false;
+  _status = 'idle';
 }
 
 /**
@@ -89,7 +106,7 @@ export function startSyncEngine(): () => void {
   const appStateListener = AppState.addEventListener('change', (state) => {
     if (state === 'active') {
       triggerSync().catch((err) =>
-        console.error('[sync-engine] foreground sync error:', err),
+        console.warn('[sync-engine] foreground sync error:', err),
       );
     }
   });
@@ -98,7 +115,7 @@ export function startSyncEngine(): () => void {
   const unsubNet = subscribeToNetworkStatus(
     () => {
       triggerSync().catch((err) =>
-        console.error('[sync-engine] reconnect sync error:', err),
+        console.warn('[sync-engine] reconnect sync error:', err),
       );
     },
     () => {
@@ -110,14 +127,14 @@ export function startSyncEngine(): () => void {
   _timer = setInterval(() => {
     if (isOnline()) {
       triggerSync().catch((err) =>
-        console.error('[sync-engine] timer sync error:', err),
+        console.warn('[sync-engine] timer sync error:', err),
       );
     }
   }, SYNC_INTERVAL_MS);
 
   // Initial sync
   triggerSync().catch((err) =>
-    console.error('[sync-engine] initial sync error:', err),
+    console.warn('[sync-engine] initial sync error:', err),
   );
 
   return () => {
