@@ -11,6 +11,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useGroupDetail, useGroupExpenses, useGroupBalances, useDeleteExpense } from '../../../../hooks/use-api';
 import { useAuthStore } from '../../../../store/auth';
 import { useTheme, RADIUS } from '../../../../lib/theme';
@@ -138,21 +139,25 @@ export default function GroupDetailScreen() {
             <ActivityIndicator style={{ marginTop: 16 }} color={colors.primary} />
           ) : !expenses || expenses.length === 0 ? (
             <EmptyState
-              icon="📝"
+              icon="document-text-outline"
               title="No expenses yet"
               subtitle='Tap "+ Add Expense" to get started.'
             />
           ) : (
             expenses.map((item: ExpenseItem) => {
               const catIcon = item.category
-                ? CATEGORY_ICONS[item.category as ExpenseCategory] ?? '📦'
-                : '📦';
+                ? CATEGORY_ICONS[item.category as ExpenseCategory] ?? 'ellipsis-horizontal-outline'
+                : 'ellipsis-horizontal-outline';
               const canDelete = item.paidById === userId;
 
               return (
                 <Card key={item.id} style={styles.expenseCard}>
                   <View style={styles.expenseRow}>
-                    <Text style={styles.expenseEmoji}>{catIcon}</Text>
+                    <Ionicons
+                      name={catIcon as React.ComponentProps<typeof Ionicons>['name']}
+                      size={24}
+                      color={colors.textSecondary}
+                    />
                     <View style={styles.expenseInfo}>
                       <Text style={styles.expenseDesc} numberOfLines={1}>
                         {item.description}
@@ -170,7 +175,7 @@ export default function GroupDetailScreen() {
                           onPress={() => handleDeleteExpense(item.id)}
                           hitSlop={8}
                         >
-                          <Text style={styles.deleteIcon}>🗑️</Text>
+                          <Ionicons name="trash-outline" size={16} color={colors.danger} />
                         </TouchableOpacity>
                       )}
                     </View>
@@ -288,8 +293,8 @@ const createStyles = (colors: ColorTokens) =>
       alignItems: 'center',
       gap: 12,
     },
-    expenseEmoji: {
-      fontSize: 24,
+    expenseIcon: {
+      width: 24,
     },
     expenseInfo: {
       flex: 1,
@@ -314,6 +319,6 @@ const createStyles = (colors: ColorTokens) =>
       color: colors.warning,
     },
     deleteIcon: {
-      fontSize: 16,
+      width: 16,
     },
   });

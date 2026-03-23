@@ -9,6 +9,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { apiClient } from '../../../lib/api-client';
 import { useTheme, RADIUS } from '../../../lib/theme';
 import type { ColorTokens } from '../../../lib/theme';
@@ -68,7 +69,7 @@ export default function FriendDetailScreen() {
     return (
       <SafeAreaView style={styles.safeArea}>
         <ScreenHeader title="Friend" />
-        <EmptyState icon="🔍" title="Not found" subtitle="Could not load friend details." />
+        <EmptyState icon="search-outline" title="Not found" subtitle="Could not load friend details." />
       </SafeAreaView>
     );
   }
@@ -121,7 +122,11 @@ export default function FriendDetailScreen() {
         renderItem={({ item }) => (
           <Card style={styles.historyCard}>
             <View style={styles.historyRow}>
-              <Text style={styles.historyEmoji}>{item.type === 'expense' ? '💸' : '🤝'}</Text>
+              <Ionicons
+                name={item.type === 'expense' ? 'cash-outline' : 'swap-horizontal-outline'}
+                size={20}
+                color={colors.textSecondary}
+              />
               <View style={styles.historyInfo}>
                 <Text style={styles.historyDesc} numberOfLines={1}>
                   {item.description}
@@ -231,8 +236,8 @@ const createStyles = (colors: ColorTokens) => StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
-  historyEmoji: {
-    fontSize: 20,
+  historyIcon: {
+    width: 20,
   },
   historyInfo: {
     flex: 1,

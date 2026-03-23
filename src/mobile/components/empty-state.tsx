@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../lib/theme';
 import type { ColorTokens } from '../lib/theme';
 
 type EmptyStateProps = {
-  icon: string;
+  icon: React.ComponentProps<typeof Ionicons>['name'];
   title: string;
   subtitle?: string;
 };
@@ -15,7 +16,7 @@ export function EmptyState({ icon, title, subtitle }: EmptyStateProps) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.icon}>{icon}</Text>
+      <Ionicons name={icon} size={48} color={colors.textSecondary} testID="empty-state-icon" />
       <Text style={styles.title}>{title}</Text>
       {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
     </View>
@@ -31,9 +32,6 @@ const createStyles = (colors: ColorTokens) =>
       paddingHorizontal: 32,
       paddingTop: 80,
       gap: 12,
-    },
-    icon: {
-      fontSize: 48,
     },
     title: {
       fontSize: 22,

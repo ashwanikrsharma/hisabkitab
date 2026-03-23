@@ -9,6 +9,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useActivity } from '../../../hooks/use-api';
 import { useTheme } from '../../../lib/theme';
 import type { ColorTokens } from '../../../lib/theme';
@@ -16,14 +17,14 @@ import { EmptyState } from '../../../components/empty-state';
 import { formatRelativeTime } from '@hisabkitab/shared';
 import type { ActivityItem } from '../../../hooks/use-api';
 
-const ACTION_ICONS: Record<string, string> = {
-  expense_added: '💸',
-  expense_deleted: '🗑️',
-  settlement_created: '🤝',
-  member_joined: '➕',
-  group_created: '👥',
-  group_renamed: '✏️',
-  group_archived: '📦',
+const ACTION_ICONS: Record<string, React.ComponentProps<typeof Ionicons>['name']> = {
+  expense_added: 'cash-outline',
+  expense_deleted: 'trash-outline',
+  settlement_created: 'swap-horizontal-outline',
+  member_joined: 'person-add-outline',
+  group_created: 'people-outline',
+  group_renamed: 'pencil-outline',
+  group_archived: 'archive-outline',
 };
 
 function getDateSection(isoString: string): string {
@@ -94,15 +95,17 @@ export default function ActivityScreen() {
               }}
               activeOpacity={0.7}
             >
-              <Text style={styles.activityIcon}>
-                {ACTION_ICONS[item.type] ?? '📌'}
-              </Text>
+              <Ionicons
+                name={ACTION_ICONS[item.type] ?? 'ellipse-outline'}
+                size={24}
+                color={colors.textSecondary}
+              />
               <View style={styles.activityInfo}>
                 <Text style={styles.activityTitle} numberOfLines={1}>
                   {item.title ?? (item.type ?? '').replace(/_/g, ' ')}
                 </Text>
                 <Text style={styles.activityMeta}>
-                  {item.group_name ? `${item.group_name} · ` : ''}
+                  {item.group_name ? `${item.group_name} \u00B7 ` : ''}
                   {formatRelativeTime(item.created_at)}
                 </Text>
               </View>
@@ -117,7 +120,7 @@ export default function ActivityScreen() {
           }
           ListEmptyComponent={
             <EmptyState
-              icon="📭"
+              icon="mail-open-outline"
               title="No activity yet"
               subtitle="Your expense and settlement activity will appear here."
             />
@@ -171,9 +174,6 @@ const createStyles = (colors: ColorTokens) => StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
-  },
-  activityIcon: {
-    fontSize: 24,
   },
   activityInfo: {
     flex: 1,

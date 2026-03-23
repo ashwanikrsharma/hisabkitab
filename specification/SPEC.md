@@ -88,7 +88,7 @@ HisabKitab is a lightweight expense-splitting app for friend groups, trips, room
 - Edit name, UPI ID, default currency
 - Currency preference (INR, USD, EUR, GBP, SGD, AED)
 - Dark/light theme toggle (mobile)
-- Sign out with redirect to login
+- Sign out with confirmation dialog and redirect to login screen
 
 ### 4.8 Android App Download (Web)
 - "Get Android App" badge on landing page and dashboard
@@ -104,7 +104,19 @@ HisabKitab is a lightweight expense-splitting app for friend groups, trips, room
 - "Get Android App" badge in navigation
 - Redirects authenticated users to dashboard
 
-### 4.10 AI Agent Observability
+### 4.10 Mobile Home Tab (Dashboard)
+- **Summary cards** — "You are owed" and "You owe" aggregate balances across all groups, displayed side-by-side at the top
+- **Your Groups strip** — horizontal scrollable row of up to 6 groups, each showing avatar, name, and per-group balance (green / red)
+- **People section** — per-person net balances aggregated across all groups; displays avatar, name, and color-coded balance (green when the person owes you, red when you owe them); empty state shows "All settled up!"
+- **Settlements by Group section** — outstanding debts involving the current user, organized under group name headers; each debt row shows direction ("You owe X" or "X owes you") with amount; debts where the user owes include a "Settle" button that navigates to the group's settle screen
+- **Recent Activity** — last 10 activity events with link to relevant group
+- **Expandable FAB** — "+" button fixed at bottom-right (above tab bar); expands to reveal two actions: "Add Expense" (navigates to the direct/friend expense modal) and "Group Expense" (opens a group picker modal then navigates to the selected group's add-expense screen)
+- **Group picker modal** — lists all user groups; if the user has exactly one group the picker is skipped and the app navigates directly; if the user has zero groups the FAB navigates to the create-group screen
+- **Section order:** Summary Cards, Your Groups, People, Settlements by Group, Recent Activity
+- Pull-to-refresh on the Home tab refreshes all sections (groups, activity, balances) simultaneously
+- All sections respect the current theme (light/dark) via the shared theme system
+
+### 4.11 AI Agent Observability
 - `agent_metrics` table logs every Claude API call
 - Fields: agent_name, prompt_version, input_tokens, output_tokens, latency_ms, success
 - `analytics_daily` table for aggregated metrics
@@ -120,9 +132,17 @@ Open app → Select Group → Tap "+ Add Expense"
 → Fill (description, amount, category, split type) → Submit → Balances updated
 ```
 
-### Add Direct Expense
+### Add Direct Expense (from FAB)
 ```
-Dashboard → "+" FAB → New Expense → Search friend → Fill form → Submit
+Home tab → Tap "+" FAB → Tap "Add Expense" (Split with friends)
+→ Direct expense modal → Fill (description, amount, friend) → Submit
+```
+
+### Add Group Expense (from FAB)
+```
+Home tab → Tap "+" FAB → Tap "Group Expense" (Within a group)
+→ Group picker modal (skipped if 1 group, replaced by create-group if 0 groups)
+→ Group add-expense screen → Fill form → Submit → Balances updated
 ```
 
 ### Settlement Flow
@@ -362,7 +382,11 @@ All routes follow: `requireAuth` → Zod validation → `@hisabkitab/services` �
 - [x] Web landing page with features and CTAs
 - [x] Dark/light theme toggle (mobile)
 - [x] Multi-currency support (INR, USD, EUR, GBP, SGD, AED)
-- [x] 27 unit/integration tests (Vitest)
+- [x] Mobile Home tab: expandable FAB with "Add Expense" and "Group Expense" actions
+- [x] Mobile Home tab: "People" section — per-person net balances aggregated across all groups
+- [x] Mobile Home tab: "Settlements by Group" section — per-group debt list with Settle buttons
+- [x] Mobile Home tab feature parity with web dashboard
+- [x] 233 unit/integration tests (Vitest) + Maestro E2E flows
 - [x] E2E login tests (Playwright)
 - [x] AI agent observability (agent_metrics table)
 

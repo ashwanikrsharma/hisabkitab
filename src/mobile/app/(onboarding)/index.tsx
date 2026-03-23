@@ -10,6 +10,7 @@ import {
   type NativeScrollEvent,
 } from 'react-native';
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../../lib/theme';
 import type { ColorTokens } from '../../lib/theme';
@@ -20,17 +21,17 @@ const ONBOARDING_KEY = 'hasSeenOnboarding';
 
 const PAGES = [
   {
-    emoji: '💸',
+    icon: 'cash-outline' as const,
     title: 'Split expenses effortlessly',
     subtitle: 'Add expenses and let HisabKitab figure out who owes whom. No more awkward maths.',
   },
   {
-    emoji: '📊',
+    icon: 'bar-chart-outline' as const,
     title: 'Track who owes whom',
     subtitle: 'See real-time balances across all your groups. Settle up with a single tap.',
   },
   {
-    emoji: '🇮🇳',
+    icon: 'flag-outline' as const,
     title: 'Built for India',
     subtitle: 'UPI payments, INR currency, paisa-level accuracy. Designed for how you split.',
   },
@@ -67,7 +68,7 @@ export default function OnboardingScreen() {
       >
         {PAGES.map((page, i) => (
           <View key={i} style={[styles.page, { width }]}>
-            <Text style={styles.emoji}>{page.emoji}</Text>
+            <Ionicons name={page.icon} size={80} color={colors.primary} />
             <Text style={styles.title}>{page.title}</Text>
             <Text style={styles.subtitle}>{page.subtitle}</Text>
           </View>
@@ -116,8 +117,7 @@ const createStyles = (colors: ColorTokens) => StyleSheet.create({
     paddingHorizontal: 40,
     gap: 20,
   },
-  emoji: {
-    fontSize: 80,
+  iconContainer: {
     marginBottom: 12,
   },
   title: {

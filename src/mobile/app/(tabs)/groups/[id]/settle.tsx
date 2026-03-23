@@ -120,7 +120,7 @@ export default function SettleScreen() {
             }
             ListEmptyComponent={
               <EmptyState
-                icon="🎉"
+                icon="checkmark-circle-outline"
                 title="All settled up!"
                 subtitle="No outstanding balances in this group."
               />

@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { ScrollView, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { EXPENSE_CATEGORIES, CATEGORY_ICONS, type ExpenseCategory } from '@hisabkitab/shared';
 import { useTheme, RADIUS } from '../lib/theme';
 import type { ColorTokens } from '../lib/theme';
@@ -20,19 +21,26 @@ export function CategoryPicker({ selected, onSelect, disabled }: CategoryPickerP
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={styles.container}
     >
-      {EXPENSE_CATEGORIES.map((cat) => (
-        <TouchableOpacity
-          key={cat}
-          style={[styles.pill, selected === cat && styles.pillSelected]}
-          onPress={() => onSelect(cat)}
-          disabled={disabled}
-        >
-          <Text style={styles.emoji}>{CATEGORY_ICONS[cat]}</Text>
-          <Text style={[styles.label, selected === cat && styles.labelSelected]}>
-            {cat.charAt(0).toUpperCase() + cat.slice(1)}
-          </Text>
-        </TouchableOpacity>
-      ))}
+      {EXPENSE_CATEGORIES.map((cat) => {
+        const isSelected = selected === cat;
+        return (
+          <TouchableOpacity
+            key={cat}
+            style={[styles.pill, isSelected && styles.pillSelected]}
+            onPress={() => onSelect(cat)}
+            disabled={disabled}
+          >
+            <Ionicons
+              name={CATEGORY_ICONS[cat] as React.ComponentProps<typeof Ionicons>['name']}
+              size={16}
+              color={isSelected ? colors.text : colors.textSecondary}
+            />
+            <Text style={[styles.label, isSelected && styles.labelSelected]}>
+              {cat.charAt(0).toUpperCase() + cat.slice(1)}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
     </ScrollView>
   );
 }
@@ -57,9 +65,6 @@ const createStyles = (colors: ColorTokens) =>
     pillSelected: {
       backgroundColor: colors.primary,
       borderColor: colors.primary,
-    },
-    emoji: {
-      fontSize: 16,
     },
     label: {
       fontSize: 13,

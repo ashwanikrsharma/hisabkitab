@@ -34,16 +34,16 @@ export const EXPENSE_CATEGORIES = [
 export type ExpenseCategory = (typeof EXPENSE_CATEGORIES)[number];
 
 export const CATEGORY_ICONS: Record<ExpenseCategory, string> = {
-  food: '🍔',
-  transport: '🚕',
-  accommodation: '🏠',
-  entertainment: '🎬',
-  utilities: '💡',
-  shopping: '🛍️',
-  health: '💊',
-  travel: '✈️',
-  groceries: '🛒',
-  other: '📦',
+  food: 'restaurant-outline',
+  transport: 'car-outline',
+  accommodation: 'bed-outline',
+  entertainment: 'musical-notes-outline',
+  utilities: 'flash-outline',
+  shopping: 'bag-outline',
+  health: 'medkit-outline',
+  travel: 'airplane-outline',
+  groceries: 'cart-outline',
+  other: 'ellipsis-horizontal-outline',
 };
 
 // ─── Split Types ──────────────────────────────────────────────────────────────

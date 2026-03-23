@@ -23,25 +23,35 @@ jest.mock('../lib/theme', () => ({
   })),
 }));
 
+// Mock @expo/vector-icons
+jest.mock('@expo/vector-icons', () => {
+  const { Text } = require('react-native');
+  return {
+    Ionicons: ({ name, testID, ...props }: any) => (
+      <Text testID={testID ?? 'ionicon'}>{name}</Text>
+    ),
+  };
+});
+
 import { EmptyState } from './empty-state';
 
 describe('EmptyState', () => {
   it('renders the title', () => {
-    render(<EmptyState icon="📭" title="No expenses yet" />);
+    render(<EmptyState icon="mail-open-outline" title="No expenses yet" />);
 
     expect(screen.getByText('No expenses yet')).toBeTruthy();
   });
 
   it('renders the icon', () => {
-    render(<EmptyState icon="📭" title="No expenses yet" />);
+    render(<EmptyState icon="mail-open-outline" title="No expenses yet" />);
 
-    expect(screen.getByText('📭')).toBeTruthy();
+    expect(screen.getByTestId('empty-state-icon')).toBeTruthy();
   });
 
   it('renders subtitle when provided', () => {
     render(
       <EmptyState
-        icon="📭"
+        icon="mail-open-outline"
         title="No expenses yet"
         subtitle="Add your first expense to get started"
       />,
@@ -51,7 +61,7 @@ describe('EmptyState', () => {
   });
 
   it('does not render subtitle when not provided', () => {
-    render(<EmptyState icon="📭" title="No expenses yet" />);
+    render(<EmptyState icon="mail-open-outline" title="No expenses yet" />);
 
     // Only icon and title should be present -- 2 text nodes
     const allText = screen.queryByText('Add your first expense to get started');
@@ -59,9 +69,8 @@ describe('EmptyState', () => {
   });
 
   it('renders different icons correctly', () => {
-    render(<EmptyState icon="👥" title="No groups" />);
+    render(<EmptyState icon="people-outline" title="No groups" />);
 
-    expect(screen.getByText('👥')).toBeTruthy();
     expect(screen.getByText('No groups')).toBeTruthy();
   });
 });

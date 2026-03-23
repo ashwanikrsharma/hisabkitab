@@ -10,6 +10,8 @@ import {
   ScrollView,
   SafeAreaView,
 } from 'react-native';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { SUPPORTED_CURRENCIES } from '@hisabkitab/shared';
 import { useAuthStore } from '../../../store/auth';
 import { useUserProfile, useUpdateProfile } from '../../../hooks/use-api';
@@ -21,6 +23,7 @@ export default function ProfileScreen() {
   const { colors, mode, toggle } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
 
+  const router = useRouter();
   const session = useAuthStore((s) => s.session);
   const signOut = useAuthStore((s) => s.signOut);
   const { data: profile, isLoading } = useUserProfile();
@@ -61,7 +64,10 @@ export default function ProfileScreen() {
       {
         text: 'Sign Out',
         style: 'destructive',
-        onPress: () => signOut(),
+        onPress: async () => {
+          await signOut();
+          router.replace('/(auth)/login');
+        },
       },
     ]);
   };
@@ -155,13 +161,19 @@ export default function ProfileScreen() {
                 style={[styles.appearanceOption, mode === 'light' && styles.appearanceOptionSelected]}
                 onPress={() => { if (mode !== 'light') toggle(); }}
               >
-                <Text style={[styles.appearanceOptionText, mode === 'light' && styles.appearanceOptionTextSelected]}>☀️ Light</Text>
+                <View style={styles.appearanceOptionContent}>
+                  <Ionicons name="sunny-outline" size={16} color={mode === 'light' ? '#ffffff' : colors.textSecondary} />
+                  <Text style={[styles.appearanceOptionText, mode === 'light' && styles.appearanceOptionTextSelected]}>Light</Text>
+                </View>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.appearanceOption, mode === 'dark' && styles.appearanceOptionSelected]}
                 onPress={() => { if (mode !== 'dark') toggle(); }}
               >
-                <Text style={[styles.appearanceOptionText, mode === 'dark' && styles.appearanceOptionTextSelected]}>🌙 Dark</Text>
+                <View style={styles.appearanceOptionContent}>
+                  <Ionicons name="moon-outline" size={16} color={mode === 'dark' ? '#ffffff' : colors.textSecondary} />
+                  <Text style={[styles.appearanceOptionText, mode === 'dark' && styles.appearanceOptionTextSelected]}>Dark</Text>
+                </View>
               </TouchableOpacity>
             </View>
           </View>
@@ -291,6 +303,11 @@ const createStyles = (colors: ColorTokens) => StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: colors.card,
     alignItems: 'center',
+  },
+  appearanceOptionContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   appearanceOptionSelected: {
     backgroundColor: colors.primary,
