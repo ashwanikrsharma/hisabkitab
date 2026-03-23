@@ -150,7 +150,7 @@
               <tr><td>Constants</td><td><code>SCREAMING_SNAKE_CASE</code></td><td><code>MAX_GROUP_MEMBERS</code></td></tr>
               <tr><td>Database tables</td><td><code>snake_case</code></td><td><code>expense_splits</code></td></tr>
               <tr><td>Zod schemas</td><td><code>PascalCaseSchema</code></td><td><code>CreateExpenseSchema</code></td></tr>
-              <tr><td>Package names</td><td><code>@hisabkitab/&lt;name&gt;</code></td><td><code>@hisabkitab/db</code></td></tr>
+              <tr><td>Package names</td><td><code>@hisabkitab/&lt;name&gt;</code></td><td><code>@hisabkitab/services</code></td></tr>
             </tbody>
           </table>
         </div>
@@ -162,7 +162,7 @@
           <li>One component/function per file for complex logic</li>
           <li>Co-locate tests next to source: <code>foo.ts</code> → <code>foo.test.ts</code></li>
           <li>Use barrel exports (<code>index.ts</code>) at package boundaries only</li>
-          <li>Never write raw Supabase queries in <code>apps/</code> — import from <code>@hisabkitab/db</code></li>
+          <li>Never write raw Supabase queries in <code>apps/</code> — import from <code>@hisabkitab/services</code></li>
         </ul>
 
         <hr>
@@ -172,7 +172,7 @@
         <div class="pipeline-box">
 1. requireAuth(req)              &rarr; First line (except webhooks)
 2. Zod safeParse on input        &rarr; Return 400 with error.flatten() on failure
-3. Use @hisabkitab/db functions  &rarr; Never raw Supabase queries
+3. Use @hisabkitab/services functions  &rarr; Never raw Supabase queries
 4. Sanitized error responses     &rarr; Never expose raw DB errors
 5. createActivity() non-blocking &rarr; Log state changes, catch errors
 6. console.error only            &rarr; No console.log in production
@@ -191,7 +191,7 @@
 
         <h3>Styling</h3>
         <ul>
-          <li>Use the existing Tailwind design tokens (see <code>apps/web/tailwind.config.js</code>)</li>
+          <li>Use the existing Tailwind design tokens (see <code>src/web/tailwind.config.js</code>)</li>
           <li>Custom classes: <code>btn-primary</code>, <code>btn-secondary</code>, <code>card</code>, <code>shadow-warm</code>, <code>glass-header</code></li>
           <li>Currency display: <code>Intl.NumberFormat('en-IN', &#x7B; style: 'currency', currency: 'INR' &#x7D;)</code></li>
         </ul>
@@ -224,7 +224,7 @@ export function DeleteButton({ id }: { id: string }) {
 
         <h3>Query Functions</h3>
         <ul>
-          <li>One file per domain in <code>packages/db/src/queries/</code></li>
+          <li>One file per domain in <code>src/services/src/queries/</code></li>
           <li>Typed inputs and outputs</li>
           <li>Descriptive error messages: <code>"Failed to &lt;action&gt;: &lt;detail&gt;"</code></li>
           <li>Always update barrel exports after adding new functions</li>
@@ -262,7 +262,7 @@ export function DeleteButton({ id }: { id: string }) {
         <div class="depth-diagram">
 Middleware (session refresh, route protection)
     &rarr; API Route (requireAuth, Zod validation)
-        &rarr; @hisabkitab/db (query-level checks)
+        &rarr; @hisabkitab/services (query-level checks)
             &rarr; PostgreSQL RLS (row-level enforcement)
         </div>
 
@@ -280,7 +280,7 @@ Middleware (session refresh, route protection)
 
         <h2>Observability</h2>
         <ul>
-          <li>All AI operations tracked via <code>logAgentMetric()</code> in <code>@hisabkitab/db</code></li>
+          <li>All AI operations tracked via <code>logAgentMetric()</code> in <code>@hisabkitab/services</code></li>
           <li>State-changing API operations log to <code>activity_log</code> via <code>createActivity()</code> (non-blocking)</li>
           <li><code>console.error</code> for error logging — never <code>console.log</code> in production paths</li>
         </ul>
@@ -289,14 +289,14 @@ Middleware (session refresh, route protection)
 
         <h2>Common Mistakes to Avoid</h2>
         <ol>
-          <li><strong>Raw Supabase queries in <code>apps/</code></strong> — Always use <code>@hisabkitab/db</code> functions</li>
+          <li><strong>Raw Supabase queries in <code>apps/</code></strong> — Always use <code>@hisabkitab/services</code> functions</li>
           <li><strong>Returning raw DB errors</strong> — Always return sanitized error messages</li>
           <li><strong>Missing AI token logging</strong> — Every Claude call must log usage</li>
           <li><strong>Skipping Zod validation</strong> — Every external input must be validated</li>
           <li><strong><code>console.log</code> in production</strong> — Use structured logging (<code>console.error</code> for errors)</li>
           <li><strong>Forgetting <code>await</code></strong> — TypeScript strict mode catches most, but stay vigilant</li>
           <li><strong>Missing RLS policies</strong> — Test with anon key to verify</li>
-          <li><strong>Not updating barrel exports</strong> — After adding functions to <code>packages/db/</code>, update <code>index.ts</code></li>
+          <li><strong>Not updating barrel exports</strong> — After adding functions to <code>src/services/</code>, update <code>index.ts</code></li>
           <li><strong>Direct HTTP calls between agents</strong> — Use function imports within the monorepo, never <code>fetch('http://localhost:...')</code></li>
           <li><strong>Missing <code>router.refresh()</code></strong> — Client mutations must refresh server state</li>
         </ol>

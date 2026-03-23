@@ -161,22 +161,22 @@
           </div>
           <div class="agent-card">
             <div class="agent-card-name">db-agent <span class="badge-opus">opus</span></div>
-            <div class="agent-card-domain">Database &rarr; <code>supabase/migrations/</code>, <code>packages/db/</code></div>
+            <div class="agent-card-domain">Database &rarr; <code>src/supabase/migrations/</code>, <code>src/services/</code></div>
             <div class="agent-card-desc">Migrations, typed query functions, database types.</div>
           </div>
           <div class="agent-card">
             <div class="agent-card-name">backend-agent <span class="badge-opus">opus</span></div>
-            <div class="agent-card-domain">API &rarr; <code>apps/web/app/api/</code>, <code>apps/web/lib/</code></div>
+            <div class="agent-card-domain">API &rarr; <code>src/web/app/api/</code>, <code>src/web/lib/</code></div>
             <div class="agent-card-desc">API route handlers, auth middleware, Zod validation.</div>
           </div>
           <div class="agent-card">
             <div class="agent-card-name">frontend-agent <span class="badge-opus">opus</span></div>
-            <div class="agent-card-domain">UI &rarr; <code>apps/web/app/</code> (non-api)</div>
+            <div class="agent-card-domain">UI &rarr; <code>src/web/app/</code> (non-api)</div>
             <div class="agent-card-desc">Pages, components, styling, Server/Client Component patterns.</div>
           </div>
           <div class="agent-card">
             <div class="agent-card-name">test-agent <span class="badge-opus">opus</span></div>
-            <div class="agent-card-domain">Testing &rarr; <code>**/*.test.ts</code>, <code>apps/web/e2e/</code></div>
+            <div class="agent-card-domain">Testing &rarr; <code>**/*.test.ts</code>, <code>src/web/e2e/</code></div>
             <div class="agent-card-desc">Unit tests (Vitest), E2E tests (Playwright), fixture management.</div>
           </div>
           <div class="agent-card">
@@ -255,7 +255,7 @@ backend-agent &#x25C4;&#x2500;&#x25BA; frontend-agent
         <p>The <code>review-agent</code> (read-only) checks 19 items across:</p>
         <ul>
           <li><strong>Security</strong>: auth on every route, no hardcoded secrets, RLS enabled, no service_role on client, prompt injection guards</li>
-          <li><strong>Conventions</strong>: Zod validation, <code>@hisabkitab/db</code> usage, sanitized errors, activity logging, prompt versioning, token logging</li>
+          <li><strong>Conventions</strong>: Zod validation, <code>@hisabkitab/services</code> usage, sanitized errors, activity logging, prompt versioning, token logging</li>
           <li><strong>Code quality</strong>: no <code>any</code>, barrel exports updated, migration naming, no <code>console.log</code></li>
           <li><strong>Architecture</strong>: tech-design compliance, no layer violations, cache invalidation, authorization checks</li>
         </ul>
@@ -309,7 +309,7 @@ backend-agent &#x25C4;&#x2500;&#x25BA; frontend-agent
         <ul class="constraint-list">
           <li><strong>Security first</strong> — <code>requireAuth()</code> on every API route, RLS on every table, no hardcoded secrets</li>
           <li><strong>Zod validation</strong> — Every external input (API params, AI outputs, form data) must be validated</li>
-          <li><strong>Layer boundaries</strong> — Pages never call <code>@hisabkitab/db</code> directly; API routes never write raw Supabase queries</li>
+          <li><strong>Layer boundaries</strong> — Pages never call <code>@hisabkitab/services</code> directly; API routes never write raw Supabase queries</li>
           <li><strong>Activity logging</strong> — All state-changing operations log to the activity feed (non-blocking)</li>
           <li><strong>No <code>any</code></strong> — TypeScript strict mode; <code>any</code> requires an explicit justification comment</li>
           <li><strong>Sanitized errors</strong> — Never expose raw DB or internal errors to the client</li>

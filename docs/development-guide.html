@@ -170,7 +170,7 @@ npm install</code></pre>
         </div>
 
         <h3>3. Database Setup</h3>
-        <p>Run Supabase migrations against your database. Migrations are in <code>supabase/migrations/</code> and should be applied in order.</p>
+        <p>Run Supabase migrations against your database. Migrations are in <code>src/supabase/migrations/</code> and should be applied in order.</p>
         <p>If using Supabase local development:</p>
         <pre><code>npx supabase start
 npx supabase db reset  # applies all migrations</code></pre>
@@ -245,7 +245,7 @@ page.tsx         &#x2192; page.test.tsx</code></pre>
         <h3>E2E Tests (Playwright)</h3>
         <pre><code>cd apps/web
 npx playwright test</code></pre>
-        <p>Playwright config is at <code>apps/web/playwright.config.ts</code>. E2E tests live in <code>apps/web/e2e/</code>.</p>
+        <p>Playwright config is at <code>src/web/playwright.config.ts</code>. E2E tests live in <code>src/web/e2e/</code>.</p>
 
         <hr>
 
@@ -263,7 +263,7 @@ export JAVA_HOME=/opt/homebrew/Cellar/openjdk@21/21.0.8/libexec/openjdk.jdk/Cont
 export ANDROID_HOME=$HOME/Library/Android/sdk
 eas build --platform android --profile preview --local</code></pre>
         <p>The APK will be output to the current directory.</p>
-        <p>Build profiles (defined in <code>apps/mobile/eas.json</code>):</p>
+        <p>Build profiles (defined in <code>src/mobile/eas.json</code>):</p>
         <ul>
           <li><code>development</code> — Dev client APK with Metro bundler connection</li>
           <li><code>preview</code> — Standalone APK with production API URL baked in</li>
@@ -303,13 +303,13 @@ eas build --platform android --profile preview --local</code></pre>
 
         <h3>Adding a New API Route</h3>
         <ol>
-          <li>Create <code>apps/web/app/api/&lt;route&gt;/route.ts</code></li>
+          <li>Create <code>src/web/app/api/&lt;route&gt;/route.ts</code></li>
           <li>Follow the mandatory handler pipeline:</li>
         </ol>
         <pre><code>import { requireAuth } from '@/lib/auth';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { createActivity } from '@hisabkitab/db';
+import { createActivity } from '@hisabkitab/services';
 
 const InputSchema = z.object({ /* ... */ });
 
@@ -320,7 +320,7 @@ export async function POST(req: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
-  // ... use @hisabkitab/db functions
+  // ... use @hisabkitab/services functions
   createActivity({ /* ... */ }).catch(console.error);
   return NextResponse.json({ data: result });
 }</code></pre>
@@ -330,18 +330,18 @@ export async function POST(req: Request) {
 
         <h3>Adding a New Database Table</h3>
         <ol>
-          <li>Create a migration: <code>supabase/migrations/YYYYMMDDHHMMSS_description.sql</code></li>
+          <li>Create a migration: <code>src/supabase/migrations/YYYYMMDDHHMMSS_description.sql</code></li>
           <li>Include: <code>CREATE TABLE</code>, <code>ENABLE ROW LEVEL SECURITY</code>, RLS policies, indexes</li>
-          <li>Add types to <code>packages/db/src/types.ts</code></li>
-          <li>Add query functions to <code>packages/db/src/queries/&lt;domain&gt;.ts</code></li>
-          <li>Update barrel exports in <code>packages/db/src/index.ts</code></li>
+          <li>Add types to <code>src/services/src/types.ts</code></li>
+          <li>Add query functions to <code>src/services/src/queries/&lt;domain&gt;.ts</code></li>
+          <li>Update barrel exports in <code>src/services/src/index.ts</code></li>
         </ol>
 
         <h3>Adding a New Web Page</h3>
         <ol>
-          <li>Create <code>apps/web/app/&lt;route&gt;/page.tsx</code></li>
+          <li>Create <code>src/web/app/&lt;route&gt;/page.tsx</code></li>
           <li>Use Server Components by default</li>
-          <li>Fetch data via API routes (not <code>@hisabkitab/db</code> directly)</li>
+          <li>Fetch data via API routes (not <code>@hisabkitab/services</code> directly)</li>
           <li>Use the existing Tailwind design tokens for styling</li>
           <li>Add <code>'use client'</code> only for interactive components, pushed as far down the tree as possible</li>
         </ol>

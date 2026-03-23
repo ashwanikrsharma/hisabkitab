@@ -7,6 +7,7 @@
 <style>
   :root {
     --accent: #E8651A;
+    --accent-hover: #cf5a16;
     --accent-light: #FFF3EC;
     --header-bg: #1A1A1A;
     --success: #059669;
@@ -23,918 +24,885 @@
     --border: #E5E7EB;
     --code-bg: #1E1E2E;
     --code-text: #CDD6F4;
-    --sidebar-w: 260px;
+    --code-keyword: #CBA6F7;
+    --code-string: #A6E3A1;
+    --code-comment: #6C7086;
+    --code-function: #89B4FA;
+    --code-number: #FAB387;
+    --sidebar-width: 260px;
+    --header-height: 56px;
+    --radius: 10px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.07);
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+  html { scroll-behavior: smooth; scroll-padding-top: calc(var(--header-height) + 16px); }
 
   body {
-    font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     background: var(--bg);
     color: var(--text);
     line-height: 1.65;
     font-size: 15px;
+    -webkit-font-smoothing: antialiased;
   }
 
-  /* ---- HEADER ---- */
+  /* ── Header ── */
   .site-header {
-    position: sticky; top: 0; z-index: 100;
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    height: var(--header-height);
     background: var(--header-bg);
     color: #fff;
-    padding: 0 32px;
-    height: 56px;
-    display: flex; align-items: center; gap: 14px;
-    box-shadow: 0 1px 3px rgba(0,0,0,.25);
+    display: flex; align-items: center; padding: 0 24px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
   }
   .site-header .logo {
-    font-size: 20px; font-weight: 700; letter-spacing: -.3px;
+    font-size: 18px; font-weight: 700; letter-spacing: -0.3px;
+    display: flex; align-items: center; gap: 10px;
   }
-  .site-header .logo span { color: var(--accent); }
-  .site-header .subtitle {
-    font-size: 13px; color: var(--text-muted); margin-left: 4px;
+  .site-header .logo-icon {
+    width: 28px; height: 28px; background: var(--accent); border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 800;
+  }
+  .site-header .badge {
+    font-size: 10px; font-weight: 600; background: var(--accent);
+    padding: 2px 7px; border-radius: 20px; margin-left: 6px; letter-spacing: 0.5px;
   }
   .hamburger {
-    display: none; background: none; border: none; color: #fff; font-size: 24px; cursor: pointer; margin-right: 8px;
+    display: none; background: none; border: none; color: #fff;
+    font-size: 22px; cursor: pointer; margin-right: 12px; padding: 4px;
   }
 
-  /* ---- LAYOUT ---- */
-  .layout { display: flex; min-height: calc(100vh - 56px); }
-
-  /* ---- SIDEBAR ---- */
+  /* ── Sidebar ── */
   .sidebar {
-    position: sticky; top: 56px;
-    width: var(--sidebar-w); min-width: var(--sidebar-w);
-    height: calc(100vh - 56px);
-    overflow-y: auto;
-    background: var(--card);
+    position: fixed; top: var(--header-height); left: 0; bottom: 0;
+    width: var(--sidebar-width); background: var(--card);
     border-right: 1px solid var(--border);
-    padding: 20px 0;
-    font-size: 13.5px;
+    overflow-y: auto; padding: 20px 0; z-index: 90;
+    transition: transform 0.25s ease;
   }
-  .sidebar-title {
-    padding: 0 20px 10px;
-    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px;
-    color: var(--text-muted);
+  .sidebar-section-title {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--text-muted);
+    padding: 16px 20px 6px; user-select: none;
   }
   .sidebar a {
-    display: block; padding: 7px 20px; color: var(--text-secondary);
-    text-decoration: none; transition: all .15s;
+    display: block; padding: 7px 20px 7px 24px;
+    color: var(--text-secondary); text-decoration: none;
+    font-size: 13.5px; font-weight: 500;
     border-left: 3px solid transparent;
+    transition: all 0.15s ease;
   }
-  .sidebar a:hover {
+  .sidebar a:hover, .sidebar a:focus {
     color: var(--accent); background: var(--accent-light);
     border-left-color: var(--accent);
   }
 
-  /* ---- MAIN ---- */
+  /* ── Main Content ── */
   .main {
-    flex: 1; max-width: 900px;
-    padding: 40px 48px 80px;
+    margin-left: var(--sidebar-width);
+    margin-top: var(--header-height);
+    padding: 32px 40px 80px;
+    max-width: 960px;
   }
 
-  /* ---- SECTIONS ---- */
-  section { margin-bottom: 56px; }
-  h1 { font-size: 28px; font-weight: 800; margin-bottom: 8px; color: var(--text); letter-spacing: -.4px; }
-  h1 .num { color: var(--accent); margin-right: 6px; }
-  h2 { font-size: 22px; font-weight: 700; margin: 36px 0 12px; color: var(--text); letter-spacing: -.3px; }
-  h3 { font-size: 16px; font-weight: 600; margin: 20px 0 8px; }
-  p { margin-bottom: 12px; }
-
-  .lead { font-size: 17px; color: var(--text-secondary); margin-bottom: 20px; }
-
-  /* ---- BADGE ---- */
-  .badge {
-    display: inline-block; font-size: 11px; font-weight: 600;
-    padding: 3px 10px; border-radius: 20px;
-    letter-spacing: .3px; text-transform: uppercase;
-    vertical-align: middle;
+  /* ── Section Headings ── */
+  .section { margin-bottom: 48px; }
+  .section-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 8px;
+    background: var(--accent); color: #fff;
+    font-size: 13px; font-weight: 700; margin-right: 10px;
+    flex-shrink: 0;
   }
-  .badge-accent { background: var(--accent-light); color: var(--accent); }
-  .badge-success { background: var(--success-light); color: var(--success); }
-  .badge-danger { background: var(--danger-light); color: var(--danger); }
-  .badge-gold { background: var(--gold-light); color: var(--gold); }
+  h2 {
+    font-size: 22px; font-weight: 700; margin-bottom: 18px;
+    display: flex; align-items: center;
+    padding-bottom: 10px; border-bottom: 2px solid var(--border);
+    letter-spacing: -0.3px;
+  }
+  h3 {
+    font-size: 16px; font-weight: 700; margin: 22px 0 10px;
+    color: var(--text);
+  }
+  h4 {
+    font-size: 14px; font-weight: 700; margin: 16px 0 8px;
+    color: var(--text-secondary);
+  }
 
-  /* ---- CARDS ---- */
+  /* ── Cards ── */
   .card {
     background: var(--card); border: 1px solid var(--border);
-    border-radius: 12px; padding: 24px; margin-bottom: 16px;
-    box-shadow: 0 1px 3px rgba(0,0,0,.04);
+    border-radius: var(--radius); padding: 20px; margin-bottom: 16px;
+    box-shadow: var(--shadow);
   }
-  .card-title {
-    font-size: 14px; font-weight: 700; margin-bottom: 8px;
-    display: flex; align-items: center; gap: 8px;
+  .card-accent { border-left: 4px solid var(--accent); }
+  .card-success { border-left: 4px solid var(--success); background: var(--success-light); }
+  .card-danger { border-left: 4px solid var(--danger); background: var(--danger-light); }
+  .card-gold { border-left: 4px solid var(--gold); background: var(--gold-light); }
+
+  /* ── Details / Summary ── */
+  details {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); margin-bottom: 12px;
+    box-shadow: var(--shadow);
   }
+  details[open] > summary { border-bottom: 1px solid var(--border); }
+  summary {
+    padding: 14px 20px; cursor: pointer; font-weight: 600;
+    font-size: 14px; list-style: none; display: flex;
+    align-items: center; gap: 8px; user-select: none;
+    transition: background 0.15s;
+  }
+  summary:hover { background: var(--accent-light); }
+  summary::before {
+    content: '\25B6'; font-size: 10px; color: var(--accent);
+    transition: transform 0.2s ease; flex-shrink: 0;
+  }
+  details[open] > summary::before { transform: rotate(90deg); }
+  summary::-webkit-details-marker { display: none; }
+  details > .details-body { padding: 16px 20px; }
 
-  /* ---- GRID ---- */
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
-  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-
-  /* ---- TABLE ---- */
-  .table-wrap { overflow-x: auto; margin-bottom: 16px; border-radius: 10px; border: 1px solid var(--border); }
+  /* ── Tables ── */
+  .table-wrap { overflow-x: auto; margin: 12px 0; border-radius: var(--radius); border: 1px solid var(--border); }
   table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
   th {
-    text-align: left; padding: 10px 14px;
-    background: var(--header-bg); color: #fff;
-    font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .5px;
+    background: var(--header-bg); color: #fff; text-align: left;
+    padding: 10px 14px; font-weight: 600; font-size: 12px;
+    text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;
   }
   td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
-  tr:nth-child(even) td { background: #F9FAFB; }
-  tr:last-child td { border-bottom: none; }
+  tbody tr:nth-child(even) { background: #F9FAFB; }
+  tbody tr:hover { background: var(--accent-light); }
 
-  /* ---- CODE ---- */
+  /* ── Code ── */
   pre {
     background: var(--code-bg); color: var(--code-text);
-    padding: 18px 20px; border-radius: 10px;
-    overflow-x: auto; font-size: 13px; line-height: 1.55;
-    margin-bottom: 16px;
+    border-radius: var(--radius); padding: 18px 20px; overflow-x: auto;
+    font-size: 13px; line-height: 1.6; margin: 12px 0;
+    border: 1px solid #313244;
   }
   code {
-    font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', Menlo, monospace;
+    font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Cascadia Code', 'Consolas', monospace;
+    font-size: 0.9em;
   }
   :not(pre) > code {
     background: #F3F4F6; color: var(--accent);
-    padding: 2px 7px; border-radius: 5px; font-size: 13px;
+    padding: 2px 6px; border-radius: 4px; font-size: 0.85em;
   }
+  .kw { color: var(--code-keyword); }
+  .str { color: var(--code-string); }
+  .cmt { color: var(--code-comment); font-style: italic; }
+  .fn { color: var(--code-function); }
+  .num { color: var(--code-number); }
 
-  /* ---- DETAILS ---- */
-  details {
-    border: 1px solid var(--border); border-radius: 10px;
-    margin-bottom: 12px; background: var(--card);
-  }
-  summary {
-    padding: 14px 18px; font-weight: 600; cursor: pointer;
-    list-style: none; display: flex; align-items: center; gap: 8px;
-    font-size: 14px;
-  }
-  summary::before {
-    content: '\25B6'; font-size: 10px; color: var(--text-muted);
-    transition: transform .2s;
-  }
-  details[open] summary::before { transform: rotate(90deg); }
-  summary::-webkit-details-marker { display: none; }
-  details .detail-body { padding: 4px 18px 18px; }
-
-  /* ---- LISTS ---- */
-  ul, ol { padding-left: 22px; margin-bottom: 12px; }
-  li { margin-bottom: 4px; }
-
-  /* ---- DIAGRAM ---- */
-  .diagram-box {
-    background: var(--code-bg); color: var(--code-text);
-    padding: 28px 24px; border-radius: 12px; text-align: center;
-    font-family: 'JetBrains Mono', monospace; font-size: 14px;
-    line-height: 1.8; margin-bottom: 16px; overflow-x: auto;
-    white-space: pre;
-  }
-
-  /* ---- PIPELINE ---- */
-  .pipeline {
-    display: flex; gap: 0; align-items: stretch; flex-wrap: wrap;
-    margin: 16px 0;
-  }
-  .pipeline-step {
-    flex: 1; min-width: 100px;
-    padding: 14px 12px; text-align: center;
-    font-size: 12px; font-weight: 600;
-    position: relative; color: #fff;
-    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%, 14px 50%);
-    margin-left: -8px;
-  }
-  .pipeline-step:first-child { clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 50%, calc(100% - 14px) 100%, 0 100%); margin-left: 0; }
-  .pipeline-step:last-child { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 14px 50%); }
-  .pipeline-step small { display: block; font-weight: 400; opacity: .8; font-size: 10px; }
-
-  /* ---- COLORS ---- */
-  .color-swatch {
-    display: flex; align-items: center; gap: 12px; padding: 10px 0;
-  }
-  .swatch {
-    width: 40px; height: 40px; border-radius: 10px;
-    border: 1px solid rgba(0,0,0,.08); flex-shrink: 0;
-  }
-
-  /* ---- CALLOUT ---- */
-  .callout {
-    border-left: 4px solid var(--accent); background: var(--accent-light);
-    padding: 14px 18px; border-radius: 0 10px 10px 0;
-    margin-bottom: 16px; font-size: 14px;
-  }
-  .callout-danger {
-    border-left-color: var(--danger); background: var(--danger-light);
-  }
-  .callout-success {
-    border-left-color: var(--success); background: var(--success-light);
-  }
-
-  /* ---- TAG LIST ---- */
-  .tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  /* ── Badges & Tags ── */
   .tag {
-    font-size: 12px; font-weight: 500; padding: 4px 12px;
-    border-radius: 20px; border: 1px solid var(--border); background: var(--card);
+    display: inline-block; padding: 2px 8px; border-radius: 20px;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.3px;
+  }
+  .tag-accent { background: var(--accent-light); color: var(--accent); }
+  .tag-success { background: var(--success-light); color: var(--success); }
+  .tag-danger { background: var(--danger-light); color: var(--danger); }
+  .tag-gold { background: var(--gold-light); color: var(--gold); }
+  .tag-muted { background: #F3F4F6; color: var(--text-secondary); }
+
+  /* ── Pipeline ── */
+  .pipeline { display: flex; flex-direction: column; gap: 4px; margin: 12px 0; }
+  .pipeline-step {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; background: var(--card);
+    border: 1px solid var(--border); border-radius: 8px;
+    font-size: 13px;
+  }
+  .pipeline-step .step-num {
+    width: 24px; height: 24px; border-radius: 6px;
+    background: var(--accent); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; flex-shrink: 0;
+  }
+  .pipeline-step .step-label { font-weight: 600; }
+  .pipeline-step .step-desc { color: var(--text-secondary); font-size: 12px; }
+  .pipeline-arrow { text-align: center; color: var(--text-muted); font-size: 11px; }
+  .parallel-group {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+    border: 2px dashed var(--border); border-radius: 10px; padding: 8px;
+  }
+  .parallel-group .parallel-label {
+    grid-column: 1 / -1; text-align: center; font-size: 10px;
+    font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--text-muted); padding: 2px 0;
   }
 
-  /* ---- FOOTER ---- */
-  .site-footer {
-    text-align: center; padding: 28px 20px;
+  /* ── Lists ── */
+  ul, ol { padding-left: 20px; margin: 8px 0; }
+  li { margin-bottom: 4px; }
+  li::marker { color: var(--accent); }
+
+  /* ── Misc ── */
+  p { margin: 8px 0; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+  .text-muted { color: var(--text-muted); }
+  .text-secondary { color: var(--text-secondary); }
+  .text-accent { color: var(--accent); font-weight: 600; }
+  .text-success { color: var(--success); }
+  .text-danger { color: var(--danger); }
+  .text-sm { font-size: 13px; }
+  .mt-2 { margin-top: 8px; }
+  .mt-4 { margin-top: 16px; }
+  .mb-2 { margin-bottom: 8px; }
+  .flex-row { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  /* ── Checklist ── */
+  .checklist { list-style: none; padding-left: 0; }
+  .checklist li { padding: 4px 0; display: flex; align-items: baseline; gap: 8px; }
+  .checklist li::before { content: '\2713'; color: var(--success); font-weight: 700; font-size: 13px; flex-shrink: 0; }
+  .checklist-danger li::before { content: '\2717'; color: var(--danger); }
+
+  /* ── Footer ── */
+  .footer {
+    margin-left: var(--sidebar-width);
+    padding: 24px 40px;
     border-top: 1px solid var(--border);
-    font-size: 13px; color: var(--text-muted);
+    color: var(--text-muted); font-size: 12px;
+    text-align: center;
   }
 
-  /* ---- MOBILE ---- */
+  /* ── Mobile ── */
   @media (max-width: 860px) {
     .hamburger { display: block; }
     .sidebar {
-      position: fixed; left: -280px; top: 56px; z-index: 200;
-      width: 280px; height: calc(100vh - 56px);
-      transition: left .25s ease;
-      box-shadow: 4px 0 20px rgba(0,0,0,.15);
+      transform: translateX(-100%);
     }
-    .sidebar.open { left: 0; }
-    .sidebar-overlay {
-      display: none; position: fixed; inset: 0; top: 56px;
-      background: rgba(0,0,0,.3); z-index: 199;
-    }
-    .sidebar.open ~ .sidebar-overlay { display: block; }
-    .main { padding: 28px 20px 60px; }
-    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
-    .pipeline { flex-direction: column; }
-    .pipeline-step {
-      clip-path: none !important; margin-left: 0 !important;
-      border-radius: 8px; margin-bottom: 4px;
-    }
+    .sidebar.open { transform: translateX(0); box-shadow: 4px 0 20px rgba(0,0,0,0.15); }
+    .main { margin-left: 0; padding: 24px 16px 60px; }
+    .footer { margin-left: 0; padding: 20px 16px; }
+    .parallel-group { grid-template-columns: 1fr; }
   }
 
-  /* ---- PRINT ---- */
+  /* ── Print ── */
   @media print {
-    .site-header, .sidebar, .hamburger, .sidebar-overlay { display: none !important; }
-    .main { max-width: 100%; padding: 20px; }
-    details { border: none; }
-    details[open] summary { font-weight: 700; }
-    details .detail-body { display: block !important; }
-    details:not([open]) .detail-body { display: block !important; }
-    details:not([open]) { }
-    details { open: true; }
+    .site-header, .sidebar, .hamburger { display: none !important; }
+    .main, .footer { margin-left: 0; }
+    details[open] > .details-body, details > .details-body { display: block !important; }
+    details { break-inside: avoid; }
+    details:not([open]) { open: true; }
+    details:not([open]) > .details-body { display: block !important; }
     pre { white-space: pre-wrap; word-break: break-all; }
-    .pipeline-step { clip-path: none !important; margin-left: 0 !important; border: 1px solid #ccc; border-radius: 6px; }
-    section { break-inside: avoid; }
+    body { font-size: 12px; }
+    .section { break-inside: avoid; }
   }
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
+<!-- Header -->
 <header class="site-header">
   <button class="hamburger" onclick="document.querySelector('.sidebar').classList.toggle('open')" aria-label="Toggle navigation">&#9776;</button>
-  <div class="logo">Hisab<span>Kitab</span></div>
-  <span class="subtitle">Developer Guide</span>
+  <div class="logo">
+    <div class="logo-icon">HK</div>
+    HisabKitab
+    <span class="badge">DEV GUIDE</span>
+  </div>
 </header>
 
-<div class="layout">
-
-<!-- SIDEBAR -->
+<!-- Sidebar -->
 <nav class="sidebar" id="sidebar">
-  <div class="sidebar-title">Sections</div>
-  <a href="#overview" onclick="closeSidebar()">1. Project Overview</a>
-  <a href="#stack" onclick="closeSidebar()">2. Technology Stack</a>
-  <a href="#architecture" onclick="closeSidebar()">3. Architecture</a>
-  <a href="#agents" onclick="closeSidebar()">4. AI Agent Workflow</a>
-  <a href="#conventions" onclick="closeSidebar()">5. Development Conventions</a>
-  <a href="#schema" onclick="closeSidebar()">6. Database Schema</a>
-  <a href="#api" onclick="closeSidebar()">7. API Routes</a>
-  <a href="#design" onclick="closeSidebar()">8. Design System</a>
-  <a href="#testing" onclick="closeSidebar()">9. Testing</a>
-  <a href="#deployment" onclick="closeSidebar()">10. Deployment</a>
-  <a href="#pitfalls" onclick="closeSidebar()">11. Common Pitfalls</a>
+  <div class="sidebar-section-title">Overview</div>
+  <a href="#project-overview">Project Overview</a>
+  <a href="#tech-stack">Tech Stack</a>
+  <a href="#architecture">Architecture &amp; Folders</a>
+  <div class="sidebar-section-title">Workflow</div>
+  <a href="#ai-agents">AI Agent Workflow</a>
+  <a href="#plugins">Plugins</a>
+  <a href="#conventions">Dev Conventions</a>
+  <div class="sidebar-section-title">Frontend &amp; Data</div>
+  <a href="#design-system">Design System</a>
+  <a href="#database">Database</a>
+  <a href="#api-routes">API Routes</a>
+  <div class="sidebar-section-title">Operations</div>
+  <a href="#testing">Testing</a>
+  <a href="#deployment">Deployment</a>
+  <a href="#pitfalls">Common Pitfalls</a>
 </nav>
-<div class="sidebar-overlay" onclick="closeSidebar()"></div>
 
-<!-- MAIN -->
-<main class="main">
+<!-- Main Content -->
+<div class="main">
 
-<!-- ==================== 1. PROJECT OVERVIEW ==================== -->
-<section id="overview">
-  <h1><span class="num">01</span> Project Overview</h1>
-  <p class="lead">HisabKitab is an AI-first group expense splitter purpose-built for the Indian market. <em>"Hisab"</em> means calculation; <em>"Kitab"</em> means book.</p>
-
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-title"><span style="font-size:18px">&#127919;</span> Target Audience</div>
-      <p style="margin:0; color:var(--text-secondary)">Young Indian adults (20s-30s), mobile-first users who split expenses across friend groups, trips, and flatmates.</p>
-    </div>
-    <div class="card">
-      <div class="card-title"><span style="font-size:18px">&#127758;</span> Platforms</div>
-      <div class="tag-list" style="margin-top:4px">
-        <span class="tag">Web (Next.js 14)</span>
-        <span class="tag">Android (Expo)</span>
-        <span class="tag">iOS (Expo)</span>
-        <span class="tag">WhatsApp Bot (P2)</span>
+  <!-- 1. Project Overview -->
+  <section class="section" id="project-overview">
+    <h2><span class="section-num">1</span> Project Overview</h2>
+    <div class="card card-accent">
+      <p><strong>HisabKitab</strong> is an AI-first group expense splitter built for the Indian market. The name comes from Hindi: <em>"Hisab"</em> (calculation) + <em>"Kitab"</em> (book) &mdash; your book of accounts.</p>
+      <div class="mt-2 flex-row">
+        <span class="tag tag-accent">AI-Powered</span>
+        <span class="tag tag-success">Live on Vercel</span>
+        <span class="tag tag-gold">India-First</span>
       </div>
     </div>
-  </div>
 
-  <h2>Architecture at a Glance</h2>
-  <div class="diagram-box">Clients (Web / Mobile / WhatsApp)
-          |
-       HTTPS
-          |
-  Next.js API Routes  (Vercel)
-          |
-    Supabase Postgres  (Auth + RLS + Realtime)</div>
+    <h3>Target Users</h3>
+    <p>Young Indian adults (20s-30s), mobile-first. Designed around Indian currency formatting, UPI-based settlements, and casual Hindi-English communication patterns.</p>
 
-  <div class="grid-4" style="margin-top:16px">
-    <div class="card" style="text-align:center;padding:16px">
-      <div style="font-size:24px;margin-bottom:4px">&#9889;</div>
-      <div style="font-size:12px;font-weight:700;color:var(--accent)">DEPLOYED</div>
-      <div style="font-size:13px;color:var(--text-secondary)">Vercel (Web)</div>
+    <h3>Platforms</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Platform</th><th>Technology</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Web</td><td>Next.js 14 (App Router)</td><td><span class="tag tag-success">Live</span></td></tr>
+          <tr><td>Android</td><td>React Native + Expo</td><td><span class="tag tag-gold">Local Builds</span></td></tr>
+          <tr><td>iOS</td><td>React Native + Expo</td><td><span class="tag tag-muted">Simulator</span></td></tr>
+          <tr><td>WhatsApp</td><td>Webhook Integration</td><td><span class="tag tag-muted">Webhook Exists</span></td></tr>
+        </tbody>
+      </table>
     </div>
-    <div class="card" style="text-align:center;padding:16px">
-      <div style="font-size:24px;margin-bottom:4px">&#128241;</div>
-      <div style="font-size:12px;font-weight:700;color:var(--accent)">MOBILE</div>
-      <div style="font-size:13px;color:var(--text-secondary)">Expo EAS</div>
+
+    <p>Production URL: <a href="https://hisabkitab-five.vercel.app" target="_blank">hisabkitab-five.vercel.app</a></p>
+
+    <h3>High-Level Architecture</h3>
+    <pre><code><span class="cmt">Clients (Web / Mobile)</span>
+      |
+      | HTTPS
+      v
+<span class="fn">Next.js API Routes</span> (19 endpoints)
+      |
+      v
+<span class="fn">@hisabkitab/services</span> (queries, types, client)
+      |
+      v
+<span class="fn">Supabase</span> (Postgres + RLS + Auth + Storage + Realtime)</code></pre>
+  </section>
+
+  <!-- 2. Tech Stack -->
+  <section class="section" id="tech-stack">
+    <h2><span class="section-num">2</span> Tech Stack</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Layer</th><th>Technology</th><th>Version</th></tr></thead>
+        <tbody>
+          <tr><td>Build System</td><td>Turborepo</td><td>2.3.0</td></tr>
+          <tr><td>Runtime</td><td>Node.js</td><td>&gt;=20.x</td></tr>
+          <tr><td>Language</td><td>TypeScript</td><td>5.4.5</td></tr>
+          <tr><td>Web Framework</td><td>Next.js (App Router)</td><td>14.2.15</td></tr>
+          <tr><td>Mobile Framework</td><td>React Native + Expo</td><td>0.76.9 / 52.0.0</td></tr>
+          <tr><td>Mobile Navigation</td><td>Expo Router</td><td>4.0.0</td></tr>
+          <tr><td>Web CSS</td><td>TailwindCSS</td><td>3.4.19</td></tr>
+          <tr><td>Mobile CSS</td><td>NativeWind</td><td>4.0.1</td></tr>
+          <tr><td>UI Primitives</td><td>Radix UI</td><td>Various</td></tr>
+          <tr><td>State Management</td><td>Zustand</td><td>4.5.2</td></tr>
+          <tr><td>Data Fetching</td><td>React Query</td><td>5.40.0</td></tr>
+          <tr><td>Validation</td><td>Zod</td><td>3.23.8</td></tr>
+          <tr><td>Database</td><td>Supabase (Postgres)</td><td>2.43.5</td></tr>
+          <tr><td>Auth</td><td>Supabase Auth (Google OAuth)</td><td>&mdash;</td></tr>
+          <tr><td>Hosting</td><td>Vercel</td><td>&mdash;</td></tr>
+          <tr><td>Testing</td><td>Vitest + Playwright</td><td>3.2.4 / 1.58.2</td></tr>
+          <tr><td>Package Manager</td><td>npm</td><td>10.8.2</td></tr>
+        </tbody>
+      </table>
     </div>
-    <div class="card" style="text-align:center;padding:16px">
-      <div style="font-size:24px;margin-bottom:4px">&#128274;</div>
-      <div style="font-size:12px;font-weight:700;color:var(--accent)">AUTH</div>
-      <div style="font-size:13px;color:var(--text-secondary)">Supabase Auth</div>
+  </section>
+
+  <!-- 3. Architecture & Folder Structure -->
+  <section class="section" id="architecture">
+    <h2><span class="section-num">3</span> Architecture &amp; Folder Structure</h2>
+    <pre><code>hisabkitab/
+├── <span class="fn">src/</span>
+│   ├── <span class="fn">web/</span>              <span class="cmt"># Next.js 14 (19 API routes + web UI)</span>
+│   ├── <span class="fn">mobile/</span>           <span class="cmt"># Expo (tabs: home, groups, activity, profile)</span>
+│   ├── <span class="fn">services/</span>         <span class="cmt"># @hisabkitab/services -- DB queries, types, client</span>
+│   ├── <span class="fn">shared/</span>           <span class="cmt"># @hisabkitab/shared -- types, constants, utils</span>
+│   └── <span class="fn">supabase/</span>         <span class="cmt"># 6 SQL migrations (immutable)</span>
+├── <span class="fn">specification/</span>        <span class="cmt"># SPEC.md (living product spec)</span>
+├── <span class="fn">tech-design/</span>          <span class="cmt"># Architecture decision records</span>
+├── <span class="fn">docs/</span>                 <span class="cmt"># HTML reports (this file)</span>
+├── <span class="fn">.claude/</span>              <span class="cmt"># 10 agent specs, 3 rules, 1 command</span>
+└── <span class="fn">package.json</span>          <span class="cmt"># workspaces: ["src/*"]</span></code></pre>
+
+    <h3>Workspaces</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Package</th><th>Path</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>@hisabkitab/services</code></td><td><code>src/services/</code></td><td>Database queries, Supabase client, types</td></tr>
+          <tr><td><code>@hisabkitab/shared</code></td><td><code>src/shared/</code></td><td>Shared types, constants, utilities</td></tr>
+          <tr><td><code>web</code></td><td><code>src/web/</code></td><td>Next.js application (API + UI)</td></tr>
+          <tr><td><code>mobile</code></td><td><code>src/mobile/</code></td><td>Expo React Native application</td></tr>
+        </tbody>
+      </table>
     </div>
-    <div class="card" style="text-align:center;padding:16px">
-      <div style="font-size:24px;margin-bottom:4px">&#129302;</div>
-      <div style="font-size:12px;font-weight:700;color:var(--accent)">AI</div>
-      <div style="font-size:13px;color:var(--text-secondary)">Anthropic Claude</div>
+  </section>
+
+  <!-- 4. AI Agent Workflow -->
+  <section class="section" id="ai-agents">
+    <h2><span class="section-num">4</span> AI Agent Workflow</h2>
+    <div class="card card-accent">
+      <p><strong>All changes</strong> go through the orchestrator agent pipeline. This is mandatory, not optional. Invoke via <code>/manager</code> command. The orchestrator determines which agents to engage and parallelizes where possible.</p>
     </div>
-  </div>
-</section>
 
-<!-- ==================== 2. TECHNOLOGY STACK ==================== -->
-<section id="stack">
-  <h1><span class="num">02</span> Technology Stack</h1>
-
-  <h2>Root Toolchain</h2>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Tool</th><th>Version</th><th>Purpose</th></tr></thead>
-      <tbody>
-        <tr><td>Turborepo</td><td>2.3.0</td><td>Monorepo task orchestration &amp; caching</td></tr>
-        <tr><td>npm</td><td>10.8.2</td><td>Package manager</td></tr>
-        <tr><td>Node.js</td><td>&ge; 20.x</td><td>Runtime</td></tr>
-        <tr><td>TypeScript</td><td>5.4.5</td><td>Type system</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <h2>Web Application</h2>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Package</th><th>Version</th><th>Role</th></tr></thead>
-      <tbody>
-        <tr><td>Next.js</td><td>14.2.15</td><td>Full-stack React framework (App Router)</td></tr>
-        <tr><td>React</td><td>18.3.1</td><td>UI library</td></tr>
-        <tr><td>TailwindCSS</td><td>3.4.19</td><td>Utility-first styling</td></tr>
-        <tr><td>Radix UI</td><td>latest</td><td>Accessible headless components</td></tr>
-        <tr><td>Zod</td><td>latest</td><td>Schema validation</td></tr>
-        <tr><td>Vitest</td><td>latest</td><td>Unit testing</td></tr>
-        <tr><td>Playwright</td><td>latest</td><td>End-to-end testing</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <h2>Mobile Application</h2>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Package</th><th>Version</th><th>Role</th></tr></thead>
-      <tbody>
-        <tr><td>Expo</td><td>52</td><td>React Native platform &amp; build tooling</td></tr>
-        <tr><td>React Native</td><td>0.76.9</td><td>Cross-platform mobile UI</td></tr>
-        <tr><td>NativeWind</td><td>latest</td><td>TailwindCSS for React Native</td></tr>
-        <tr><td>React Query</td><td>5.x</td><td>Async state management</td></tr>
-        <tr><td>Zustand</td><td>4.5.2</td><td>Lightweight client state</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <h2>Services &amp; Shared</h2>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Package</th><th>Version</th><th>Role</th></tr></thead>
-      <tbody>
-        <tr><td>Supabase JS</td><td>2.43.5</td><td>Postgres client, Auth, Realtime</td></tr>
-        <tr><td>@hisabkitab/shared</td><td>-</td><td>Pure TypeScript types &amp; utilities</td></tr>
-        <tr><td>@hisabkitab/services</td><td>-</td><td>DB queries, types, Supabase wrappers</td></tr>
-      </tbody>
-    </table>
-  </div>
-</section>
-
-<!-- ==================== 3. ARCHITECTURE ==================== -->
-<section id="architecture">
-  <h1><span class="num">03</span> Architecture &amp; Folder Structure</h1>
-
-  <pre><code>hisabkitab/
-├── src/
-│   ├── web/              # Next.js 14 (API routes + web UI)
-│   ├── mobile/           # Expo React Native app
-│   ├── services/         # @hisabkitab/services (DB queries, types)
-│   └── shared/           # @hisabkitab/shared (types, constants, utils)
-├── supabase/
-│   └── migrations/       # 6 SQL migration files
-├── tech-design/          # Architecture decision records
-├── turbo.json            # Turborepo pipeline config
-├── vercel.json           # Vercel deployment config
-├── eas.json              # Expo EAS build profiles
-├── tsconfig.base.json    # Shared TS config
-└── CLAUDE.md             # Agent conventions</code></pre>
-
-  <h2>Workspace Configuration</h2>
-  <div class="callout">
-    Workspaces are declared as <code>"workspaces": ["src/*"]</code> in the root <code>package.json</code>. This means each directory under <code>src/</code> is an independently versioned package.
-  </div>
-
-  <h2>Package Aliases</h2>
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-title"><code>@hisabkitab/services</code></div>
-      <p style="margin:0;color:var(--text-secondary);font-size:13px">All database queries, Supabase client setup, and generated types. Every data-access operation must come from here.</p>
-    </div>
-    <div class="card">
-      <div class="card-title"><code>@hisabkitab/shared</code></div>
-      <p style="margin:0;color:var(--text-secondary);font-size:13px">Pure TypeScript types, constants, and utility functions shared across web &amp; mobile.</p>
-    </div>
-  </div>
-</section>
-
-<!-- ==================== 4. AI AGENT WORKFLOW ==================== -->
-<section id="agents">
-  <h1><span class="num">04</span> AI Agent Workflow</h1>
-  <p class="lead">All code changes go through a mandatory orchestrator pipeline. The orchestrator decomposes tasks and delegates to specialized agents.</p>
-
-  <div class="callout">
-    <strong>Rule:</strong> The orchestrator agent (<code>/manager</code>) is invoked for <em>every</em> task, regardless of size. It decides which specialist agents are needed.
-  </div>
-
-  <h2>Pipeline</h2>
-  <div class="pipeline">
-    <div class="pipeline-step" style="background:#6366F1">Architect<small>Step 0</small></div>
-    <div class="pipeline-step" style="background:#8B5CF6">DB<small>Step 1</small></div>
-    <div class="pipeline-step" style="background:var(--accent)">Backend<small>Step 2</small></div>
-    <div class="pipeline-step" style="background:#F59E0B">Frontend<small>Step 3</small></div>
-    <div class="pipeline-step" style="background:var(--success)">Test<small>Step 4</small></div>
-    <div class="pipeline-step" style="background:#0EA5E9">Review<small>Step 4</small></div>
-    <div class="pipeline-step" style="background:var(--header-bg)">Deploy<small>Step 5</small></div>
-  </div>
-
-  <details>
-    <summary>Agent Details (10 agents)</summary>
-    <div class="detail-body">
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Agent</th><th>Step</th><th>Owns</th><th>Parallelism</th></tr></thead>
-          <tbody>
-            <tr><td><strong>architect-agent</strong></td><td>0</td><td><code>tech-design/</code></td><td>Runs first, produces the design doc</td></tr>
-            <tr><td><strong>db-agent</strong></td><td>1</td><td><code>packages/db/</code>, <code>supabase/migrations/</code></td><td>Can run in parallel with frontend if no type deps</td></tr>
-            <tr><td><strong>backend-agent</strong></td><td>2</td><td><code>apps/web/app/api/</code></td><td>Parallel with frontend when API contract defined</td></tr>
-            <tr><td><strong>frontend-agent</strong></td><td>3</td><td><code>apps/web/app/</code> (excl. <code>api/</code>)</td><td>Parallel with backend</td></tr>
-            <tr><td><strong>test-web-agent</strong></td><td>4</td><td>Playwright &amp; Vitest tests</td><td>Parallel with review &amp; test-mobile</td></tr>
-            <tr><td><strong>test-mobile-agent</strong></td><td>4</td><td>Maestro mobile E2E</td><td>Parallel with review &amp; test-web</td></tr>
-            <tr><td><strong>review-agent</strong></td><td>4</td><td>Security &amp; convention audit (read-only)</td><td>Parallel with test agents</td></tr>
-            <tr><td><strong>web-deploy-agent</strong></td><td>5</td><td>Vercel deployment</td><td>Parallel with mobile-build</td></tr>
-            <tr><td><strong>mobile-build-agent</strong></td><td>6</td><td>Local Android/iOS build</td><td>Parallel with web-deploy</td></tr>
-            <tr><td><strong>orchestrator</strong></td><td>-</td><td>Everything (coordinator)</td><td>Manages all other agents</td></tr>
-          </tbody>
-        </table>
+    <h3>Agent Pipeline (10 agents)</h3>
+    <div class="pipeline">
+      <div class="pipeline-step">
+        <span class="step-num">0</span>
+        <div><span class="step-label">architect-agent</span><br><span class="step-desc">Produces tech-design doc with decisions, file manifest, and acceptance criteria</span></div>
+      </div>
+      <div class="pipeline-arrow">&#8595;</div>
+      <div class="pipeline-step">
+        <span class="step-num">1</span>
+        <div><span class="step-label">db-agent</span><br><span class="step-desc">Migrations, query functions, types in src/services/ and src/supabase/migrations/</span></div>
+      </div>
+      <div class="pipeline-arrow">&#8595;</div>
+      <div class="parallel-group">
+        <div class="parallel-label">Parallel Execution</div>
+        <div class="pipeline-step">
+          <span class="step-num">2</span>
+          <div><span class="step-label">backend-agent</span><br><span class="step-desc">API routes</span></div>
+        </div>
+        <div class="pipeline-step">
+          <span class="step-num">3</span>
+          <div><span class="step-label">frontend-agent</span><br><span class="step-desc">UI pages &amp; components</span></div>
+        </div>
+      </div>
+      <div class="pipeline-arrow">&#8595;</div>
+      <div class="pipeline-step">
+        <span class="step-num">4</span>
+        <div><span class="step-label">spec-sync</span><br><span class="step-desc">Update SPEC.md (orchestrator does directly)</span></div>
+      </div>
+      <div class="pipeline-arrow">&#8595;</div>
+      <div class="parallel-group">
+        <div class="parallel-label">Parallel Execution</div>
+        <div class="pipeline-step">
+          <span class="step-num">5</span>
+          <div><span class="step-label">test-web-agent</span><br><span class="step-desc">Unit + E2E tests</span></div>
+        </div>
+        <div class="pipeline-step">
+          <span class="step-num">6</span>
+          <div><span class="step-label">test-mobile-agent</span><br><span class="step-desc">Mobile tests</span></div>
+        </div>
+      </div>
+      <div class="pipeline-arrow">&#8595;</div>
+      <div class="pipeline-step">
+        <span class="step-num">7</span>
+        <div><span class="step-label">review-agent</span><br><span class="step-desc">Security, convention, and architecture compliance check (read-only; parallel with tests)</span></div>
+      </div>
+      <div class="pipeline-arrow">&#8595;</div>
+      <div class="parallel-group">
+        <div class="parallel-label">Parallel Execution</div>
+        <div class="pipeline-step">
+          <span class="step-num">8</span>
+          <div><span class="step-label">web-build-deploy-agent</span><br><span class="step-desc">Vercel preview</span></div>
+        </div>
+        <div class="pipeline-step">
+          <span class="step-num">9</span>
+          <div><span class="step-label">mobile-build-deploy-agent</span><br><span class="step-desc">Local emulator/simulator</span></div>
+        </div>
       </div>
     </div>
-  </details>
 
-  <h2>Key Parallelism Rules</h2>
-  <ul>
-    <li><strong>db-agent + frontend-agent</strong> can run in parallel when independent</li>
-    <li><strong>backend-agent + frontend-agent</strong> can run in parallel when the API contract is defined</li>
-    <li><strong>test-web + test-mobile + review</strong> always run in parallel after implementation</li>
-    <li>Only serialize when there is a true data dependency</li>
-  </ul>
-</section>
+    <details>
+      <summary>Regression Gates (Mandatory Before Deploy)</summary>
+      <div class="details-body">
+        <ul class="checklist">
+          <li><code>npx turbo test --force</code> &mdash; all tests pass</li>
+          <li><code>npx turbo build</code> + <code>npx turbo type-check</code> &mdash; zero errors</li>
+          <li>Platform verification: Web + Android + iOS (all three, parallel)</li>
+          <li>New code must have tests; bug fixes must have regression tests</li>
+          <li>Never deploy with failing tests</li>
+        </ul>
+      </div>
+    </details>
+  </section>
 
-<!-- ==================== 5. DEVELOPMENT CONVENTIONS ==================== -->
-<section id="conventions">
-  <h1><span class="num">05</span> Development Conventions</h1>
+  <!-- 5. Plugins -->
+  <section class="section" id="plugins">
+    <h2><span class="section-num">5</span> Plugins</h2>
+    <p>10 plugins are enabled in the Claude Code agent environment:</p>
+    <div class="flex-row mt-2">
+      <span class="tag tag-accent">supabase</span>
+      <span class="tag tag-accent">frontend-design</span>
+      <span class="tag tag-accent">vercel</span>
+      <span class="tag tag-accent">github</span>
+      <span class="tag tag-accent">playwright</span>
+      <span class="tag tag-accent">chrome-devtools-mcp</span>
+      <span class="tag tag-accent">code-review</span>
+      <span class="tag tag-accent">atlassian</span>
+      <span class="tag tag-accent">impeccable</span>
+      <span class="tag tag-accent">claude-hud</span>
+    </div>
+    <div class="card mt-4">
+      <h4>Custom Command</h4>
+      <p><code>/manager</code> &mdash; Invokes the orchestrator agent. This is the entry point for all development tasks.</p>
+    </div>
+  </section>
 
-  <h2>API Route Pattern</h2>
-  <p>Every route handler follows this exact order:</p>
-  <pre><code>import { requireAuth } from '@/lib/auth';
-import { CreateExpenseSchema } from '@hisabkitab/shared';
-import { createExpense, createActivity } from '@hisabkitab/services';
+  <!-- 6. Development Conventions -->
+  <section class="section" id="conventions">
+    <h2><span class="section-num">6</span> Development Conventions</h2>
 
-export async function POST(req: Request) {
-  // 1. Auth (first line, always)
-  const user = await requireAuth(req);
+    <details>
+      <summary>API Route Pattern (Mandatory)</summary>
+      <div class="details-body">
+        <p>Every API route handler must follow this exact order:</p>
+        <ol>
+          <li><strong><code>requireAuth(req)</code></strong> &mdash; first line of every handler (except webhooks)</li>
+          <li><strong>Zod validation</strong> &mdash; validate all inputs with <code>safeParse</code></li>
+          <li><strong><code>@hisabkitab/services</code></strong> &mdash; never write raw Supabase queries in API routes</li>
+          <li><strong>Sanitized errors</strong> &mdash; never expose raw database or internal errors</li>
+          <li><strong>Activity logging</strong> &mdash; log state-changing operations (non-blocking)</li>
+          <li><strong><code>console.error</code> only</strong> &mdash; no <code>console.log</code> in production routes</li>
+        </ol>
+        <pre><code><span class="kw">import</span> { requireAuth } <span class="kw">from</span> <span class="str">'@/lib/auth'</span>;
+<span class="kw">import</span> { z } <span class="kw">from</span> <span class="str">'zod'</span>;
+<span class="kw">import</span> { createExpense } <span class="kw">from</span> <span class="str">'@hisabkitab/services'</span>;
 
-  // 2. Zod validation
-  const body = await req.json();
-  const parsed = CreateExpenseSchema.safeParse(body);
-  if (!parsed.success) {
-    return Response.json({ error: parsed.error.flatten() }, { status: 400 });
-  }
+<span class="kw">const</span> <span class="fn">Schema</span> = z.object({ amount: z.number().positive() });
 
-  // 3. DB call via @hisabkitab/services
-  try {
-    const expense = await createExpense(parsed.data);
-
-    // 4. Activity log (non-blocking)
-    createActivity({ ... }).catch(console.error);
-
-    return Response.json(expense, { status: 201 });
-  } catch (error) {
-    // 5. Sanitized errors
-    console.error('Failed to create expense:', error);
-    return Response.json({ error: 'Failed to create expense' }, { status: 500 });
-  }
+<span class="kw">export async function</span> <span class="fn">POST</span>(req: Request) {
+  <span class="kw">const</span> user = <span class="kw">await</span> <span class="fn">requireAuth</span>(req);
+  <span class="kw">const</span> parsed = Schema.<span class="fn">safeParse</span>(<span class="kw">await</span> req.<span class="fn">json</span>());
+  <span class="kw">if</span> (!parsed.success) <span class="kw">return</span> Response.<span class="fn">json</span>({ error: parsed.error.<span class="fn">flatten</span>() }, { status: <span class="num">400</span> });
+  <span class="kw">const</span> result = <span class="kw">await</span> <span class="fn">createExpense</span>(parsed.data);
+  <span class="kw">return</span> Response.<span class="fn">json</span>(result);
 }</code></pre>
+      </div>
+    </details>
 
-  <h2>Security Rules</h2>
-  <div class="grid-2">
-    <div class="card" style="border-left:4px solid var(--danger)">
-      <div class="card-title"><span class="badge badge-danger">mandatory</span> Never Hardcode Secrets</div>
-      <p style="margin:0;font-size:13px;color:var(--text-secondary)">No API keys in source. Only <code>.env.example</code> with placeholders in git.</p>
+    <details>
+      <summary>Security Rules</summary>
+      <div class="details-body">
+        <ul>
+          <li>RLS enabled on <strong>all</strong> tables; <code>service_role</code> key is server-only</li>
+          <li>DB queries live exclusively in <code>src/services/</code></li>
+          <li>Never commit <code>.env.local</code> or any file with real credentials</li>
+          <li>Every Claude API call must include <code>prompt_version</code> + log to <code>agent_metrics</code></li>
+        </ul>
+      </div>
+    </details>
+
+    <details>
+      <summary>TypeScript &amp; Naming</summary>
+      <div class="details-body">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Rule</th><th>Convention</th></tr></thead>
+            <tbody>
+              <tr><td>Strict mode</td><td>Enabled. No <code>any</code> without explicit justification comment.</td></tr>
+              <tr><td>Type vs Interface</td><td>Prefer <code>type</code> unless extending.</td></tr>
+              <tr><td>Error handling</td><td>All async functions must handle errors (try/catch or <code>.catch()</code>).</td></tr>
+              <tr><td>Files</td><td><code>kebab-case.ts</code></td></tr>
+              <tr><td>Components</td><td><code>PascalCase</code></td></tr>
+              <tr><td>Functions / Variables</td><td><code>camelCase</code></td></tr>
+              <tr><td>Constants</td><td><code>SCREAMING_SNAKE_CASE</code></td></tr>
+              <tr><td>DB Tables</td><td><code>snake_case</code></td></tr>
+              <tr><td>Zod Schemas</td><td><code>PascalCaseSchema</code></td></tr>
+              <tr><td>Migrations</td><td><code>YYYYMMDDHHMMSS_description.sql</code> (never modify existing)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+
+    <details>
+      <summary>AI / Claude API Rules</summary>
+      <div class="details-body">
+        <ul>
+          <li>Every call must include <code>prompt_version</code> in metadata (format: <code>&lt;name&gt;-v&lt;major&gt;.&lt;minor&gt;</code>)</li>
+          <li>Every call result must be logged to <code>agent_metrics</code> table</li>
+          <li>Sanitize user input before injecting into prompts (prompt injection guard)</li>
+          <li>SPEC.md must be updated after every feature or fix</li>
+        </ul>
+      </div>
+    </details>
+  </section>
+
+  <!-- 7. Design System -->
+  <section class="section" id="design-system">
+    <h2><span class="section-num">7</span> Design System</h2>
+
+    <h3>Colors</h3>
+    <div class="flex-row mb-2">
+      <span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:20px;height:20px;border-radius:5px;background:#E8651A;display:inline-block;"></span> Accent <code>#E8651A</code></span>
+      <span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:20px;height:20px;border-radius:5px;background:#059669;display:inline-block;"></span> Success <code>#059669</code></span>
+      <span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:20px;height:20px;border-radius:5px;background:#E11D48;display:inline-block;"></span> Danger <code>#E11D48</code></span>
+      <span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:20px;height:20px;border-radius:5px;background:#D4A017;display:inline-block;"></span> Gold <code>#D4A017</code></span>
     </div>
-    <div class="card" style="border-left:4px solid var(--danger)">
-      <div class="card-title"><span class="badge badge-danger">mandatory</span> RLS on All Tables</div>
-      <p style="margin:0;font-size:13px;color:var(--text-secondary)">Every migration includes <code>ALTER TABLE ... ENABLE ROW LEVEL SECURITY</code>.</p>
+
+    <h3>Typography</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Usage</th><th>Font</th></tr></thead>
+        <tbody>
+          <tr><td>Display / Headings</td><td>Outfit</td></tr>
+          <tr><td>Body Text</td><td>DM Sans</td></tr>
+          <tr><td>Currency / Code</td><td>JetBrains Mono</td></tr>
+        </tbody>
+      </table>
     </div>
-    <div class="card" style="border-left:4px solid var(--danger)">
-      <div class="card-title"><span class="badge badge-danger">mandatory</span> Auth on Every Route</div>
-      <p style="margin:0;font-size:13px;color:var(--text-secondary)"><code>requireAuth(req)</code> must be the first line of every protected handler.</p>
+
+    <h3>Tokens</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Token</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>Card Radius</td><td>16px</td></tr>
+          <tr><td>Button Radius</td><td>12px</td></tr>
+          <tr><td>Pill Radius</td><td>20px</td></tr>
+          <tr><td>Shadows</td><td>Warm low-opacity (<code>shadow-warm</code>, <code>shadow-warm-lg</code>, <code>shadow-warm-xl</code>)</td></tr>
+          <tr><td>Animations</td><td><code>fade-up</code>, <code>scale-in</code>, <code>fade-in</code> (0.2&ndash;0.5s, out-expo easing)</td></tr>
+        </tbody>
+      </table>
     </div>
-    <div class="card" style="border-left:4px solid var(--danger)">
-      <div class="card-title"><span class="badge badge-danger">mandatory</span> Zod Validation</div>
-      <p style="margin:0;font-size:13px;color:var(--text-secondary)">All API inputs, AI outputs, and shared function params validated with Zod.</p>
+
+    <h3>Design Principles</h3>
+    <div class="card">
+      <ul>
+        <li><strong>Trust through clarity</strong> &mdash; financial data must be unambiguous</li>
+        <li><strong>Speed is the feature</strong> &mdash; optimize for perceived performance</li>
+        <li><strong>Warm not sterile</strong> &mdash; friendly tone, warm color palette</li>
+        <li><strong>Indian by default</strong> &mdash; INR formatting, local context</li>
+        <li><strong>Premium but approachable</strong> &mdash; polished without intimidating</li>
+      </ul>
     </div>
-  </div>
+  </section>
 
-  <h2>Naming Conventions</h2>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>What</th><th>Convention</th><th>Example</th></tr></thead>
-      <tbody>
-        <tr><td>Files</td><td><code>kebab-case</code></td><td><code>expense-form.tsx</code></td></tr>
-        <tr><td>React Components</td><td><code>PascalCase</code></td><td><code>ExpenseForm</code></td></tr>
-        <tr><td>Functions / Variables</td><td><code>camelCase</code></td><td><code>getGroupById</code></td></tr>
-        <tr><td>Constants</td><td><code>SCREAMING_SNAKE_CASE</code></td><td><code>MAX_MEMBERS</code></td></tr>
-        <tr><td>Database Tables</td><td><code>snake_case</code></td><td><code>group_members</code></td></tr>
-        <tr><td>Zod Schemas</td><td><code>PascalCaseSchema</code></td><td><code>CreateExpenseSchema</code></td></tr>
-        <tr><td>Migrations</td><td><code>YYYYMMDDHHMMSS_desc.sql</code></td><td><code>20260320120000_add_comments.sql</code></td></tr>
-      </tbody>
-    </table>
-  </div>
+  <!-- 8. Database -->
+  <section class="section" id="database">
+    <h2><span class="section-num">8</span> Database</h2>
+    <p>Supabase Postgres with 10 tables. All tables have UUID primary keys, RLS enabled, <code>created_at</code>/<code>updated_at</code> timestamps, and foreign key indexes.</p>
 
-  <h2>TypeScript Rules</h2>
-  <ul>
-    <li>Strict mode enabled &mdash; no <code>any</code> without explicit justification comment</li>
-    <li>Prefer <code>type</code> over <code>interface</code> for object shapes (unless extending)</li>
-    <li>All async functions must handle errors (try/catch or <code>.catch()</code>)</li>
-    <li>DB queries live exclusively in <code>src/services/</code> &mdash; never raw Supabase in <code>apps/</code></li>
-  </ul>
-</section>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Table</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td><code>users</code></td><td>User profiles (synced from Supabase Auth)</td></tr>
+          <tr><td><code>groups</code></td><td>Expense groups (trips, households, etc.)</td></tr>
+          <tr><td><code>group_members</code></td><td>Group membership and roles</td></tr>
+          <tr><td><code>expenses</code></td><td>Individual expenses with metadata</td></tr>
+          <tr><td><code>expense_splits</code></td><td>How each expense is split among members</td></tr>
+          <tr><td><code>settlements</code></td><td>Payment settlements between members</td></tr>
+          <tr><td><code>activity_log</code></td><td>Audit trail for group actions</td></tr>
+          <tr><td><code>admin_audit_log</code></td><td>Admin-level audit events</td></tr>
+          <tr><td><code>agent_metrics</code></td><td>AI agent performance tracking</td></tr>
+          <tr><td><code>analytics_daily</code></td><td>Aggregated daily analytics</td></tr>
+        </tbody>
+      </table>
+    </div>
 
-<!-- ==================== 6. DATABASE SCHEMA ==================== -->
-<section id="schema">
-  <h1><span class="num">06</span> Database Schema</h1>
-  <p class="lead">Supabase Postgres with Row-Level Security on every table. All tables use UUID primary keys and automatic timestamps.</p>
-
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Table</th><th>Purpose</th><th>Key Columns</th></tr></thead>
-      <tbody>
-        <tr><td><code>users</code></td><td>User profiles synced from Supabase Auth</td><td>id, email, name, phone, avatar_url</td></tr>
-        <tr><td><code>groups</code></td><td>Expense groups (trips, flats, etc.)</td><td>id, name, created_by, currency, type</td></tr>
-        <tr><td><code>group_members</code></td><td>Many-to-many: users in groups</td><td>group_id, user_id, role, joined_at</td></tr>
-        <tr><td><code>expenses</code></td><td>Individual expense records</td><td>id, group_id, paid_by, amount, description, category</td></tr>
-        <tr><td><code>expense_splits</code></td><td>How each expense is split among members</td><td>expense_id, user_id, amount, percentage</td></tr>
-        <tr><td><code>settlements</code></td><td>Debt settlement records</td><td>id, group_id, from_user, to_user, amount, status</td></tr>
-        <tr><td><code>activity_log</code></td><td>Audit trail of all group actions</td><td>id, group_id, user_id, action, details</td></tr>
-        <tr><td><code>admin_audit_log</code></td><td>Admin-level audit events</td><td>id, admin_id, action, target_type, target_id</td></tr>
-        <tr><td><code>agent_metrics</code></td><td>AI agent performance tracking</td><td>agent_name, prompt_version, tokens, latency_ms</td></tr>
-        <tr><td><code>analytics_daily</code></td><td>Aggregated daily metrics</td><td>date, metric_name, value, dimensions</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <h2>Table Standards</h2>
-  <div class="callout-success callout">
-    Every table <strong>must</strong> have: UUID PK via <code>gen_random_uuid()</code>, <code>created_at</code> / <code>updated_at</code> timestamps, RLS enabled, FK indexes, and descriptive RLS policy names.
-  </div>
-
-  <details>
-    <summary>Migration File Template</summary>
-    <div class="detail-body">
-      <pre><code>-- YYYYMMDDHHMMSS_description.sql
-
--- 1. Create the table
-CREATE TABLE table_name (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_id UUID REFERENCES auth.users(id) NOT NULL,
-  -- columns...
-  created_at TIMESTAMPTZ DEFAULT NOW() NOT NULL,
-  updated_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
+    <details>
+      <summary>Migration Conventions</summary>
+      <div class="details-body">
+        <ul>
+          <li>6 migrations in <code>src/supabase/</code> (immutable &mdash; never edit existing ones)</li>
+          <li>Format: <code>YYYYMMDDHHMMSS_description.sql</code></li>
+          <li>Every new table requires: <code>ENABLE ROW LEVEL SECURITY</code> + policies + FK indexes</li>
+        </ul>
+        <pre><code><span class="kw">CREATE TABLE</span> table_name (
+  id <span class="fn">UUID</span> <span class="kw">PRIMARY KEY DEFAULT</span> <span class="fn">gen_random_uuid</span>(),
+  <span class="cmt">-- columns...</span>
+  created_at <span class="fn">TIMESTAMPTZ</span> <span class="kw">DEFAULT</span> <span class="fn">NOW</span>() <span class="kw">NOT NULL</span>,
+  updated_at <span class="fn">TIMESTAMPTZ</span> <span class="kw">DEFAULT</span> <span class="fn">NOW</span>() <span class="kw">NOT NULL</span>
 );
 
--- 2. MANDATORY: Enable RLS
-ALTER TABLE table_name ENABLE ROW LEVEL SECURITY;
+<span class="kw">ALTER TABLE</span> table_name <span class="kw">ENABLE ROW LEVEL SECURITY</span>;
 
--- 3. MANDATORY: Create RLS policies
-CREATE POLICY "Users can view their own data"
-  ON table_name FOR SELECT
-  USING (auth.uid() = user_id);
+<span class="kw">CREATE POLICY</span> <span class="str">"Users can view their own data"</span>
+  <span class="kw">ON</span> table_name <span class="kw">FOR SELECT USING</span> (auth.<span class="fn">uid</span>() = user_id);</code></pre>
+      </div>
+    </details>
+  </section>
 
-CREATE POLICY "Users can insert their own data"
-  ON table_name FOR INSERT
-  WITH CHECK (auth.uid() = user_id);
+  <!-- 9. API Routes -->
+  <section class="section" id="api-routes">
+    <h2><span class="section-num">9</span> API Routes</h2>
+    <p>19 endpoints in <code>src/web/app/api/</code>.</p>
 
--- 4. Indexes on foreign keys
-CREATE INDEX idx_table_name_user_id ON table_name(user_id);</code></pre>
-    </div>
-  </details>
-</section>
+    <details>
+      <summary>Groups (8 endpoints)</summary>
+      <div class="details-body">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Method</th><th>Path</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><span class="tag tag-success">GET</span></td><td><code>/api/groups</code></td><td>List user's groups</td></tr>
+              <tr><td><span class="tag tag-accent">POST</span></td><td><code>/api/groups</code></td><td>Create a group</td></tr>
+              <tr><td><span class="tag tag-success">GET</span></td><td><code>/api/groups/[id]</code></td><td>Get group details</td></tr>
+              <tr><td><span class="tag tag-gold">PATCH</span></td><td><code>/api/groups/[id]</code></td><td>Update group</td></tr>
+              <tr><td><span class="tag tag-success">GET</span></td><td><code>/api/groups/[id]/members</code></td><td>List group members</td></tr>
+              <tr><td><span class="tag tag-accent">POST</span></td><td><code>/api/groups/[id]/members</code></td><td>Add member to group</td></tr>
+              <tr><td><span class="tag tag-success">GET</span></td><td><code>/api/groups/[id]/balances</code></td><td>Get group balances</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </details>
 
-<!-- ==================== 7. API ROUTES ==================== -->
-<section id="api">
-  <h1><span class="num">07</span> API Routes</h1>
-  <p class="lead">All routes live in <code>src/web/app/api/</code> and follow the Next.js 14 App Router convention.</p>
+    <details>
+      <summary>Expenses (3 endpoints)</summary>
+      <div class="details-body">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Method</th><th>Path</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><span class="tag tag-success">GET</span></td><td><code>/api/expenses</code></td><td>List expenses</td></tr>
+              <tr><td><span class="tag tag-accent">POST</span></td><td><code>/api/expenses</code></td><td>Create expense</td></tr>
+              <tr><td><span class="tag tag-danger">DELETE</span></td><td><code>/api/expenses/[id]</code></td><td>Delete expense</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </details>
 
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Route</th><th>Methods</th><th>Auth</th><th>Description</th></tr></thead>
-      <tbody>
-        <tr><td><code>/api/expenses</code></td><td>GET, POST</td><td><span class="badge badge-danger">required</span></td><td>List and create expenses</td></tr>
-        <tr><td><code>/api/groups</code></td><td>GET, POST</td><td><span class="badge badge-danger">required</span></td><td>List and create groups</td></tr>
-        <tr><td><code>/api/groups/[id]/members</code></td><td>GET, POST, DELETE</td><td><span class="badge badge-danger">required</span></td><td>Manage group membership</td></tr>
-        <tr><td><code>/api/groups/[id]/balances</code></td><td>GET</td><td><span class="badge badge-danger">required</span></td><td>Calculated balances for a group</td></tr>
-        <tr><td><code>/api/settlements</code></td><td>GET, POST</td><td><span class="badge badge-danger">required</span></td><td>Record and list settlements</td></tr>
-        <tr><td><code>/api/activity</code></td><td>GET</td><td><span class="badge badge-danger">required</span></td><td>Activity feed for groups</td></tr>
-        <tr><td><code>/api/users</code></td><td>GET, PATCH</td><td><span class="badge badge-danger">required</span></td><td>User profile operations</td></tr>
-        <tr><td><code>/api/webhooks/whatsapp</code></td><td>POST</td><td><span class="badge badge-gold">webhook</span></td><td>WhatsApp bot incoming messages</td></tr>
-      </tbody>
-    </table>
-  </div>
+    <details>
+      <summary>Settlements (3 endpoints)</summary>
+      <div class="details-body">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Method</th><th>Path</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><span class="tag tag-success">GET</span></td><td><code>/api/settlements</code></td><td>List settlements</td></tr>
+              <tr><td><span class="tag tag-accent">POST</span></td><td><code>/api/settlements</code></td><td>Create settlement</td></tr>
+              <tr><td><span class="tag tag-gold">PATCH</span></td><td><code>/api/settlements/[id]</code></td><td>Update settlement</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </details>
 
-  <h2>Handler Lifecycle</h2>
-  <div class="pipeline">
-    <div class="pipeline-step" style="background:var(--danger)">requireAuth<small>Auth check</small></div>
-    <div class="pipeline-step" style="background:#8B5CF6">Zod Parse<small>Validate input</small></div>
-    <div class="pipeline-step" style="background:var(--accent)">Auth Check<small>Ownership/role</small></div>
-    <div class="pipeline-step" style="background:#0EA5E9">DB Call<small>@hisabkitab/services</small></div>
-    <div class="pipeline-step" style="background:var(--gold)">Activity Log<small>Non-blocking</small></div>
-    <div class="pipeline-step" style="background:var(--success)">Response<small>JSON result</small></div>
-  </div>
-</section>
+    <details>
+      <summary>Other (5 endpoints)</summary>
+      <div class="details-body">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Method</th><th>Path</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><span class="tag tag-success">GET</span></td><td><code>/api/activity</code></td><td>Activity feed</td></tr>
+              <tr><td><span class="tag tag-success">GET</span></td><td><code>/api/users</code></td><td>Get current user</td></tr>
+              <tr><td><span class="tag tag-gold">PATCH</span></td><td><code>/api/users</code></td><td>Update current user</td></tr>
+              <tr><td><span class="tag tag-success">GET</span></td><td><code>/api/users/search</code></td><td>Search users</td></tr>
+              <tr><td><span class="tag tag-success">GET</span></td><td><code>/api/friends/[userId]</code></td><td>Get user's friends</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </details>
 
-<!-- ==================== 8. DESIGN SYSTEM ==================== -->
-<section id="design">
-  <h1><span class="num">08</span> Design System</h1>
+    <details>
+      <summary>Webhooks (2 endpoints)</summary>
+      <div class="details-body">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Method</th><th>Path</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr><td><span class="tag tag-success">GET</span></td><td><code>/api/webhooks/whatsapp</code></td><td>WhatsApp verification</td></tr>
+              <tr><td><span class="tag tag-accent">POST</span></td><td><code>/api/webhooks/whatsapp</code></td><td>WhatsApp incoming messages</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </details>
+  </section>
 
-  <h2>Color Palette</h2>
-  <div class="grid-2">
+  <!-- 10. Testing -->
+  <section class="section" id="testing">
+    <h2><span class="section-num">10</span> Testing</h2>
     <div class="card">
-      <div class="color-swatch"><div class="swatch" style="background:#E8651A"></div><div><strong>Accent</strong><br><code>#E8651A</code></div></div>
-      <div class="color-swatch"><div class="swatch" style="background:#059669"></div><div><strong>Success</strong><br><code>#059669</code></div></div>
-      <div class="color-swatch"><div class="swatch" style="background:#E11D48"></div><div><strong>Danger</strong><br><code>#E11D48</code></div></div>
+      <p><strong>11 test files</strong> using Vitest (unit) and Playwright (E2E).</p>
+      <p class="mt-2">Run all tests: <code>npx turbo test --force</code></p>
     </div>
-    <div class="card">
-      <div class="color-swatch"><div class="swatch" style="background:#D4A017"></div><div><strong>Gold</strong><br><code>#D4A017</code></div></div>
-      <div class="color-swatch"><div class="swatch" style="background:#1A1A1A"></div><div><strong>Text Primary</strong><br><code>#1A1A1A</code></div></div>
-      <div class="color-swatch"><div class="swatch" style="background:#9CA3AF"></div><div><strong>Muted</strong><br><code>#9CA3AF</code></div></div>
+
+    <h3>Test Requirements</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Trigger</th><th>Required Tests</th></tr></thead>
+        <tbody>
+          <tr><td>New API route</td><td>Auth test (401), validation test (400), success test (200)</td></tr>
+          <tr><td>Bug fix</td><td>Regression test that proves the fix</td></tr>
+          <tr><td>New component</td><td>Render test</td></tr>
+          <tr><td>Any change</td><td>All existing tests must still pass</td></tr>
+        </tbody>
+      </table>
     </div>
-  </div>
 
-  <h2>Typography</h2>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Use</th><th>Font</th><th>Weight</th></tr></thead>
-      <tbody>
-        <tr><td>Display / Headings</td><td>Outfit</td><td>600-800</td></tr>
-        <tr><td>Body Text</td><td>DM Sans</td><td>400-500</td></tr>
-        <tr><td>Currency &amp; Code</td><td>JetBrains Mono</td><td>500</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <h2>Spacing &amp; Radius</h2>
-  <div class="grid-3">
-    <div class="card" style="text-align:center;padding:16px">
-      <div style="width:60px;height:40px;background:#F3F4F6;border-radius:16px;margin:0 auto 8px;border:2px solid var(--border)"></div>
-      <div style="font-size:13px;font-weight:600">Cards</div>
-      <div style="font-size:12px;color:var(--text-muted)">16px radius</div>
+    <div class="card card-gold mt-4">
+      <p><strong>Important:</strong> Never mock Supabase in unit tests. Test at the API or query layer instead. Use a real test DB or <code>supabase local</code>.</p>
     </div>
-    <div class="card" style="text-align:center;padding:16px">
-      <div style="width:80px;height:36px;background:var(--accent);border-radius:12px;margin:0 auto 8px"></div>
-      <div style="font-size:13px;font-weight:600">Buttons</div>
-      <div style="font-size:12px;color:var(--text-muted)">12px radius</div>
+  </section>
+
+  <!-- 11. Deployment -->
+  <section class="section" id="deployment">
+    <h2><span class="section-num">11</span> Deployment</h2>
+
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Platform</th><th>Method</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Web</td><td>Vercel (<code>vercel.json</code> with custom install/rewrite for workspaces)</td><td>Preview by default; production only when explicitly requested</td></tr>
+          <tr><td>Android</td><td><code>npx expo run:android</code> (local build)</td><td>EAS Build may have hoisted npm package issues</td></tr>
+          <tr><td>iOS</td><td><code>npx expo run:ios</code> (simulator)</td><td>Simulator may not render emoji; use Ionicons vector icons</td></tr>
+        </tbody>
+      </table>
     </div>
-    <div class="card" style="text-align:center;padding:16px">
-      <div style="width:60px;height:28px;background:#F3F4F6;border-radius:20px;margin:0 auto 8px;border:2px solid var(--border)"></div>
-      <div style="font-size:13px;font-weight:600">Pills / Tags</div>
-      <div style="font-size:12px;color:var(--text-muted)">20px radius</div>
+
+    <div class="card card-danger mt-4">
+      <p><strong>All three platforms must be verified before deployment.</strong> Web, Android, and iOS verification runs in parallel as part of the regression gate.</p>
     </div>
-  </div>
+  </section>
 
-  <h2>Shadows</h2>
-  <div class="tag-list">
-    <span class="tag"><code>shadow-warm</code> &mdash; low-opacity warm</span>
-    <span class="tag"><code>shadow-warm-lg</code> &mdash; elevated cards</span>
-    <span class="tag"><code>shadow-warm-xl</code> &mdash; modals/overlays</span>
-  </div>
+  <!-- 12. Common Pitfalls -->
+  <section class="section" id="pitfalls">
+    <h2><span class="section-num">12</span> Common Pitfalls</h2>
 
-  <h2>Animations</h2>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Name</th><th>Duration</th><th>Easing</th><th>Use</th></tr></thead>
-      <tbody>
-        <tr><td><code>fade-up</code></td><td>0.3-0.5s</td><td>out-expo</td><td>Page entry, card reveal</td></tr>
-        <tr><td><code>scale-in</code></td><td>0.2-0.3s</td><td>out-expo</td><td>Modals, tooltips</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <h2>Design Principles</h2>
-  <div class="grid-2">
-    <div class="card" style="border-top:3px solid var(--accent)">
-      <h3 style="margin-top:0">Trust through clarity</h3>
-      <p style="margin:0;font-size:13px;color:var(--text-secondary)">Financial apps require absolute transparency. Every number, every split, every balance must be immediately clear.</p>
+    <div class="card card-danger">
+      <h4>Things That Will Break Your PR</h4>
+      <ul class="checklist checklist-danger" style="margin-top:8px;">
+        <li>Forgetting <code>requireAuth</code> on API routes</li>
+        <li>Writing raw Supabase queries outside <code>src/services/</code></li>
+        <li>Committing <code>.env.local</code> or credentials</li>
+        <li>Skipping spec-sync &mdash; SPEC.md must match reality</li>
+        <li>Deploying with failing tests &mdash; regression gates are mandatory</li>
+        <li>Verifying only web &mdash; all three platforms must be checked</li>
+      </ul>
     </div>
-    <div class="card" style="border-top:3px solid var(--success)">
-      <h3 style="margin-top:0">Speed is the feature</h3>
-      <p style="margin:0;font-size:13px;color:var(--text-secondary)">Expense logging must be faster than opening a notes app. Optimize for the 3-second expense capture.</p>
-    </div>
-    <div class="card" style="border-top:3px solid var(--gold)">
-      <h3 style="margin-top:0">Warm, not sterile</h3>
-      <p style="margin:0;font-size:13px;color:var(--text-secondary)">Money conversations are sensitive. Use warm colors, friendly language, and gentle animations.</p>
-    </div>
-    <div class="card" style="border-top:3px solid #6366F1">
-      <h3 style="margin-top:0">Indian by default</h3>
-      <p style="margin:0;font-size:13px;color:var(--text-secondary)">INR formatting (<code>en-IN</code>), UPI integration, Hindi/English mix, Indian phone numbers.</p>
-    </div>
-  </div>
-</section>
 
-<!-- ==================== 9. TESTING ==================== -->
-<section id="testing">
-  <h1><span class="num">09</span> Testing</h1>
+    <details>
+      <summary>Platform-Specific Gotchas</summary>
+      <div class="details-body">
+        <h4>EAS Build (Android/iOS)</h4>
+        <p>Hoisted npm packages in the monorepo can cause plugin resolution failures during EAS builds. If an Expo config plugin cannot be resolved, check that the dependency is not hoisted above <code>src/mobile/node_modules/</code>.</p>
 
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-title"><span class="badge badge-success">unit</span> Vitest</div>
-      <p style="color:var(--text-secondary);font-size:13px">27 tests across 6 files. Uses jsdom environment. Located alongside source files (<code>foo.test.ts</code>).</p>
-      <pre style="margin:8px 0 0"><code>cd src/web && npx vitest run</code></pre>
-    </div>
-    <div class="card">
-      <div class="card-title"><span class="badge badge-accent">e2e</span> Playwright</div>
-      <p style="color:var(--text-secondary);font-size:13px">Login flow and critical path tests. Browser-based E2E testing.</p>
-      <pre style="margin:8px 0 0"><code>cd src/web && npx playwright test</code></pre>
-    </div>
-  </div>
+        <h4>iOS Simulator</h4>
+        <p>The iOS Simulator may not render emoji characters correctly. Use <strong>Ionicons vector icons</strong> instead of emoji for any UI elements.</p>
 
-  <h2>Running All Tests</h2>
-  <pre><code># Run all tests across the monorepo
-npx turbo test
+        <h4>Supabase RLS</h4>
+        <p>Always test queries with the <code>anon</code> key, not <code>service_role</code>. Missing RLS policies will silently return empty results rather than throwing errors.</p>
+      </div>
+    </details>
+  </section>
 
-# Run web unit tests only
-cd src/web && npx vitest run
-
-# Run with coverage
-cd src/web && npx vitest run --coverage</code></pre>
-
-  <h2>Testing Rules</h2>
-  <ul>
-    <li>Never mock Supabase in unit tests &mdash; use a real test DB or <code>supabase local</code></li>
-    <li>AI tests use recorded fixtures, not live API calls (avoid cost + flakiness)</li>
-    <li>Co-locate tests next to source files: <code>foo.ts</code> / <code>foo.test.ts</code></li>
-  </ul>
-</section>
-
-<!-- ==================== 10. DEPLOYMENT ==================== -->
-<section id="deployment">
-  <h1><span class="num">10</span> Deployment</h1>
-
-  <h2>Web (Vercel)</h2>
-  <div class="card">
-    <p>The web app deploys to Vercel via the <code>web-deploy-agent</code>. Configuration lives in <code>vercel.json</code> at the repo root with custom install commands that handle workspace resolution.</p>
-    <div class="callout" style="margin-top:12px;margin-bottom:0">
-      <strong>Default: Preview.</strong> Production deploys only happen when explicitly requested. Never deploy to production automatically.
-    </div>
-  </div>
-
-  <h2>Mobile (Expo EAS)</h2>
-  <div class="card">
-    <p>Mobile builds use Expo EAS (cloud) or local builds. Build profiles are defined in <code>eas.json</code>.</p>
-    <pre style="margin:8px 0 0"><code># Cloud build
-eas build --platform android --profile preview
-
-# Local build
-npx expo run:android
-npx expo run:ios</code></pre>
-  </div>
-
-  <h2>Environment Variables</h2>
-  <div class="table-wrap">
-    <table>
-      <thead><tr><th>Context</th><th>Access Pattern</th></tr></thead>
-      <tbody>
-        <tr><td>Server-side (Next.js API)</td><td><code>process.env.VAR_NAME</code></td></tr>
-        <tr><td>Next.js Client</td><td><code>process.env.NEXT_PUBLIC_VAR</code></td></tr>
-        <tr><td>Expo Mobile</td><td><code>Constants.expoConfig?.extra?.varName</code></td></tr>
-        <tr><td>Expo Client (SDK 49+)</td><td><code>EXPO_PUBLIC_</code> prefixed vars</td></tr>
-      </tbody>
-    </table>
-  </div>
-</section>
-
-<!-- ==================== 11. COMMON PITFALLS ==================== -->
-<section id="pitfalls">
-  <h1><span class="num">11</span> Common Pitfalls</h1>
-
-  <div class="callout-danger callout" style="margin-bottom:24px">
-    These are real issues the team has encountered. Read them before making your first contribution.
-  </div>
-
-  <details>
-    <summary><span class="badge badge-danger">critical</span> Never use @vercel/postgres or @vercel/kv</summary>
-    <div class="detail-body">
-      <p>These packages are sunset. HisabKitab uses <strong>Supabase</strong> for all database access. Always use <code>@hisabkitab/services</code> for queries.</p>
-    </div>
-  </details>
-
-  <details>
-    <summary><span class="badge badge-danger">critical</span> Missing requireAuth on API routes</summary>
-    <div class="detail-body">
-      <p>Every protected API route must call <code>requireAuth(req)</code> as its very first line. Forgetting this creates an unauthenticated endpoint. The review-agent checks for this automatically.</p>
-    </div>
-  </details>
-
-  <details>
-    <summary><span class="badge badge-danger">critical</span> Raw Supabase queries outside src/services/</summary>
-    <div class="detail-body">
-      <p>Never write <code>supabase.from('table').select()</code> in API routes or components. All database access must go through <code>@hisabkitab/services</code> to ensure consistency, typing, and audit trails.</p>
-    </div>
-  </details>
-
-  <details>
-    <summary><span class="badge badge-danger">critical</span> Committing .env.local or credentials</summary>
-    <div class="detail-body">
-      <p>Only <code>.env.example</code> with placeholder values may be committed. Never commit real API keys, tokens, or passwords.</p>
-    </div>
-  </details>
-
-  <details>
-    <summary><span class="badge badge-gold">mobile</span> Emoji icons show as ? on iOS simulator</summary>
-    <div class="detail-body">
-      <p>The iOS simulator does not render all emoji reliably. Use <strong>Ionicons</strong> (from <code>@expo/vector-icons</code>) instead of emoji characters for icons in the mobile app.</p>
-    </div>
-  </details>
-
-  <details>
-    <summary><span class="badge badge-gold">mobile</span> EAS Build: hoisted npm packages cause plugin resolution issues</summary>
-    <div class="detail-body">
-      <p>In monorepo setups, npm hoists packages to the root <code>node_modules</code>. This can cause Expo plugins (especially native ones) to fail during EAS builds. Ensure critical native packages are listed in the app's own <code>package.json</code>, not just at the root.</p>
-    </div>
-  </details>
-
-  <details>
-    <summary><span class="badge badge-accent">convention</span> Returning raw DB errors to the client</summary>
-    <div class="detail-body">
-      <p>Always return sanitized error messages. Never expose Supabase or Postgres error details to the client &mdash; log them server-side with <code>console.error</code> and return a generic message.</p>
-    </div>
-  </details>
-
-  <details>
-    <summary><span class="badge badge-accent">convention</span> Not logging AI token usage</summary>
-    <div class="detail-body">
-      <p>Every Claude API call must be tracked in the <code>agent_metrics</code> table using <code>logAgentMetric()</code>. This includes <code>prompt_version</code>, input/output tokens, latency, and success status.</p>
-    </div>
-  </details>
-</section>
-
-</main>
 </div>
 
-<!-- FOOTER -->
-<footer class="site-footer">
-  Generated on 2026-03-23 by Claude Code
+<!-- Footer -->
+<footer class="footer">
+  Generated on 2026-03-23 by Claude Code &mdash; HisabKitab Developer Guide
 </footer>
 
+<!-- Sidebar mobile close on nav click -->
 <script>
-function closeSidebar() {
-  document.querySelector('.sidebar').classList.remove('open');
-}
-// Close sidebar on outside click (mobile)
-document.addEventListener('click', function(e) {
-  const sidebar = document.querySelector('.sidebar');
-  const hamburger = document.querySelector('.hamburger');
-  if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !hamburger.contains(e.target)) {
-    sidebar.classList.remove('open');
-  }
-});
+  document.querySelectorAll('.sidebar a').forEach(function(link) {
+    link.addEventListener('click', function() {
+      document.querySelector('.sidebar').classList.remove('open');
+    });
+  });
+
+  // Print: force open all details
+  window.addEventListener('beforeprint', function() {
+    document.querySelectorAll('details').forEach(function(d) { d.setAttribute('open', ''); });
+  });
 </script>
+
 </body>
 </html>

@@ -125,10 +125,10 @@
     <div class="content-wrap">
       <article>
         <h1>Database Guide</h1>
-        <p class="page-subtitle">Schema, migrations, RLS policies, query patterns, and the <code>@hisabkitab/db</code> package.</p>
+        <p class="page-subtitle">Schema, migrations, RLS policies, query patterns, and the <code>@hisabkitab/services</code> package.</p>
 
         <h2>Overview</h2>
-        <p>HisabKitab uses <strong>Supabase</strong> (managed PostgreSQL) with Row-Level Security (RLS) enforced on every table. All database access goes through the <code>@hisabkitab/db</code> package — raw Supabase queries in <code>apps/</code> are forbidden.</p>
+        <p>HisabKitab uses <strong>Supabase</strong> (managed PostgreSQL) with Row-Level Security (RLS) enforced on every table. All database access goes through the <code>@hisabkitab/services</code> package — raw Supabase queries in <code>apps/</code> are forbidden.</p>
 
         <hr>
 
@@ -226,7 +226,7 @@ analytics_daily
         <hr>
 
         <h2>Migrations</h2>
-        <p>Migrations live in <code>supabase/migrations/</code> as numbered SQL files.</p>
+        <p>Migrations live in <code>src/supabase/migrations/</code> as numbered SQL files.</p>
 
         <h3>Current Migrations</h3>
         <div class="table-wrap">
@@ -255,9 +255,9 @@ analytics_daily
 
         <hr>
 
-        <h2>The <code>@hisabkitab/db</code> Package</h2>
+        <h2>The <code>@hisabkitab/services</code> Package</h2>
 
-        <h3>Client Factories (<code>packages/db/src/client.ts</code>)</h3>
+        <h3>Client Factories (<code>src/services/src/client.ts</code>)</h3>
         <div class="table-wrap">
           <table>
             <thead><tr><th>Function</th><th>Auth Level</th><th>Use Case</th></tr></thead>
@@ -271,7 +271,7 @@ analytics_daily
         <p>All are singletons (except <code>getAuthedClient</code> which is per-request).</p>
 
         <h3>Query Functions</h3>
-        <p>Organized by domain in <code>packages/db/src/queries/</code>:</p>
+        <p>Organized by domain in <code>src/services/src/queries/</code>:</p>
         <div class="table-wrap">
           <table>
             <thead><tr><th>File</th><th>Functions</th></tr></thead>
@@ -307,11 +307,11 @@ analytics_daily
 
         <h3>Adding New Functions</h3>
         <ol>
-          <li>Create or edit the appropriate file in <code>packages/db/src/queries/</code></li>
+          <li>Create or edit the appropriate file in <code>src/services/src/queries/</code></li>
           <li>Use <code>getServerClient()</code> for the Supabase client</li>
           <li>Add explicit TypeScript types for parameters and return values</li>
           <li>Throw descriptive errors: <code>new Error('Failed to &lt;action&gt;: &lt;detail&gt;')</code></li>
-          <li><strong>Update barrel exports</strong> in <code>packages/db/src/index.ts</code></li>
+          <li><strong>Update barrel exports</strong> in <code>src/services/src/index.ts</code></li>
         </ol>
 
         <hr>
@@ -335,11 +335,11 @@ analytics_daily
         <hr>
 
         <h2>Types</h2>
-        <p>Database types are defined in <code>packages/db/src/types.ts</code>:</p>
+        <p>Database types are defined in <code>src/services/src/types.ts</code>:</p>
         <pre><code>type SplitType = 'equal' | 'exact' | 'percentage';
 type SettlementStatus = 'pending' | 'confirmed' | 'disputed';
 type AgentName = 'expense-parser' | 'chat-assistant' | 'reminder';</code></pre>
-        <p>Client-safe types (camelCase) are in <code>packages/shared/src/types/index.ts</code> — these mirror the DB types but use JavaScript conventions and omit DB-specific nullable fields.</p>
+        <p>Client-safe types (camelCase) are in <code>src/shared/src/types/index.ts</code> — these mirror the DB types but use JavaScript conventions and omit DB-specific nullable fields.</p>
 
         <div class="page-nav">
           <a href="api-reference.html">

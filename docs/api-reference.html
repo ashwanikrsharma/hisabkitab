@@ -137,7 +137,7 @@
         <p>Every API route (except webhooks) requires authentication via <code>requireAuth(req)</code>.</p>
 
         <h3>Web (Cookie-Based)</h3>
-        <p>Supabase session cookies are automatically included by the browser. The middleware at <code>apps/web/middleware.ts</code> refreshes sessions on every request.</p>
+        <p>Supabase session cookies are automatically included by the browser. The middleware at <code>src/web/middleware.ts</code> refreshes sessions on every request.</p>
 
         <h3>Mobile (Bearer Token)</h3>
         <p>Send the Supabase access token in the <code>Authorization</code> header:</p>
@@ -446,7 +446,7 @@
 1. requireAuth(req)           &rarr; 401 if unauthenticated
 2. Parse &amp; validate body      &rarr; 400 if invalid (Zod safeParse)
 3. Authorization check        &rarr; 403 if not permitted
-4. Execute via @hisabkitab/db &rarr; Business logic
+4. Execute via @hisabkitab/services &rarr; Business logic
 5. createActivity(...)        &rarr; Non-blocking activity log
 6. Return JSON response       &rarr; Sanitized data
         </div>

@@ -140,7 +140,7 @@
 
         <hr>
 
-        <h2>Frontend — Web (<code>apps/web/</code>)</h2>
+        <h2>Frontend — Web (<code>src/web/</code>)</h2>
         <div class="table-wrap">
           <table>
             <thead><tr><th>Technology</th><th>Purpose</th><th>Version</th></tr></thead>
@@ -192,7 +192,7 @@
 
         <hr>
 
-        <h2>Frontend — Mobile (<code>apps/mobile/</code>)</h2>
+        <h2>Frontend — Mobile (<code>src/mobile/</code>)</h2>
         <div class="table-wrap">
           <table>
             <thead><tr><th>Technology</th><th>Purpose</th><th>Version</th></tr></thead>
@@ -223,13 +223,13 @@
           <table>
             <thead><tr><th>Technology</th><th>Purpose</th></tr></thead>
             <tbody>
-              <tr><td><strong>Next.js API Routes</strong></td><td>REST API endpoints (<code>apps/web/app/api/</code>)</td></tr>
+              <tr><td><strong>Next.js API Routes</strong></td><td>REST API endpoints (<code>src/web/app/api/</code>)</td></tr>
               <tr><td><strong>Supabase SSR</strong> (<code>@supabase/ssr</code>)</td><td>Cookie-based auth for web, session management</td></tr>
               <tr><td><strong>Supabase JS</strong> (<code>@supabase/supabase-js</code>)</td><td>Bearer token auth for mobile</td></tr>
             </tbody>
           </table>
         </div>
-        <p>The same API routes serve both web (cookie auth) and mobile (Bearer token auth). See <code>apps/web/lib/auth.ts</code> for the dual-auth <code>requireAuth()</code> implementation.</p>
+        <p>The same API routes serve both web (cookie auth) and mobile (Bearer token auth). See <code>src/web/lib/auth.ts</code> for the dual-auth <code>requireAuth()</code> implementation.</p>
 
         <hr>
 
@@ -253,7 +253,7 @@
           <table>
             <thead><tr><th>Package</th><th>Purpose</th></tr></thead>
             <tbody>
-              <tr><td><code>@hisabkitab/db</code></td><td>Supabase client factories, typed query functions, database types</td></tr>
+              <tr><td><code>@hisabkitab/services</code></td><td>Supabase client factories, typed query functions, database types</td></tr>
               <tr><td><code>@hisabkitab/shared</code></td><td>Constants (currencies, categories), client-safe types, utility functions</td></tr>
               <tr><td><code>@hisabkitab/ai</code></td><td>Claude API client, prompts, schemas (planned — not yet implemented)</td></tr>
             </tbody>
