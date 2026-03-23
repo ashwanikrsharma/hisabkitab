@@ -55,7 +55,7 @@ function SettleForm() {
     setLoading(true);
 
     try {
-      fetch('/api/settlements', {
+      const res = await fetch('/api/settlements', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -68,14 +68,13 @@ function SettleForm() {
           upiTransactionId: method === 'upi' ? (upiTxnId.trim() || undefined) : undefined,
           paymentMethod: method,
         }),
-      }).then(async (res) => {
-        if (!res.ok) {
-          const data = (await res.json().catch(() => ({}))) as { error?: string };
-          console.error('Failed to record settlement:', data.error ?? 'Unknown error');
-        }
-      }).catch(() => {
-        console.error('Failed to record settlement');
       });
+
+      if (!res.ok) {
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        setError(data.error ?? 'Failed to create settlement');
+        return;
+      }
 
       router.push(`/groups/${groupId}`);
       router.refresh();
