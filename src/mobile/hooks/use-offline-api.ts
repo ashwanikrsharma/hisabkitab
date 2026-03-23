@@ -287,28 +287,75 @@ export function useOfflineGroupDetail(groupId: string) {
     queryKey: ['group', groupId],
     queryFn: async () => {
       const result = await getLocalGroupById(groupId);
-      if (!result) {
-        return { id: groupId, name: '', currency: 'INR', members: [] };
+      if (result) {
+        const members: GroupMember[] = await Promise.all(
+          result.members.map(async (m): Promise<GroupMember> => {
+            const name = await getLocalUserName(m.user_id);
+            const balance = await computeUserBalance(groupId, m.user_id);
+            return {
+              id: m.user_id,
+              name,
+              balance,
+            };
+          }),
+        );
+
+        return {
+          id: result.group.id,
+          name: result.group.name,
+          currency: result.group.currency,
+          members,
+        };
       }
 
-      const members: GroupMember[] = await Promise.all(
-        result.members.map(async (m): Promise<GroupMember> => {
-          const name = await getLocalUserName(m.user_id);
-          const balance = await computeUserBalance(groupId, m.user_id);
-          return {
-            id: m.user_id,
-            name,
-            balance,
-          };
-        }),
-      );
+      // Fallback: fetch from server and seed local DB
+      try {
+        type Resp = {
+          group?: GroupDetail;
+          id?: string;
+          name?: string;
+          currency?: string;
+          members?: GroupMember[];
+        };
+        const data = await apiClient<Resp>(`/api/groups/${groupId}`);
+        const g = data.group ?? (data as GroupDetail);
+        const detail: GroupDetail = {
+          id: g.id ?? groupId,
+          name: g.name ?? '',
+          currency: g.currency ?? 'INR',
+          members: g.members ?? [],
+        };
 
-      return {
-        id: result.group.id,
-        name: result.group.name,
-        currency: result.group.currency,
-        members,
-      };
+        // Seed group and members into local DB
+        const database = getDb();
+        const now = new Date().toISOString();
+        await database.withTransactionAsync(async () => {
+          await database.runAsync(
+            `INSERT OR REPLACE INTO local_groups (id, name, description, currency, created_by, avatar_url, is_archived, created_at, updated_at, _sync_status, _last_synced_at)
+             VALUES (?, ?, ?, ?, ?, ?, 0, ?, ?, 'synced', ?)`,
+            [detail.id, detail.name, null, detail.currency, '', null, now, now, now],
+          );
+          for (const m of detail.members) {
+            await database.runAsync(
+              `INSERT OR IGNORE INTO local_group_members (id, group_id, user_id, role, joined_at, is_active, _sync_status, _last_synced_at)
+               VALUES (?, ?, ?, 'member', ?, 1, 'synced', ?)`,
+              [`${detail.id}_${m.id}`, detail.id, m.id, now, now],
+            );
+            // Seed user name for future local lookups
+            await database.runAsync(
+              `INSERT OR IGNORE INTO local_users (id, name, created_at, updated_at, _sync_status, _last_synced_at)
+               VALUES (?, ?, ?, ?, 'synced', ?)`,
+              [m.id, m.name, now, now, now],
+            );
+          }
+        });
+
+        return detail;
+      } catch {
+        // Server fetch failed — return empty shell
+      }
+
+      return { id: groupId, name: '', currency: 'INR', members: [] };
     },
     enabled: Boolean(groupId),
   });
@@ -320,24 +367,91 @@ export function useOfflineGroupExpenses(groupId: string) {
     queryFn: async () => {
       const expenses = await getLocalExpenses(groupId);
 
-      const items: ExpenseItem[] = await Promise.all(
-        expenses.map(async (e): Promise<ExpenseItem> => {
-          const paidByName = await getLocalUserName(e.paid_by);
-          return {
+      if (expenses.length > 0) {
+        const items: ExpenseItem[] = await Promise.all(
+          expenses.map(async (e): Promise<ExpenseItem> => {
+            const paidByName = await getLocalUserName(e.paid_by);
+            return {
+              id: e.id,
+              description: e.description,
+              amount: e.amount,
+              currency: e.currency,
+              category: e.category ?? undefined,
+              created_at: e.created_at,
+              paidByName,
+              paidById: e.paid_by,
+              splitType: e.split_type,
+            };
+          }),
+        );
+        return items;
+      }
+
+      // Fallback: fetch from server and seed local DB
+      try {
+        type Resp = {
+          expenses: Array<{
+            id: string;
+            description: string;
+            amount: number;
+            currency: string;
+            category?: string;
+            created_at: string;
+            paidByName?: string;
+            paid_by_name?: string;
+            paidById?: string;
+            paid_by_id?: string;
+            paid_by?: string;
+            splitType?: string;
+            split_type?: string;
+            notes?: string;
+            created_by?: string;
+            updated_at?: string;
+          }>;
+        };
+        const data = await apiClient<Resp>(
+          `/api/expenses?groupId=${encodeURIComponent(groupId)}`,
+        );
+        const serverExpenses = data.expenses ?? [];
+
+        if (serverExpenses.length > 0) {
+          const database = getDb();
+          const now = new Date().toISOString();
+
+          await database.withTransactionAsync(async () => {
+            for (const e of serverExpenses) {
+              const paidBy = e.paidById ?? e.paid_by_id ?? e.paid_by ?? '';
+              await database.runAsync(
+                `INSERT OR REPLACE INTO local_expenses (id, group_id, description, amount, currency, paid_by, category, split_type, notes, created_by, created_at, updated_at, _sync_status, _last_synced_at)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'synced', ?)`,
+                [
+                  e.id, groupId, e.description, e.amount, e.currency ?? 'INR',
+                  paidBy, e.category ?? null,
+                  e.splitType ?? e.split_type ?? 'equal',
+                  e.notes ?? null, e.created_by ?? paidBy,
+                  e.created_at ?? now, e.updated_at ?? now, now,
+                ],
+              );
+            }
+          });
+
+          return serverExpenses.map((e): ExpenseItem => ({
             id: e.id,
             description: e.description,
             amount: e.amount,
             currency: e.currency,
-            category: e.category ?? undefined,
+            category: e.category,
             created_at: e.created_at,
-            paidByName,
-            paidById: e.paid_by,
-            splitType: e.split_type,
-          };
-        }),
-      );
+            paidByName: e.paidByName ?? e.paid_by_name ?? 'Unknown',
+            paidById: e.paidById ?? e.paid_by_id ?? e.paid_by,
+            splitType: e.splitType ?? e.split_type,
+          }));
+        }
+      } catch {
+        // Server fetch failed — return empty
+      }
 
-      return items;
+      return [];
     },
     enabled: Boolean(groupId),
   });
@@ -357,59 +471,73 @@ export function useOfflineGroupBalances(groupId: string) {
         [groupId],
       );
 
-      // Compute net balance per user: positive = owed money, negative = owes money
-      const balances: Record<string, number> = {};
-      for (const m of members) {
-        balances[m.user_id] = await computeUserBalance(groupId, m.user_id);
-      }
-
-      // Simplify debts: users with negative balance owe users with positive balance
-      const creditors: Array<{ userId: string; amount: number }> = [];
-      const debtors: Array<{ userId: string; amount: number }> = [];
-
-      for (const [uid, bal] of Object.entries(balances)) {
-        if (bal > 0.01) {
-          creditors.push({ userId: uid, amount: bal });
-        } else if (bal < -0.01) {
-          debtors.push({ userId: uid, amount: -bal });
-        }
-      }
-
-      // Sort descending so largest debts are settled first
-      creditors.sort((a, b) => b.amount - a.amount);
-      debtors.sort((a, b) => b.amount - a.amount);
-
-      const debts: Debt[] = [];
-      let ci = 0;
-      let di = 0;
-
-      while (ci < creditors.length && di < debtors.length) {
-        const creditor = creditors[ci];
-        const debtor = debtors[di];
-        const settleAmount = Math.min(creditor.amount, debtor.amount);
-
-        if (settleAmount > 0.01) {
-          const fromName = await getLocalUserName(debtor.userId);
-          const toName = await getLocalUserName(creditor.userId);
-
-          debts.push({
-            fromUserId: debtor.userId,
-            fromName,
-            toUserId: creditor.userId,
-            toName,
-            amount: Math.round(settleAmount * 100) / 100,
-            currency: 'INR',
-          });
+      if (members.length > 0) {
+        // Compute net balance per user: positive = owed money, negative = owes money
+        const balances: Record<string, number> = {};
+        for (const m of members) {
+          balances[m.user_id] = await computeUserBalance(groupId, m.user_id);
         }
 
-        creditor.amount -= settleAmount;
-        debtor.amount -= settleAmount;
+        // Simplify debts: users with negative balance owe users with positive balance
+        const creditors: Array<{ userId: string; amount: number }> = [];
+        const debtors: Array<{ userId: string; amount: number }> = [];
 
-        if (creditor.amount < 0.01) ci++;
-        if (debtor.amount < 0.01) di++;
+        for (const [uid, bal] of Object.entries(balances)) {
+          if (bal > 0.01) {
+            creditors.push({ userId: uid, amount: bal });
+          } else if (bal < -0.01) {
+            debtors.push({ userId: uid, amount: -bal });
+          }
+        }
+
+        // Sort descending so largest debts are settled first
+        creditors.sort((a, b) => b.amount - a.amount);
+        debtors.sort((a, b) => b.amount - a.amount);
+
+        const debts: Debt[] = [];
+        let ci = 0;
+        let di = 0;
+
+        while (ci < creditors.length && di < debtors.length) {
+          const creditor = creditors[ci];
+          const debtor = debtors[di];
+          const settleAmount = Math.min(creditor.amount, debtor.amount);
+
+          if (settleAmount > 0.01) {
+            const fromName = await getLocalUserName(debtor.userId);
+            const toName = await getLocalUserName(creditor.userId);
+
+            debts.push({
+              fromUserId: debtor.userId,
+              fromName,
+              toUserId: creditor.userId,
+              toName,
+              amount: Math.round(settleAmount * 100) / 100,
+              currency: 'INR',
+            });
+          }
+
+          creditor.amount -= settleAmount;
+          debtor.amount -= settleAmount;
+
+          if (creditor.amount < 0.01) ci++;
+          if (debtor.amount < 0.01) di++;
+        }
+
+        return debts;
       }
 
-      return debts;
+      // Fallback: fetch from server API
+      try {
+        const data = await apiClient<{ debts: Debt[] }>(
+          `/api/groups/${groupId}/balances`,
+        );
+        return data.debts ?? [];
+      } catch {
+        // Server fetch failed — return empty
+      }
+
+      return [];
     },
     enabled: Boolean(groupId),
   });
@@ -438,16 +566,53 @@ export function useOfflineActivity(groupId?: string) {
         ? activities.filter((a) => a.group_id === groupId)
         : activities;
 
-      return filtered.map((a): ActivityItem => ({
-        id: a.id,
-        type: a.type,
-        title: a.title,
-        description: a.description,
-        actor_id: a.actor_id,
-        metadata: a.metadata ? safeJsonParse(a.metadata) : null,
-        group_id: a.group_id ?? undefined,
-        created_at: a.created_at,
-      }));
+      if (filtered.length > 0) {
+        return filtered.map((a): ActivityItem => ({
+          id: a.id,
+          type: a.type,
+          title: a.title,
+          description: a.description,
+          actor_id: a.actor_id,
+          metadata: a.metadata ? safeJsonParse(a.metadata) : null,
+          group_id: a.group_id ?? undefined,
+          created_at: a.created_at,
+        }));
+      }
+
+      // Fallback: fetch from server and seed local DB
+      try {
+        const params = groupId ? `?groupId=${encodeURIComponent(groupId)}` : '';
+        const data = await apiClient<{ activity: ActivityItem[] }>(
+          `/api/activity${params}`,
+        );
+        const serverActivity = data.activity ?? [];
+
+        if (serverActivity.length > 0) {
+          const database = getDb();
+          const now = new Date().toISOString();
+
+          await database.withTransactionAsync(async () => {
+            for (const a of serverActivity) {
+              await database.runAsync(
+                `INSERT OR IGNORE INTO local_activity_log (id, group_id, actor_id, type, title, description, metadata, created_at, _sync_status, _last_synced_at)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'synced', ?)`,
+                [
+                  a.id, a.group_id ?? null, a.actor_id, a.type,
+                  a.title, a.description,
+                  a.metadata ? JSON.stringify(a.metadata) : null,
+                  a.created_at, now,
+                ],
+              );
+            }
+          });
+        }
+
+        return serverActivity;
+      } catch {
+        // Server fetch failed — return empty
+      }
+
+      return [];
     },
     enabled: Boolean(userId),
   });

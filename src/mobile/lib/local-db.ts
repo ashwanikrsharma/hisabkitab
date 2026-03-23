@@ -204,6 +204,41 @@ export function getDb(): SQLite.SQLiteDatabase {
   return db;
 }
 
+/**
+ * Reset the local database by deleting all rows from every table.
+ * Used on sign-out to prevent stale data from persisting across accounts.
+ * After clearing, re-runs initLocalDb() to ensure the schema is ready.
+ */
+export async function resetLocalDb(): Promise<void> {
+  if (db) {
+    try {
+      await db.execAsync(`
+        DELETE FROM sync_queue;
+        DELETE FROM sync_conflicts;
+        DELETE FROM sync_metadata;
+        DELETE FROM local_expense_splits;
+        DELETE FROM local_expenses;
+        DELETE FROM local_settlements;
+        DELETE FROM local_activity_log;
+        DELETE FROM local_group_members;
+        DELETE FROM local_groups;
+        DELETE FROM local_users;
+      `);
+    } catch (err) {
+      console.error('[local-db] resetLocalDb delete failed, closing DB:', err);
+    }
+    try {
+      await db.closeAsync();
+    } catch {
+      // Ignore close errors
+    }
+    db = null;
+  }
+
+  // Re-initialize so the DB is ready for the next login
+  await initLocalDb();
+}
+
 // ─── Helper: current ISO timestamp ──────────────────────────────────────────
 
 function nowISO(): string {

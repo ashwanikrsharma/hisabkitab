@@ -20,6 +20,11 @@ jest.mock('expo-constants', () => ({
 
 jest.mock('react-native-url-polyfill/auto', () => ({}));
 
+const mockResetLocalDb = jest.fn().mockResolvedValue(undefined);
+jest.mock('../lib/local-db', () => ({
+  resetLocalDb: (...args: any[]) => mockResetLocalDb(...args),
+}));
+
 // Use module-level variables that jest.mock factory can close over
 const mockGetSession = jest.fn();
 const mockSignOut = jest.fn();
@@ -125,6 +130,23 @@ describe('useAuthStore', () => {
 
       expect(mockSignOut).toHaveBeenCalled();
       expect(useAuthStore.getState().session).toBeNull();
+    });
+
+    it('calls resetLocalDb before signing out', async () => {
+      useAuthStore.setState({
+        session: { access_token: 'token' } as any,
+        loading: false,
+      });
+
+      mockSignOut.mockResolvedValue({ error: null });
+
+      await useAuthStore.getState().signOut();
+
+      expect(mockResetLocalDb).toHaveBeenCalled();
+      // resetLocalDb should be called before signOut
+      const resetOrder = mockResetLocalDb.mock.invocationCallOrder[0];
+      const signOutOrder = mockSignOut.mock.invocationCallOrder[0];
+      expect(resetOrder).toBeLessThan(signOutOrder);
     });
 
     it('sets session null even when the API call fails', async () => {

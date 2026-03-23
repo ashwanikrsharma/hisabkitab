@@ -17,7 +17,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from '../components/theme-provider';
 import { useTheme } from '../lib/theme';
 import { initLocalDb } from '../lib/local-db';
-import { startSyncEngine } from '../lib/sync-engine';
+import { startSyncEngine, triggerSync } from '../lib/sync-engine';
+import { useAuthStore } from '../store/auth';
 
 // Prevent splash screen from auto-hiding before fonts are loaded
 SplashScreen.preventAutoHideAsync();
@@ -37,6 +38,8 @@ function ThemedStatusBar() {
 }
 
 export default function RootLayout() {
+  const session = useAuthStore((s) => s.session);
+
   useEffect(() => {
     // Hide splash screen once layout is mounted
     SplashScreen.hideAsync();
@@ -55,6 +58,15 @@ export default function RootLayout() {
 
     return () => cleanup?.();
   }, []);
+
+  // Trigger a full server sync whenever a new session is detected (login)
+  useEffect(() => {
+    if (session) {
+      triggerSync().catch((err) =>
+        console.error('[layout] Post-login sync failed:', err),
+      );
+    }
+  }, [session]);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
