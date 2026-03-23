@@ -69,7 +69,6 @@ function NewDirectExpenseForm() {
 
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
-  const [currency, setCurrency] = useState('INR');
   const [paidByMe, setPaidByMe] = useState(true);
   const [paidByFriendId, setPaidByFriendId] = useState('');
   const [category, setCategory] = useState('');
@@ -186,7 +185,7 @@ function NewDirectExpenseForm() {
         // No groupId — this is a direct expense
         description: description.trim(),
         amount: numAmount,
-        currency,
+        currency: 'INR',
         paidById,
         splitType,
         category: category || undefined,
@@ -351,46 +350,24 @@ function NewDirectExpenseForm() {
               />
             </div>
 
-            {/* Amount + Currency */}
-            <div className="flex gap-3">
-              <div className="flex-1">
-                <label htmlFor="amount" className="block text-sm font-medium text-ink mb-1.5">
-                  Amount <span className="text-danger">*</span>
-                </label>
-                <input
-                  id="amount"
-                  type="number"
-                  step="0.01"
-                  min="0.01"
-                  placeholder="0.00"
-                  value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
-                  required
-                  disabled={loading}
-                  className="input-field text-currency text-lg"
-                  data-testid="amount-input"
-                />
-              </div>
-              <div className="w-28">
-                <label htmlFor="currency" className="block text-sm font-medium text-ink mb-1.5">
-                  Currency
-                </label>
-                <select
-                  id="currency"
-                  value={currency}
-                  onChange={(e) => setCurrency(e.target.value)}
-                  disabled={loading}
-                  className="input-field"
-                  data-testid="currency-select"
-                >
-                  <option value="INR">INR</option>
-                  <option value="USD">USD</option>
-                  <option value="EUR">EUR</option>
-                  <option value="GBP">GBP</option>
-                  <option value="SGD">SGD</option>
-                  <option value="AED">AED</option>
-                </select>
-              </div>
+            {/* Amount */}
+            <div>
+              <label htmlFor="amount" className="block text-sm font-medium text-ink mb-1.5">
+                Amount <span className="text-[10px] font-bold text-ink-muted uppercase tracking-wider">(INR)</span> <span className="text-danger">*</span>
+              </label>
+              <input
+                id="amount"
+                type="number"
+                step="0.01"
+                min="0.01"
+                placeholder="0.00"
+                value={amount}
+                onChange={(e) => setAmount(e.target.value)}
+                required
+                disabled={loading}
+                className="input-field text-currency text-lg"
+                data-testid="amount-input"
+              />
             </div>
 
             {/* Paid by */}

@@ -55,13 +55,6 @@ describe('New Direct Expense Page', () => {
     expect(button).toBeDisabled();
   });
 
-  it('should render currency selector with INR as default', () => {
-    render(<NewDirectExpensePage />);
-    const select = screen.getByTestId('currency-select');
-    expect(select).toBeInTheDocument();
-    expect(select).toHaveValue('INR');
-  });
-
   it('should render "Paid by" section with You button selected by default', () => {
     render(<NewDirectExpensePage />);
     expect(screen.getByTestId('paid-by-selector')).toBeInTheDocument();

@@ -31,7 +31,6 @@ function SettleForm() {
   const [amount, setAmount] = useState(prefillAmount);
   const [method, setMethod] = useState('upi');
   const [note, setNote] = useState('');
-  const [upiTxnId, setUpiTxnId] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -62,7 +61,6 @@ function SettleForm() {
           amount: numAmount,
           currency,
           note: note.trim() || undefined,
-          upiTransactionId: method === 'upi' ? (upiTxnId.trim() || undefined) : undefined,
           paymentMethod: method,
         }),
       }).then(async (res) => {
@@ -157,24 +155,6 @@ function SettleForm() {
                 ))}
               </div>
             </div>
-
-            {/* UPI Transaction ID */}
-            {method === 'upi' && (
-              <div>
-                <label htmlFor="upi-txn" className="block text-sm font-medium text-ink mb-1.5">
-                  UPI Transaction ID <span className="text-ink-muted text-xs">(optional)</span>
-                </label>
-                <input
-                  id="upi-txn"
-                  type="text"
-                  placeholder="e.g. 426318765432"
-                  value={upiTxnId}
-                  onChange={(e) => setUpiTxnId(e.target.value)}
-                  disabled={loading}
-                  className="input-field"
-                />
-              </div>
-            )}
 
             {/* Note */}
             <div>

@@ -6,15 +6,6 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase';
 
-const CURRENCIES = [
-  { code: 'INR', label: 'INR — Indian Rupee' },
-  { code: 'USD', label: 'USD — US Dollar' },
-  { code: 'EUR', label: 'EUR — Euro' },
-  { code: 'GBP', label: 'GBP — British Pound' },
-  { code: 'SGD', label: 'SGD — Singapore Dollar' },
-  { code: 'AED', label: 'AED — UAE Dirham' },
-];
-
 const AVATAR_COLORS = [
   'from-orange-500 to-amber-600',
   'from-amber-500 to-orange-500',
@@ -34,8 +25,6 @@ type UserProfile = {
   id: string;
   name: string;
   phone: string;
-  upi_id: string | null;
-  default_currency: string;
 };
 
 export default function ProfilePage() {
@@ -48,8 +37,6 @@ export default function ProfilePage() {
 
   // Form state
   const [name, setName] = useState('');
-  const [upiId, setUpiId] = useState('');
-  const [currency, setCurrency] = useState('INR');
 
   useEffect(() => {
     async function fetchProfile() {
@@ -62,8 +49,6 @@ export default function ProfilePage() {
         const data = (await res.json()) as { user: UserProfile };
         setProfile(data.user);
         setName(data.user.name ?? '');
-        setUpiId(data.user.upi_id ?? '');
-        setCurrency(data.user.default_currency ?? 'INR');
       } catch {
         toast.error('Failed to load profile');
       } finally {
@@ -75,9 +60,7 @@ export default function ProfilePage() {
 
   const isDirty =
     profile !== null &&
-    (name !== (profile.name ?? '') ||
-      upiId !== (profile.upi_id ?? '') ||
-      currency !== (profile.default_currency ?? 'INR'));
+    name !== (profile.name ?? '');
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
@@ -89,8 +72,6 @@ export default function ProfilePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: name.trim(),
-          upi_id: upiId.trim(),
-          default_currency: currency,
         }),
       });
 
@@ -104,8 +85,6 @@ export default function ProfilePage() {
       const data = (await res.json()) as { user: UserProfile };
       setProfile(data.user);
       setName(data.user.name ?? '');
-      setUpiId(data.user.upi_id ?? '');
-      setCurrency(data.user.default_currency ?? 'INR');
       toast.success('Profile updated');
     } catch {
       toast.error('An unexpected error occurred.');
@@ -185,40 +164,6 @@ export default function ProfilePage() {
                   disabled={saving}
                   className="input-field"
                 />
-              </div>
-
-              <div>
-                <label htmlFor="profile-upi" className="block text-sm font-medium text-ink mb-1.5">
-                  UPI ID
-                </label>
-                <input
-                  id="profile-upi"
-                  type="text"
-                  placeholder="yourname@upi"
-                  value={upiId}
-                  onChange={(e) => setUpiId(e.target.value)}
-                  maxLength={100}
-                  disabled={saving}
-                  className="input-field"
-                />
-                <p className="text-xs text-ink-muted mt-1">Others can pay you directly via this UPI ID</p>
-              </div>
-
-              <div>
-                <label htmlFor="profile-currency" className="block text-sm font-medium text-ink mb-1.5">
-                  Default Currency
-                </label>
-                <select
-                  id="profile-currency"
-                  value={currency}
-                  onChange={(e) => setCurrency(e.target.value)}
-                  disabled={saving}
-                  className="input-field"
-                >
-                  {CURRENCIES.map((c) => (
-                    <option key={c.code} value={c.code}>{c.label}</option>
-                  ))}
-                </select>
               </div>
 
               <button

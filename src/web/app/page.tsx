@@ -181,7 +181,7 @@ export default async function LandingPage() {
               Every paisa, accounted for.
             </h2>
             <p className="text-ink-secondary max-w-md mx-auto leading-relaxed">
-              INR-first, UPI-friendly, and designed for how Indians actually split bills — from chai runs to Goa trips.
+              INR-first and designed for how Indians actually split bills — from chai runs to Goa trips.
             </p>
             <div className="mt-8">
               <Link href="/login" className="btn-primary px-8 py-3.5 text-base shadow-warm-lg">

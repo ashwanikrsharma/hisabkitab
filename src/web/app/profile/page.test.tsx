@@ -34,8 +34,6 @@ const mockUser = {
   id: 'user-1',
   name: 'Test User',
   phone: '+919876543210',
-  upi_id: 'testuser@upi',
-  default_currency: 'INR',
 };
 
 beforeEach(() => {
@@ -68,28 +66,6 @@ describe('Profile Page', () => {
       const nameInput = screen.getByLabelText('Name');
       expect(nameInput).toBeInTheDocument();
       expect(nameInput).toHaveValue('Test User');
-    });
-  });
-
-  it('should render UPI ID input with fetched value', async () => {
-    mockProfileFetch();
-    render(<ProfilePage />);
-
-    await waitFor(() => {
-      const upiInput = screen.getByLabelText('UPI ID');
-      expect(upiInput).toBeInTheDocument();
-      expect(upiInput).toHaveValue('testuser@upi');
-    });
-  });
-
-  it('should render currency selector with fetched value', async () => {
-    mockProfileFetch();
-    render(<ProfilePage />);
-
-    await waitFor(() => {
-      const currencySelect = screen.getByLabelText('Default Currency');
-      expect(currencySelect).toBeInTheDocument();
-      expect(currencySelect).toHaveValue('INR');
     });
   });
 

@@ -10,7 +10,7 @@
 
 ## 1. Product Vision
 
-HisabKitab is a lightweight expense-splitting app for friend groups, trips, roommates, and events. Unlike Splitwise, it optimizes for **zero friction**: users can add expenses via a simple mobile UI or web dashboard. Built for India first — INR formatting, UPI-ready settlements, familiar patterns from GPay/PhonePe.
+HisabKitab is a lightweight expense-splitting app for friend groups, trips, roommates, and events. Unlike Splitwise, it optimizes for **zero friction**: users can add expenses via a simple mobile UI or web dashboard. Built for India first — INR formatting, familiar patterns from GPay/PhonePe.
 
 ---
 
@@ -44,7 +44,7 @@ HisabKitab is a lightweight expense-splitting app for friend groups, trips, room
 - *Not implemented: Phone OTP, guest mode*
 
 ### 4.2 Groups
-- Create named group with currency (INR, USD, EUR, GBP, SGD, AED)
+- Create named group (fixed to INR; currency selection UI has been removed)
 - Add members via user search (by name or phone)
 - View all groups with member count
 - Group detail with members, expenses, balances, settlement history
@@ -71,11 +71,11 @@ HisabKitab is a lightweight expense-splitting app for friend groups, trips, room
 - Per-member balance within a group (who owes whom, how much)
 - **Simplified debt minimization** — minimize number of transactions
 - Direct (friend-to-friend) bilateral balances across all groups
-- **Record settlement** with payment method (UPI, Cash, Bank)
-- **UPI transaction ID** tracking
+- **Record settlement** with payment method (Cash, Bank Transfer, Other)
 - **Settlement status**: Pending, Confirmed, Disputed
 - Settlement history with timestamps
 - Mark expense splits as settled upon settlement
+- *UPI payment method and UPI transaction ID tracking removed from the settlement UI; the `upi_transaction_id` column remains in the database for future use*
 
 ### 4.6 Activity Feed
 - Chronological activity log across all groups
@@ -85,10 +85,10 @@ HisabKitab is a lightweight expense-splitting app for friend groups, trips, room
 - Metadata stored as JSONB for rich display
 
 ### 4.7 User Profile
-- Edit name, UPI ID, default currency
-- Currency preference (INR, USD, EUR, GBP, SGD, AED)
+- Edit display name
 - Dark/light theme toggle (mobile)
 - Sign out with confirmation dialog and redirect to login screen
+- *UPI ID field and currency selection removed from profile UI; `upi_id` and `default_currency` columns remain in the database for future use*
 
 ### 4.8 Android App Download (Web)
 - "Get Android App" badge on landing page and dashboard
@@ -103,6 +103,7 @@ HisabKitab is a lightweight expense-splitting app for friend groups, trips, room
 - "Built for India" callout with "Every paisa, accounted for"
 - "Get Android App" badge in navigation
 - Redirects authenticated users to dashboard
+- *UPI-specific messaging removed from landing page copy*
 
 ### 4.10 Mobile Home Tab (Dashboard)
 - **Summary cards** — "You are owed" and "You owe" aggregate balances across all groups, displayed side-by-side at the top
@@ -148,12 +149,12 @@ Home tab → Tap "+" FAB → Tap "Group Expense" (Within a group)
 ### Settlement Flow
 ```
 Group detail → "You owe Priya ₹850" → Tap "Settle"
-→ Enter amount, method (UPI/Cash), note → Record → Activity logged
+→ Enter amount, method (Cash/Bank Transfer/Other), note → Record → Activity logged
 ```
 
 ### New Group Flow
 ```
-Groups tab → "Create your first group" → Name + currency → Create → Add members → Add expenses
+Groups tab → "Create your first group" → Name → Create → Add members → Add expenses
 ```
 
 ### Add Member Flow
@@ -375,13 +376,13 @@ All routes follow: `requireAuth` → Zod validation → `@hisabkitab/services` �
 - [x] Expense creation with equal/exact/percentage splits
 - [x] Direct (friend-to-friend) expenses
 - [x] Balance calculation with simplified debt minimization
-- [x] Settlement flow with UPI/Cash/Bank methods
+- [x] Settlement flow with Cash/Bank Transfer/Other payment methods (UPI removed from UI)
 - [x] Activity feed with day grouping
-- [x] User profile (name, UPI ID, currency, theme)
+- [x] User profile (name, theme); UPI ID and currency fields removed from UI
 - [x] Android app download page with QR code (/mobile)
-- [x] Web landing page with features and CTAs
+- [x] Web landing page with features and CTAs (UPI-specific copy removed)
 - [x] Dark/light theme toggle (mobile)
-- [x] Multi-currency support (INR, USD, EUR, GBP, SGD, AED)
+- [x] INR-only currency display in all UIs (multi-currency data layer retained for future use)
 - [x] Mobile Home tab: expandable FAB with "Add Expense" and "Group Expense" actions
 - [x] Mobile Home tab: "People" section — per-person net balances aggregated across all groups
 - [x] Mobile Home tab: "Settlements by Group" section — per-group debt list with Settle buttons
@@ -416,7 +417,7 @@ All routes follow: `requireAuth` → Zod validation → `@hisabkitab/services` �
 | Database | Supabase (Postgres + RLS) | Built-in auth, realtime, admin UI |
 | Auth method | Google OAuth | No password resets, fast onboarding |
 | Package naming | `@hisabkitab/services` | Clear data layer separation |
-| Currency | INR default, multi-currency | India-first, expandable |
+| Currency | INR only in UI; multi-currency in data layer | India-first; DB supports expansion without a migration |
 | Split types | Equal/Exact/Percentage | Covers 99% of real-world splits |
 | Soft deletes | `deleted_at` timestamp | Audit trail, undo capability |
 | Agent workflow | Orchestrator + specialists | Consistent, traceable changes |

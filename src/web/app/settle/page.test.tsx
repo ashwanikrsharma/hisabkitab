@@ -62,21 +62,6 @@ describe('Direct Settle Page', () => {
     expect(screen.getByPlaceholderText('e.g. Paid via Google Pay')).toBeInTheDocument();
   });
 
-  it('should show UPI Transaction ID field when UPI is selected', () => {
-    render(<SettlePage />);
-    // UPI is selected by default
-    expect(screen.getByLabelText(/UPI Transaction ID/)).toBeInTheDocument();
-  });
-
-  it('should hide UPI Transaction ID field when Cash is selected', async () => {
-    const user = userEvent.setup();
-    render(<SettlePage />);
-
-    await user.click(screen.getByRole('button', { name: 'Cash' }));
-
-    expect(screen.queryByLabelText(/UPI Transaction ID/)).not.toBeInTheDocument();
-  });
-
   it('should call router.push and router.refresh after successful settlement', async () => {
     const user = userEvent.setup();
 

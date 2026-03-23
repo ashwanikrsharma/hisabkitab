@@ -4,20 +4,10 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-const CURRENCIES = [
-  { code: 'INR', label: 'INR — Indian Rupee' },
-  { code: 'USD', label: 'USD — US Dollar' },
-  { code: 'EUR', label: 'EUR — Euro' },
-  { code: 'GBP', label: 'GBP — British Pound' },
-  { code: 'SGD', label: 'SGD — Singapore Dollar' },
-  { code: 'AED', label: 'AED — UAE Dirham' },
-];
-
 export default function NewGroupPage() {
   const router = useRouter();
 
   const [name, setName] = useState('');
-  const [currency, setCurrency] = useState('INR');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,7 +20,7 @@ export default function NewGroupPage() {
       fetch('/api/groups', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), currency }),
+        body: JSON.stringify({ name: name.trim(), currency: 'INR' }),
       }).then(async (res) => {
         if (!res.ok) {
           const body = await res.json().catch(() => ({})) as { error?: unknown };
@@ -87,23 +77,6 @@ export default function NewGroupPage() {
                 disabled={loading}
                 className="input-field"
               />
-            </div>
-
-            <div>
-              <label htmlFor="currency" className="block text-sm font-medium text-ink mb-1.5">
-                Default Currency
-              </label>
-              <select
-                id="currency"
-                value={currency}
-                onChange={(e) => setCurrency(e.target.value)}
-                disabled={loading}
-                className="input-field"
-              >
-                {CURRENCIES.map((c) => (
-                  <option key={c.code} value={c.code}>{c.label}</option>
-                ))}
-              </select>
             </div>
 
             <div className="flex gap-3 pt-2">

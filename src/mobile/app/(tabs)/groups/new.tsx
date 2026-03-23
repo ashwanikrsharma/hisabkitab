@@ -11,7 +11,6 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { router } from 'expo-router';
-import { SUPPORTED_CURRENCIES } from '@hisabkitab/shared';
 import { useCreateGroup } from '../../../hooks/use-api';
 import { useTheme, RADIUS } from '../../../lib/theme';
 import type { ColorTokens } from '../../../lib/theme';
@@ -21,7 +20,6 @@ export default function NewGroupScreen() {
   const { colors } = useTheme();
   const styles = useMemo(() => createStyles(colors), [colors]);
   const [name, setName] = useState('');
-  const [currency, setCurrency] = useState<string>('INR');
   const createGroup = useCreateGroup();
 
   const handleCreate = async () => {
@@ -32,7 +30,7 @@ export default function NewGroupScreen() {
     }
 
     createGroup.mutate(
-      { name: trimmedName, currency },
+      { name: trimmedName, currency: 'INR' },
       {
         onSuccess: () => {
           router.back();
@@ -67,31 +65,6 @@ export default function NewGroupScreen() {
             />
           </View>
 
-          <View style={styles.fieldGroup}>
-            <Text style={styles.label}>Currency</Text>
-            <View style={styles.currencyGrid}>
-              {SUPPORTED_CURRENCIES.map((c) => (
-                <TouchableOpacity
-                  key={c}
-                  style={[
-                    styles.currencyOption,
-                    currency === c && styles.currencyOptionSelected,
-                  ]}
-                  onPress={() => setCurrency(c)}
-                  disabled={submitting}
-                >
-                  <Text
-                    style={[
-                      styles.currencyOptionText,
-                      currency === c && styles.currencyOptionTextSelected,
-                    ]}
-                  >
-                    {c}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </View>
         </View>
 
         <TouchableOpacity
@@ -145,31 +118,6 @@ const createStyles = (colors: ColorTokens) =>
       paddingHorizontal: 16,
       paddingVertical: 14,
       fontSize: 16,
-      color: colors.text,
-    },
-    currencyGrid: {
-      flexDirection: 'row',
-      flexWrap: 'wrap',
-      gap: 10,
-    },
-    currencyOption: {
-      paddingHorizontal: 18,
-      paddingVertical: 10,
-      borderRadius: 10,
-      borderWidth: 1,
-      borderColor: colors.border,
-      backgroundColor: colors.card,
-    },
-    currencyOptionSelected: {
-      backgroundColor: colors.primary,
-      borderColor: colors.primary,
-    },
-    currencyOptionText: {
-      fontSize: 14,
-      fontWeight: '600',
-      color: colors.textSecondary,
-    },
-    currencyOptionTextSelected: {
       color: colors.text,
     },
     submitButton: {

@@ -30,21 +30,6 @@ describe('New Group Page', () => {
     expect(screen.getByPlaceholderText('e.g. Goa Trip, Flatmates, Office Lunch')).toBeInTheDocument();
   });
 
-  it('should render currency selector with INR as default', () => {
-    render(<NewGroupPage />);
-    const select = screen.getByLabelText(/Default Currency/);
-    expect(select).toBeInTheDocument();
-    expect(select).toHaveValue('INR');
-  });
-
-  it('should render all currency options', () => {
-    render(<NewGroupPage />);
-    expect(screen.getByText('INR \u2014 Indian Rupee')).toBeInTheDocument();
-    expect(screen.getByText('USD \u2014 US Dollar')).toBeInTheDocument();
-    expect(screen.getByText('EUR \u2014 Euro')).toBeInTheDocument();
-    expect(screen.getByText('GBP \u2014 British Pound')).toBeInTheDocument();
-  });
-
   it('should render Create Group button', () => {
     render(<NewGroupPage />);
     expect(screen.getByRole('button', { name: 'Create Group' })).toBeInTheDocument();

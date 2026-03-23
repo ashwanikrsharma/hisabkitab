@@ -33,7 +33,7 @@ const PAGES = [
   {
     icon: 'flag-outline' as const,
     title: 'Built for India',
-    subtitle: 'UPI payments, INR currency, paisa-level accuracy. Designed for how you split.',
+    subtitle: 'INR currency, paisa-level accuracy. Designed for how you split.',
   },
 ];
 

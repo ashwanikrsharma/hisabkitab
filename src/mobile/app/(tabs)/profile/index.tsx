@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { SUPPORTED_CURRENCIES } from '@hisabkitab/shared';
 import { useAuthStore } from '../../../store/auth';
 import { useUserProfile, useUpdateProfile } from '../../../hooks/use-api';
 import { useTheme, RADIUS } from '../../../lib/theme';
@@ -30,15 +29,11 @@ export default function ProfileScreen() {
   const updateProfile = useUpdateProfile();
 
   const [name, setName] = useState('');
-  const [upiId, setUpiId] = useState('');
-  const [defaultCurrency, setDefaultCurrency] = useState('INR');
   const [dirty, setDirty] = useState(false);
 
   useEffect(() => {
     if (profile) {
       setName(profile.name ?? '');
-      setUpiId(profile.upi_id ?? '');
-      setDefaultCurrency(profile.default_currency ?? 'INR');
     }
   }, [profile]);
 
@@ -46,8 +41,7 @@ export default function ProfileScreen() {
     updateProfile.mutate(
       {
         name: name.trim() || undefined,
-        upi_id: upiId.trim() || undefined,
-        default_currency: defaultCurrency,
+        default_currency: 'INR',
       },
       {
         onSuccess: () => {
@@ -111,47 +105,6 @@ export default function ProfileScreen() {
               placeholder="Your name"
               placeholderTextColor={colors.textMuted}
             />
-          </View>
-
-          <View style={styles.fieldGroup}>
-            <Text style={styles.label}>UPI ID</Text>
-            <TextInput
-              style={styles.input}
-              value={upiId}
-              onChangeText={handleChange(setUpiId)}
-              placeholder="yourname@upi"
-              placeholderTextColor={colors.textMuted}
-              autoCapitalize="none"
-              autoCorrect={false}
-            />
-          </View>
-
-          <View style={styles.fieldGroup}>
-            <Text style={styles.label}>Default Currency</Text>
-            <View style={styles.currencyGrid}>
-              {SUPPORTED_CURRENCIES.map((c) => (
-                <TouchableOpacity
-                  key={c}
-                  style={[
-                    styles.currencyOption,
-                    defaultCurrency === c && styles.currencyOptionSelected,
-                  ]}
-                  onPress={() => {
-                    setDefaultCurrency(c);
-                    setDirty(true);
-                  }}
-                >
-                  <Text
-                    style={[
-                      styles.currencyOptionText,
-                      defaultCurrency === c && styles.currencyOptionTextSelected,
-                    ]}
-                  >
-                    {c}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
           </View>
 
           <View style={styles.fieldGroup}>
@@ -264,31 +217,6 @@ const createStyles = (colors: ColorTokens) => StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     fontSize: 16,
-    color: colors.text,
-  },
-  currencyGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  currencyOption: {
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.card,
-  },
-  currencyOptionSelected: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  currencyOptionText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.textSecondary,
-  },
-  currencyOptionTextSelected: {
     color: colors.text,
   },
   appearanceRow: {

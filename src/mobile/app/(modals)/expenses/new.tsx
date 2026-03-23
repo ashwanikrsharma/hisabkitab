@@ -14,7 +14,7 @@ import {
   Switch,
 } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
-import { SUPPORTED_CURRENCIES, type SplitType, type ExpenseCategory, CURRENCY_SYMBOLS, type SupportedCurrency } from '@hisabkitab/shared';
+import { type SplitType, type ExpenseCategory, CURRENCY_SYMBOLS, type SupportedCurrency } from '@hisabkitab/shared';
 import { useAuthStore } from '../../../store/auth';
 import { useCreateExpense } from '../../../hooks/use-api';
 import { useTheme, RADIUS } from '../../../lib/theme';
@@ -40,7 +40,6 @@ export default function NewDirectExpenseScreen() {
 
   const [description, setDescription] = useState('');
   const [amount, setAmount] = useState('');
-  const [currency, setCurrency] = useState<string>('INR');
   const [splitType, setSplitType] = useState<SplitType>('equal');
   const [category, setCategory] = useState<ExpenseCategory>('other');
   const [notes, setNotes] = useState('');
@@ -89,7 +88,7 @@ export default function NewDirectExpenseScreen() {
       {
         description: description.trim(),
         amount: parsedAmount,
-        currency,
+        currency: 'INR',
         paidById: userId,
         splitType,
         category,
@@ -174,11 +173,11 @@ export default function NewDirectExpenseScreen() {
             <View style={styles.fieldGroup}>
               <Text style={styles.label}>Amount *</Text>
               <View style={styles.amountRow}>
-                <TouchableOpacity style={styles.currencyBadge}>
+                <View style={styles.currencyBadge}>
                   <Text style={styles.currencyBadgeText}>
-                    {CURRENCY_SYMBOLS[currency as SupportedCurrency] ?? currency}
+                    {CURRENCY_SYMBOLS['INR' as SupportedCurrency]}
                   </Text>
-                </TouchableOpacity>
+                </View>
                 <TextInput
                   style={[styles.input, styles.amountInput]}
                   value={amount}

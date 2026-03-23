@@ -19,7 +19,7 @@ import { useTheme, RADIUS } from '../../lib/theme';
 import type { ColorTokens } from '../../lib/theme';
 import { ScreenHeader } from '../../components/screen-header';
 
-const PAYMENT_METHODS = ['UPI', 'Cash', 'Bank Transfer'] as const;
+const PAYMENT_METHODS = ['Cash', 'Bank Transfer', 'Other'] as const;
 
 export default function DirectSettleScreen() {
   const { payeeId, payeeName, amount: prefillAmount, currency: prefillCurrency } = useLocalSearchParams<{
@@ -36,8 +36,7 @@ export default function DirectSettleScreen() {
   const userId = session?.user?.id;
 
   const [amount, setAmount] = useState(prefillAmount ?? '');
-  const [paymentMethod, setPaymentMethod] = useState<string>('UPI');
-  const [upiId, setUpiId] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<string>('Cash');
   const [note, setNote] = useState('');
 
   const settleMutation = useCreateSettlement();
@@ -56,7 +55,6 @@ export default function DirectSettleScreen() {
 
     const noteText = [
       paymentMethod,
-      upiId.trim() ? `UPI: ${upiId.trim()}` : '',
       note.trim(),
     ].filter(Boolean).join(' | ');
 
@@ -143,23 +141,6 @@ export default function DirectSettleScreen() {
                 ))}
               </View>
             </View>
-
-            {/* UPI ID (only if UPI selected) */}
-            {paymentMethod === 'UPI' && (
-              <View style={styles.fieldGroup}>
-                <Text style={styles.label}>UPI ID (optional)</Text>
-                <TextInput
-                  style={styles.input}
-                  value={upiId}
-                  onChangeText={setUpiId}
-                  placeholder="name@upi"
-                  placeholderTextColor={colors.textMuted}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  editable={!submitting}
-                />
-              </View>
-            )}
 
             {/* Note */}
             <View style={styles.fieldGroup}>
