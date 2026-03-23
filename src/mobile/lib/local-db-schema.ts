@@ -113,7 +113,8 @@ CREATE TABLE IF NOT EXISTS local_activity_log (
   description TEXT NOT NULL,
   metadata TEXT,
   created_at TEXT NOT NULL,
-  _sync_status TEXT DEFAULT 'synced' CHECK(_sync_status IN ('synced','pending','error'))
+  _sync_status TEXT DEFAULT 'synced' CHECK(_sync_status IN ('synced','pending','error')),
+  _last_synced_at TEXT
 );
 
 -- ===== Sync infrastructure tables =====

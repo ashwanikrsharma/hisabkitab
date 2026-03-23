@@ -183,6 +183,13 @@ export async function initLocalDb(): Promise<void> {
   // Create all tables and indexes
   await db.execAsync(LOCAL_DB_SCHEMA);
 
+  // Migrate existing databases: add _last_synced_at to local_activity_log if missing
+  try {
+    await db.execAsync(`ALTER TABLE local_activity_log ADD COLUMN _last_synced_at TEXT`);
+  } catch {
+    // Column already exists — ignore "duplicate column" error
+  }
+
   // Store schema version in sync_metadata
   await db.runAsync(
     `INSERT OR REPLACE INTO sync_metadata (key, value) VALUES ('db_version', ?)`,
