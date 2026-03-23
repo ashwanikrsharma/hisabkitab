@@ -102,9 +102,11 @@ temp/
 .env*.local
 
 # Mobile build credentials
-apps/mobile/credentials/
-apps/mobile/credentials.json
-apps/mobile/*.apk
+src/mobile/credentials/
+src/mobile/credentials.json
+*.apk
+*.aab
+*.ipa
 
 # APK output directory
-apps/mobile/appbundles/
+src/mobile/appbundles/
