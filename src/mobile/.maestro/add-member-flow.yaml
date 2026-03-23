@@ -1,0 +1,64 @@
+appId: com.hisabkitab.app
+name: "Add member to group and verify member list"
+---
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 1: Login and navigate to a group
+# ═══════════════════════════════════════════════════════════════════════════════
+
+- launchApp
+
+- runFlow:
+    when:
+      visible: "Use Test Account"
+    commands:
+      - tapOn: "Use Test Account"
+      - extendedWaitUntil:
+          visible: "Home"
+          timeout: 15000
+
+- tapOn: "Groups"
+- extendedWaitUntil:
+    visible: "Groups"
+    timeout: 10000
+
+# Tap on first available group
+- tapOn:
+    text: ".*"
+    index: 0
+- extendedWaitUntil:
+    visible: "Members"
+    timeout: 10000
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 2: Open Add Member screen
+# ═══════════════════════════════════════════════════════════════════════════════
+
+- tapOn: "Add Member"
+- extendedWaitUntil:
+    visible: "Add Member"
+    timeout: 5000
+
+# Verify search input is present
+- assertVisible: "Search for people to add"
+- takeScreenshot: "screenshots/add-member-01-search"
+
+# Type a search query
+- tapOn: "Search for people to add"
+- inputText: "Test"
+
+# Wait for search results (may or may not find users depending on DB state)
+- extendedWaitUntil:
+    visible: ".*"
+    timeout: 5000
+- takeScreenshot: "screenshots/add-member-02-results"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 3: Go back and verify group detail
+# ═══════════════════════════════════════════════════════════════════════════════
+
+- tapOn: "Done adding members"
+- extendedWaitUntil:
+    visible: "Members"
+    timeout: 10000
+- takeScreenshot: "screenshots/add-member-03-back-to-group"

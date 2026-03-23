@@ -1,0 +1,70 @@
+appId: com.hisabkitab.app
+name: "Profile management and sign out flow"
+---
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 1: Login
+# ═══════════════════════════════════════════════════════════════════════════════
+
+- launchApp
+
+- runFlow:
+    when:
+      visible: "Use Test Account"
+    commands:
+      - tapOn: "Use Test Account"
+      - extendedWaitUntil:
+          visible: "Home"
+          timeout: 15000
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 2: Profile Tab — verify all elements
+# ═══════════════════════════════════════════════════════════════════════════════
+
+- tapOn: "Profile"
+- extendedWaitUntil:
+    visible: "Profile"
+    timeout: 10000
+
+# Verify profile form elements
+- assertVisible: "Name"
+- assertVisible: "UPI ID"
+- assertVisible: "Default Currency"
+- assertVisible: "Appearance"
+- assertVisible: "Sign Out"
+- takeScreenshot: "screenshots/profile-01-overview"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 3: Theme toggle
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Toggle to dark mode
+- tapOn: "Dark"
+- takeScreenshot: "screenshots/profile-02-dark-mode"
+
+# Toggle back to light
+- tapOn: "Light"
+- takeScreenshot: "screenshots/profile-03-light-mode"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 4: Sign out
+# ═══════════════════════════════════════════════════════════════════════════════
+
+- tapOn: "Sign Out"
+
+# Confirm sign out dialog
+- extendedWaitUntil:
+    visible: "Are you sure you want to sign out"
+    timeout: 5000
+- tapOn: "Sign Out"
+
+# Should be redirected to login
+- extendedWaitUntil:
+    visible: "Use Test Account"
+    timeout: 10000
+- takeScreenshot: "screenshots/profile-04-signed-out"
+
+# Verify we're on the login screen
+- assertVisible: "HisabKitab"
+- assertVisible: "Continue with Google"
+- assertVisible: "Use Test Account"

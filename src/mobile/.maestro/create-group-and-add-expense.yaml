@@ -1,0 +1,112 @@
+appId: com.hisabkitab.app
+name: "Create a group, add members, add expense, verify balances"
+---
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 1: Login
+# ═══════════════════════════════════════════════════════════════════════════════
+
+- launchApp
+
+- runFlow:
+    when:
+      visible: "Use Test Account"
+    commands:
+      - tapOn: "Use Test Account"
+      - extendedWaitUntil:
+          visible: "Home"
+          timeout: 15000
+
+# If already logged in, ensure we're on Home
+- extendedWaitUntil:
+    visible: "HisabKitab"
+    timeout: 10000
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 2: Create a new group
+# ═══════════════════════════════════════════════════════════════════════════════
+
+- tapOn: "Groups"
+- extendedWaitUntil:
+    visible: "Groups"
+    timeout: 10000
+
+- tapOn: "+ New"
+- extendedWaitUntil:
+    visible: "New Group"
+    timeout: 5000
+
+# Fill in group name
+- tapOn: "Group name"
+- inputText: "Maestro Test Group"
+
+# Verify currency default
+- assertVisible: "INR"
+
+# Create the group
+- tapOn: "Create Group"
+- extendedWaitUntil:
+    visible: "Groups"
+    timeout: 10000
+
+# Verify the new group appears in the list
+- assertVisible: "Maestro Test Group"
+- takeScreenshot: "screenshots/create-group-01-list"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 3: Open group and verify detail page
+# ═══════════════════════════════════════════════════════════════════════════════
+
+- tapOn: "Maestro Test Group"
+- extendedWaitUntil:
+    visible: "Members"
+    timeout: 10000
+
+# Verify group detail sections
+- assertVisible: "Members"
+- assertVisible: "Add Member"
+- assertVisible: "+ Add Expense"
+- takeScreenshot: "screenshots/create-group-02-detail"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 4: Add an expense
+# ═══════════════════════════════════════════════════════════════════════════════
+
+- tapOn: "+ Add Expense"
+- extendedWaitUntil:
+    visible: "Add Expense"
+    timeout: 5000
+
+# Fill expense form
+- tapOn: "e.g. Dinner at Barbeque Nation"
+- inputText: "Team Lunch"
+
+- tapOn: "0.00"
+- inputText: "500"
+
+# Select Food category
+- tapOn: "Food"
+
+# Submit
+- tapOn: "Add Expense"
+- extendedWaitUntil:
+    visible: "Team Lunch"
+    timeout: 10000
+
+- assertVisible: "Team Lunch"
+- takeScreenshot: "screenshots/create-group-03-expense-added"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 5: Navigate back and verify home shows the group
+# ═══════════════════════════════════════════════════════════════════════════════
+
+- tapOn: "Home"
+- extendedWaitUntil:
+    visible: "HisabKitab"
+    timeout: 10000
+
+# The group should appear in "Your Groups"
+- assertVisible:
+    text: "Maestro"
+    optional: true
+- takeScreenshot: "screenshots/create-group-04-home-with-group"

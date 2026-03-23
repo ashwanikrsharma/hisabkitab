@@ -11,6 +11,7 @@
     "web": "expo start --web",
     "build": "expo export",
     "lint": "eslint . --ext .ts,.tsx",
+    "test": "jest --passWithNoTests",
     "type-check": "tsc --noEmit",
     "postinstall": "node scripts/eas-link-plugins.js",
     "eas-build-pre-install": "cd ../.. && npm install"
@@ -62,8 +63,16 @@
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",
+    "@testing-library/jest-native": "^5.4.3",
+    "@testing-library/react-native": "^13.3.3",
+    "@types/jest": "^30.0.0",
     "@types/react": "~18.3.0",
+    "@types/react-test-renderer": "^19.1.0",
     "ajv": "^8.18.0",
+    "jest": "^29.7.0",
+    "jest-expo": "~52.0.0",
+    "react-test-renderer": "^18.3.1",
+    "ts-jest": "^29.4.6",
     "typescript": "^5.4.5"
   }
 }

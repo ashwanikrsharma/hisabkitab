@@ -1,0 +1,80 @@
+appId: com.hisabkitab.app
+name: "Activity feed navigation and content verification"
+---
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 1: Login
+# ═══════════════════════════════════════════════════════════════════════════════
+
+- launchApp
+
+- runFlow:
+    when:
+      visible: "Use Test Account"
+    commands:
+      - tapOn: "Use Test Account"
+      - extendedWaitUntil:
+          visible: "Home"
+          timeout: 15000
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 2: Home tab — check Recent Activity section
+# ═══════════════════════════════════════════════════════════════════════════════
+
+- assertVisible:
+    text: "Recent Activity"
+    optional: true
+- takeScreenshot: "screenshots/activity-01-home-recent"
+
+# If "See all" link exists, tap it
+- runFlow:
+    when:
+      visible: "See all"
+    commands:
+      - tapOn: "See all"
+      - extendedWaitUntil:
+          visible: "Activity"
+          timeout: 10000
+      - takeScreenshot: "screenshots/activity-02-full-list"
+      - tapOn: "Home"
+      - extendedWaitUntil:
+          visible: "HisabKitab"
+          timeout: 5000
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 3: Activity Tab — full view
+# ═══════════════════════════════════════════════════════════════════════════════
+
+- tapOn: "Activity"
+- extendedWaitUntil:
+    visible: "Activity"
+    timeout: 10000
+- takeScreenshot: "screenshots/activity-03-tab"
+
+# Scroll down to see more activity items
+- scroll
+- takeScreenshot: "screenshots/activity-04-scrolled"
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PHASE 4: Tap an activity to navigate to group
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Tap on first activity item that has a group (optional — might not have any)
+- runFlow:
+    when:
+      visible: ".*added.*|.*created.*|.*Expense.*"
+    commands:
+      - tapOn:
+          text: ".*added.*|.*created.*|.*Expense.*"
+          index: 0
+      - extendedWaitUntil:
+          visible: ".*"
+          timeout: 10000
+      - takeScreenshot: "screenshots/activity-05-navigated"
+      - back
+
+# Return to home
+- tapOn: "Home"
+- extendedWaitUntil:
+    visible: "HisabKitab"
+    timeout: 5000
