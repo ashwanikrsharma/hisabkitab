@@ -1,3 +1,11 @@
+/**
+ * API hooks — offline-first by default.
+ *
+ * This file re-exports offline hooks under the original names so existing
+ * screen imports continue to work without changes. The original online-only
+ * hooks are preserved with an `Online` prefix for fallback use.
+ */
+
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Alert } from 'react-native';
 import { apiClient } from '../lib/api-client';
@@ -79,9 +87,39 @@ type UserSearchResult = {
   phone?: string;
 };
 
-// ─── Query Hooks ─────────────────────────────────────────────────────────────
+// ─── Re-export types for consumers ───────────────────────────────────────────
 
-export function useGroups() {
+export type {
+  GroupListItem,
+  GroupDetail,
+  GroupMember,
+  ExpenseItem,
+  Debt,
+  ActivityItem,
+  UserProfile,
+  UserSearchResult,
+};
+
+// ─── Default exports: offline-first hooks ────────────────────────────────────
+
+export { useOfflineGroups as useGroups } from './use-offline-api';
+export { useOfflineGroupDetail as useGroupDetail } from './use-offline-api';
+export { useOfflineGroupExpenses as useGroupExpenses } from './use-offline-api';
+export { useOfflineGroupBalances as useGroupBalances } from './use-offline-api';
+export { useOfflineGroupMembers as useGroupMembers } from './use-offline-api';
+export { useOfflineActivity as useActivity } from './use-offline-api';
+export { useOfflineUserProfile as useUserProfile } from './use-offline-api';
+export { useOfflineCreateGroup as useCreateGroup } from './use-offline-api';
+export { useOfflineCreateExpense as useCreateExpense } from './use-offline-api';
+export { useOfflineAddMember as useAddMember } from './use-offline-api';
+export { useOfflineCreateSettlement as useCreateSettlement } from './use-offline-api';
+export { useOfflineDeleteExpense as useDeleteExpense } from './use-offline-api';
+export { useOfflineUpdateProfile as useUpdateProfile } from './use-offline-api';
+export { useOfflineUserSearch as useUserSearch } from './use-offline-api';
+
+// ─── Online-only hooks (preserved with Online prefix for fallback) ───────────
+
+export function useOnlineGroups() {
   return useQuery({
     queryKey: ['groups'],
     queryFn: async () => {
@@ -108,7 +146,7 @@ export function useGroups() {
   });
 }
 
-export function useGroupDetail(groupId: string) {
+export function useOnlineGroupDetail(groupId: string) {
   return useQuery({
     queryKey: ['group', groupId],
     queryFn: async () => {
@@ -132,7 +170,7 @@ export function useGroupDetail(groupId: string) {
   });
 }
 
-export function useGroupExpenses(groupId: string) {
+export function useOnlineGroupExpenses(groupId: string) {
   return useQuery({
     queryKey: ['expenses', groupId],
     queryFn: async () => {
@@ -171,7 +209,7 @@ export function useGroupExpenses(groupId: string) {
   });
 }
 
-export function useGroupBalances(groupId: string) {
+export function useOnlineGroupBalances(groupId: string) {
   return useQuery({
     queryKey: ['balances', groupId],
     queryFn: async () => {
@@ -184,15 +222,15 @@ export function useGroupBalances(groupId: string) {
   });
 }
 
-export function useGroupMembers(groupId: string) {
-  const detail = useGroupDetail(groupId);
+export function useOnlineGroupMembers(groupId: string) {
+  const detail = useOnlineGroupDetail(groupId);
   return {
     ...detail,
     data: detail.data?.members ?? [],
   };
 }
 
-export function useActivity(groupId?: string) {
+export function useOnlineActivity(groupId?: string) {
   const params = groupId ? `?groupId=${encodeURIComponent(groupId)}` : '';
   return useQuery({
     queryKey: ['activity', groupId ?? 'all'],
@@ -205,7 +243,7 @@ export function useActivity(groupId?: string) {
   });
 }
 
-export function useUserProfile() {
+export function useOnlineUserProfile() {
   return useQuery({
     queryKey: ['profile'],
     queryFn: async () => {
@@ -215,7 +253,7 @@ export function useUserProfile() {
   });
 }
 
-export function useUserSearch(query: string) {
+export function useOnlineUserSearch(query: string) {
   return useQuery({
     queryKey: ['userSearch', query],
     queryFn: async () => {
@@ -228,9 +266,7 @@ export function useUserSearch(query: string) {
   });
 }
 
-// ─── Mutation Hooks ──────────────────────────────────────────────────────────
-
-export function useCreateGroup() {
+export function useOnlineCreateGroup() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: { name: string; currency: string }) =>
@@ -247,7 +283,7 @@ export function useCreateGroup() {
   });
 }
 
-export function useCreateExpense() {
+export function useOnlineCreateExpense() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: Record<string, unknown>) =>
@@ -271,7 +307,7 @@ export function useCreateExpense() {
   });
 }
 
-export function useCreateSettlement() {
+export function useOnlineCreateSettlement() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: {
@@ -300,7 +336,7 @@ export function useCreateSettlement() {
   });
 }
 
-export function useAddMember() {
+export function useOnlineAddMember() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: { groupId: string; userId: string }) =>
@@ -318,7 +354,7 @@ export function useAddMember() {
   });
 }
 
-export function useDeleteExpense() {
+export function useOnlineDeleteExpense() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (params: { expenseId: string; groupId?: string }) =>
@@ -338,7 +374,7 @@ export function useDeleteExpense() {
   });
 }
 
-export function useUpdateProfile() {
+export function useOnlineUpdateProfile() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: { name?: string; upi_id?: string; default_currency?: string }) =>
@@ -354,15 +390,3 @@ export function useUpdateProfile() {
     },
   });
 }
-
-// Re-export types for consumers
-export type {
-  GroupListItem,
-  GroupDetail,
-  GroupMember,
-  ExpenseItem,
-  Debt,
-  ActivityItem,
-  UserProfile,
-  UserSearchResult,
-};
