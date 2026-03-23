@@ -2,7 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": "nextjs",
   "buildCommand": "cd src/web && npx next build",
-  "installCommand": "node -e \"const p=JSON.parse(require('fs').readFileSync('package.json','utf8')); p.workspaces=['src/web','src/services','src/shared']; require('fs').writeFileSync('package.json', JSON.stringify(p,null,2));\" && rm package-lock.json && npm install --legacy-peer-deps",
+  "installCommand": "sh scripts/vercel-install.sh",
   "outputDirectory": "src/web/.next",
   "headers": [
     {

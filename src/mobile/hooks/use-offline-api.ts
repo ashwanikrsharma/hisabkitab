@@ -396,12 +396,12 @@ export function useOfflineUserProfile() {
   const session = useAuthStore((s) => s.session);
   const userId = session?.user?.id;
 
-  return useQuery<UserProfile | undefined>({
+  return useQuery<UserProfile | null>({
     queryKey: ['profile'],
     queryFn: async () => {
-      if (!userId) return undefined;
+      if (!userId) return null;
       const user = await getLocalUser(userId);
-      return user ?? undefined;
+      return user ?? null;
     },
     enabled: Boolean(userId),
   });

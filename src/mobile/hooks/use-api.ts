@@ -248,7 +248,7 @@ export function useOnlineUserProfile() {
     queryKey: ['profile'],
     queryFn: async () => {
       const data = await apiClient<{ user: UserProfile }>('/api/users');
-      return data.user;
+      return data.user ?? null;
     },
   });
 }
