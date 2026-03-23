@@ -201,21 +201,82 @@ export function useOfflineGroups() {
       if (!userId) return [];
       const localGroups = await getLocalGroups(userId);
 
-      const items: GroupListItem[] = await Promise.all(
-        localGroups.map(async (g): Promise<GroupListItem> => {
-          const memberCount = await getGroupMemberCount(g.id);
-          const yourBalance = await computeUserBalance(g.id, userId);
-          return {
+      if (localGroups.length > 0) {
+        const items: GroupListItem[] = await Promise.all(
+          localGroups.map(async (g): Promise<GroupListItem> => {
+            const memberCount = await getGroupMemberCount(g.id);
+            const yourBalance = await computeUserBalance(g.id, userId);
+            return {
+              id: g.id,
+              name: g.name,
+              currency: g.currency,
+              memberCount,
+              yourBalance,
+            };
+          }),
+        );
+        return items;
+      }
+
+      // Fallback: fetch from server and seed local DB
+      try {
+        const { apiClient } = await import('../lib/api-client');
+        type Resp = {
+          groups: Array<{
+            id: string;
+            name: string;
+            currency: string;
+            description?: string;
+            created_by?: string;
+            is_archived?: boolean;
+            memberCount?: number;
+            member_count?: number;
+            yourBalance?: number;
+            your_balance?: number;
+            created_at?: string;
+            updated_at?: string;
+          }>;
+        };
+        const data = await apiClient<Resp>('/api/groups');
+        const serverGroups = data.groups ?? [];
+
+        if (serverGroups.length > 0) {
+          const database = getDb();
+          const now = new Date().toISOString();
+
+          await database.withTransactionAsync(async () => {
+            for (const g of serverGroups) {
+              await database.runAsync(
+                `INSERT OR REPLACE INTO local_groups (id, name, description, currency, created_by, avatar_url, is_archived, created_at, updated_at, _sync_status, _last_synced_at)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'synced', ?)`,
+                [
+                  g.id, g.name, g.description ?? null, g.currency ?? 'INR',
+                  g.created_by ?? userId, null, g.is_archived ? 1 : 0,
+                  g.created_at ?? now, g.updated_at ?? now, now,
+                ],
+              );
+              // Seed the current user as a member so getLocalGroups finds them
+              await database.runAsync(
+                `INSERT OR IGNORE INTO local_group_members (id, group_id, user_id, role, joined_at, is_active, _sync_status, _last_synced_at)
+                 VALUES (?, ?, ?, 'member', ?, 1, 'synced', ?)`,
+                [`${g.id}_${userId}`, g.id, userId, now, now],
+              );
+            }
+          });
+
+          return serverGroups.map((g): GroupListItem => ({
             id: g.id,
             name: g.name,
-            currency: g.currency,
-            memberCount,
-            yourBalance,
-          };
-        }),
-      );
+            currency: g.currency ?? 'INR',
+            memberCount: g.memberCount ?? g.member_count ?? 0,
+            yourBalance: g.yourBalance ?? g.your_balance ?? 0,
+          }));
+        }
+      } catch {
+        // Server fetch failed — return empty, will retry on next query
+      }
 
-      return items;
+      return [];
     },
     enabled: Boolean(userId),
   });
