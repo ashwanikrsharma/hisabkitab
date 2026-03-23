@@ -400,8 +400,41 @@ export function useOfflineUserProfile() {
     queryKey: ['profile'],
     queryFn: async () => {
       if (!userId) return null;
-      const user = await getLocalUser(userId);
-      return user ?? null;
+
+      // Try local DB first
+      const localUser = await getLocalUser(userId);
+      if (localUser) return localUser;
+
+      // Fallback: fetch from server and seed local DB
+      try {
+        const { apiClient } = await import('../lib/api-client');
+        const data = await apiClient<{ user: UserProfile }>('/api/users');
+        const serverUser = data.user;
+        if (serverUser) {
+          const database = getDb();
+          const now = new Date().toISOString();
+          await database.runAsync(
+            `INSERT OR REPLACE INTO local_users (id, name, phone, upi_id, default_currency, avatar_url, created_at, updated_at, _sync_status, _last_synced_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'synced', ?)`,
+            [
+              userId,
+              serverUser.name ?? '',
+              serverUser.phone ?? null,
+              serverUser.upi_id ?? null,
+              serverUser.default_currency ?? 'INR',
+              serverUser.avatar_url ?? null,
+              now,
+              now,
+              now,
+            ],
+          );
+          return serverUser;
+        }
+      } catch {
+        // Server fetch failed — return null, will retry on next query
+      }
+
+      return null;
     },
     enabled: Boolean(userId),
   });
