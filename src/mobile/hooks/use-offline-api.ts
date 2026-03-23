@@ -220,7 +220,7 @@ export function useOfflineGroups() {
 
       // Fallback: fetch from server and seed local DB
       try {
-        const { apiClient } = await import('../lib/api-client');
+
         type Resp = {
           groups: Array<{
             id: string;
@@ -633,7 +633,7 @@ export function useOfflineUserProfile() {
 
       // Fallback: fetch from server and seed local DB
       try {
-        const { apiClient } = await import('../lib/api-client');
+
         const data = await apiClient<{ user: UserProfile }>('/api/users');
         const serverUser = data.user;
         if (serverUser) {

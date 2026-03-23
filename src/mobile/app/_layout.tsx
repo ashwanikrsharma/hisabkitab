@@ -59,9 +59,11 @@ export default function RootLayout() {
     return () => cleanup?.();
   }, []);
 
-  // Trigger a full server sync whenever a new session is detected (login)
+  // On login: invalidate all cached queries so hooks re-fetch with the new session,
+  // then trigger a background sync to populate the local DB.
   useEffect(() => {
     if (session) {
+      queryClient.invalidateQueries();
       triggerSync().catch((err) =>
         console.warn('[layout] Post-login sync failed:', err),
       );
