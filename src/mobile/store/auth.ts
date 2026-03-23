@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { createClient, type Session } from '@supabase/supabase-js';
 import Constants from 'expo-constants';
 import 'react-native-url-polyfill/auto';
+import { SecureStoreAdapter } from '../lib/secure-store-adapter';
 
 // EXPO_PUBLIC_ vars are inlined at build time by Metro (Expo SDK 49+).
 // Fall back to Constants.expoConfig.extra for dev-client builds.
@@ -20,7 +21,14 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    storage: SecureStoreAdapter,
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: false, // not needed for mobile
+  },
+});
 
 type AuthState = {
   session: Session | null;
