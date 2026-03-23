@@ -116,24 +116,25 @@ describe('ProfileScreen', () => {
     expect(queryByText('Default Currency')).toBeNull();
   });
 
-  it('shows Save button when name is edited (dirty state)', async () => {
-    const { queryByText, getByText, getByPlaceholderText } = renderWithProviders(
+  it('shows Save button always, disabled until name is edited (dirty state)', async () => {
+    const { getByText, getByPlaceholderText } = renderWithProviders(
       <ProfileScreen />,
     );
     await waitFor(() => {
       expect(getByText('Profile')).toBeTruthy();
     });
 
-    // Save button should not be visible initially
-    expect(queryByText('Save Changes')).toBeNull();
+    // Save button should be visible but disabled initially
+    const saveButton = getByText('Save Changes');
+    expect(saveButton).toBeTruthy();
 
     // Edit the name using the placeholder to locate the input
     const nameInput = getByPlaceholderText('Your name');
     fireEvent.changeText(nameInput, 'New Name');
 
-    // Save button should now be visible
+    // Save button should still be visible (now enabled)
     await waitFor(() => {
-      expect(queryByText('Save Changes')).toBeTruthy();
+      expect(getByText('Save Changes')).toBeTruthy();
     });
   });
 

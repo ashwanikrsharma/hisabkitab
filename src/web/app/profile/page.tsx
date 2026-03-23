@@ -130,7 +130,7 @@ export default function ProfilePage() {
         </div>
       </header>
 
-      <main className="max-w-2xl mx-auto px-4 py-6 space-y-6">
+      <main className="max-w-2xl mx-auto px-4 py-6 space-y-6 flex flex-col min-h-[calc(100vh-64px)]">
         {/* Profile hero */}
         <section className="flex flex-col items-center gap-3 opacity-0 animate-fade-up">
           <div className={`w-20 h-20 rounded-full bg-gradient-to-br ${avatarColor(displayName)} flex items-center justify-center text-white text-2xl font-bold shadow-warm-lg`}>
@@ -168,8 +168,13 @@ export default function ProfilePage() {
 
               <button
                 type="submit"
+                data-testid="save-profile"
                 disabled={saving || !isDirty}
-                className="btn-primary w-full"
+                className={`btn-primary w-full transition-all ${
+                  !isDirty && !saving
+                    ? 'opacity-50 cursor-not-allowed'
+                    : ''
+                }`}
               >
                 {saving ? 'Saving...' : 'Save Changes'}
               </button>
@@ -178,7 +183,7 @@ export default function ProfilePage() {
         </section>
 
         {/* Sign out */}
-        <section className="opacity-0 animate-fade-up stagger-2">
+        <section className="opacity-0 animate-fade-up stagger-2 mt-auto pt-8">
           <div className="card p-6">
             <h2 className="text-sm font-display font-bold text-danger mb-2">Sign Out</h2>
             <p className="text-xs text-ink-secondary mb-4">
@@ -186,6 +191,7 @@ export default function ProfilePage() {
             </p>
             <button
               type="button"
+              data-testid="sign-out"
               onClick={handleSignOut}
               disabled={signingOut}
               className="w-full rounded-xl border-2 border-danger/20 bg-danger-light text-danger font-semibold text-sm py-3 px-4 hover:bg-danger/10 transition-colors disabled:opacity-50"

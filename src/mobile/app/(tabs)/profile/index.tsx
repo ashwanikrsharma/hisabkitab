@@ -133,22 +133,24 @@ export default function ProfileScreen() {
         </View>
 
         {/* Save */}
-        {dirty && (
-          <TouchableOpacity
-            style={[styles.saveButton, updateProfile.isPending && styles.saveButtonDisabled]}
-            onPress={handleSave}
-            disabled={updateProfile.isPending}
-          >
-            {updateProfile.isPending ? (
-              <ActivityIndicator color="#ffffff" />
-            ) : (
-              <Text style={styles.saveButtonText}>Save Changes</Text>
-            )}
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity
+          style={[styles.saveButton, (!dirty || updateProfile.isPending) && styles.saveButtonDisabled]}
+          onPress={handleSave}
+          disabled={!dirty || updateProfile.isPending}
+          data-testid="save-button"
+        >
+          {updateProfile.isPending ? (
+            <ActivityIndicator color="#ffffff" />
+          ) : (
+            <Text style={styles.saveButtonText}>Save Changes</Text>
+          )}
+        </TouchableOpacity>
+
+        {/* Spacer pushes Sign Out to the bottom */}
+        <View style={styles.spacer} />
 
         {/* Sign Out */}
-        <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+        <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut} data-testid="sign-out-button">
           <Text style={styles.signOutButtonText}>Sign Out</Text>
         </TouchableOpacity>
       </ScrollView>
@@ -172,6 +174,7 @@ const createStyles = (colors: ColorTokens) => StyleSheet.create({
     backgroundColor: colors.bg,
   },
   content: {
+    flexGrow: 1,
     padding: 20,
     paddingTop: 60,
     paddingBottom: 48,
@@ -263,6 +266,10 @@ const createStyles = (colors: ColorTokens) => StyleSheet.create({
     color: colors.text,
     fontSize: 16,
     fontWeight: '700',
+  },
+  spacer: {
+    flexGrow: 1,
+    minHeight: 32,
   },
   signOutButton: {
     borderRadius: RADIUS.lg,
