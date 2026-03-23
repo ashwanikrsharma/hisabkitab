@@ -1,24 +1,27 @@
 # HisabKitab — Product & Technical Specification
 
-> A simplified group expense splitter for the Indian market.
+> AI-first group expense splitter for the Indian market.
 > "Hisab" = account/calculation, "Kitab" = book — Your expense book.
+
+**Last updated:** 2026-03-23
+**Status:** MVP shipped, iterating
 
 ---
 
 ## 1. Product Vision
 
-HisabKitab is a lightweight expense-splitting app for friend groups, trips, roommates, and events. Unlike Splitwise, it optimizes for **zero friction**: users can add expenses via a simple mobile UI. One non-technical admin manages the backend via a simple dashboard.
+HisabKitab is a lightweight expense-splitting app for friend groups, trips, roommates, and events. Unlike Splitwise, it optimizes for **zero friction**: users can add expenses via a simple mobile UI or web dashboard. Built for India first — INR formatting, UPI-ready settlements, familiar patterns from GPay/PhonePe.
 
 ---
 
 ## 2. Target Users & Platforms
 
-| Platform         | Priority |
-|------------------|----------|
-| Mobile Web       | P0 — PWA, works in any browser |
-| Android App      | P1 — via React Native / Expo |
-| iOS App          | P1 — via React Native / Expo |
-| WhatsApp Bot     | P2 — expense entry via WA |
+| Platform | Priority | Status |
+|----------|----------|--------|
+| Web App (Next.js) | P0 | **SHIPPED** — hisabkitab-five.vercel.app |
+| Android App (Expo) | P1 | **SHIPPED** — local builds, APK available |
+| iOS App (Expo) | P1 | **SHIPPED** — simulator builds working |
+| WhatsApp Bot | P2 | Webhook endpoint exists, not fully wired |
 
 ---
 
@@ -30,304 +33,352 @@ HisabKitab is a lightweight expense-splitting app for friend groups, trips, room
 
 ---
 
-## 4. Feature Spec
+## 4. Feature Spec — Implemented
 
-### 4.1 Groups
-- Create a named group (e.g., "Goa Trip 2026", "Flat Expenses")
-- Invite members via link or phone number
-- Group currency setting (default INR)
-- Group status: Active / Archived
+### 4.1 Authentication
+- **Google OAuth** via Supabase Auth (web + mobile)
+- **Test account** for demo (`test@hisabkitab.app` / `test1234`)
+- **Cookie-based sessions** for web (Supabase SSR)
+- **Bearer token auth** for mobile (stored in Expo Secure Store)
+- **Middleware** redirects unauthenticated users to login
+- *Not implemented: Phone OTP, guest mode*
 
-### 4.2 Members
-- Join via invite link (no forced sign-up — nickname + phone optional)
-- Optional sign-up with Google or phone OTP
-- Guest mode: name only, no account needed
+### 4.2 Groups
+- Create named group with currency (INR, USD, EUR, GBP, SGD, AED)
+- Add members via user search (by name or phone)
+- View all groups with member count
+- Group detail with members, expenses, balances, settlement history
+- Archive group (soft delete)
+- Rename group
+- Admin role for group creator
 
-### 4.3 Expenses
-- Add expense: amount, description, who paid, split among whom
-- Split types:
-  - Equal (default)
-  - Custom amounts
-  - Percentages
-- Categories: Food, Transport, Accommodation, Entertainment, Other
-- Attach photo of receipt (optional)
-- Edit / Delete expense (by creator or admin)
+### 4.3 Members
+- Search and add members to groups
+- View member list with avatars and names
+- Admin vs member roles
+- Active/inactive status tracking
+
+### 4.4 Expenses
+- **Group expenses**: Add expense within a group, auto-split among members
+- **Direct expenses**: Add expense between two friends (no group required)
+- **Split types**: Equal (default), Exact amounts, Percentage
+- **Categories**: Food, Transport, Accommodation, Entertainment, Utilities, Shopping, Health, Travel, Groceries, Other
+- **Soft delete** expenses (only by creator)
+- **Pagination** support for expense lists
+- *Not implemented: Receipt photo upload, AI-powered expense parsing, edit expense*
 
 ### 4.5 Balances & Settlements
-- Per-person balance within a group: who owes whom and how much
-- Simplified debt (minimize number of transactions)
-- Mark settlement: "Rahul paid Priya ₹400 via UPI"
-- Settlement history
-- Activity logged on settlement (visible to all group members)
+- Per-member balance within a group (who owes whom, how much)
+- **Simplified debt minimization** — minimize number of transactions
+- Direct (friend-to-friend) bilateral balances across all groups
+- **Record settlement** with payment method (UPI, Cash, Bank)
+- **UPI transaction ID** tracking
+- **Settlement status**: Pending, Confirmed, Disputed
+- Settlement history with timestamps
+- Mark expense splits as settled upon settlement
 
-### 4.6 Admin Dashboard (for the 1 non-tech admin)
-- View all groups
-- Manually fix any data issues
-- User management (remove spammer, merge duplicate users)
-- Simple analytics: active groups, total expenses, MAU
-
-### 4.7 Recent Activity Feed
-- Chronological activity log across all groups the user belongs to
-- Activity types:
-  - Expense added (amount, description, who paid)
-  - Expense deleted
-  - Settlement recorded (who paid whom, amount)
-  - Member joined a group
-  - Group created
-- Activities are group-scoped: all group members see the same activity
+### 4.6 Activity Feed
+- Chronological activity log across all groups
+- **Activity types**: expense_added, expense_deleted, settlement_created, member_joined, group_created, group_renamed, group_archived
 - Activities grouped by day (Today, Yesterday, weekday, date)
 - Each activity links to the relevant group detail page
+- Metadata stored as JSONB for rich display
+
+### 4.7 User Profile
+- Edit name, UPI ID, default currency
+- Currency preference (INR, USD, EUR, GBP, SGD, AED)
+- Dark/light theme toggle (mobile)
+- Sign out with redirect to login
+
+### 4.8 Android App Download (Web)
+- "Get Android App" badge on landing page and dashboard
+- QR code modal for APK download link
+- Dedicated `/mobile` page with standalone QR code + download button
+- Uses `@radix-ui/react-dialog` for accessible modal
+
+### 4.9 Web Landing Page
+- Hero section: "Split expenses, not friendships"
+- Feature cards: AI-Powered Parsing, Smart Settlements, Built for Groups
+- "How it works" steps: Create group → Add expenses → Settle up
+- "Built for India" callout with "Every paisa, accounted for"
+- "Get Android App" badge in navigation
+- Redirects authenticated users to dashboard
+
+### 4.10 AI Agent Observability
+- `agent_metrics` table logs every Claude API call
+- Fields: agent_name, prompt_version, input_tokens, output_tokens, latency_ms, success
+- `analytics_daily` table for aggregated metrics
+- Admin audit log for data changes
 
 ---
 
 ## 5. User Flows
 
-### Primary Flow: Add an Expense
+### Add Group Expense
 ```
-Open app → Select Group → Tap "+"
-→ Fill form → Confirm → Expense saved → Balances updated
+Open app → Select Group → Tap "+ Add Expense"
+→ Fill (description, amount, category, split type) → Submit → Balances updated
+```
+
+### Add Direct Expense
+```
+Dashboard → "+" FAB → New Expense → Search friend → Fill form → Submit
 ```
 
 ### Settlement Flow
 ```
-Home → "You owe Priya ₹850" → Tap "Settle" →
-Mark paid (UPI/Cash/etc.) → Activity logged for group
+Group detail → "You owe Priya ₹850" → Tap "Settle"
+→ Enter amount, method (UPI/Cash), note → Record → Activity logged
 ```
 
 ### New Group Flow
 ```
-"+" → Name group → Share invite link → Members join → Add expenses
+Groups tab → "Create your first group" → Name + currency → Create → Add members → Add expenses
+```
+
+### Add Member Flow
+```
+Group detail → "Add Member" button → Search by name/phone → Tap user → Added
 ```
 
 ---
 
 ## 6. Non-Functional Requirements
 
-| Requirement       | Target                              |
-|-------------------|-------------------------------------|
-| Load time (mobile)| < 2 seconds on 4G                   |
-| Offline support   | View balances offline (PWA cache)   |
-| Availability      | 99.5% uptime                        |
-| Data retention    | Groups archived after 12mo inactivity |
-| Auth              | Phone OTP + Google OAuth            |
-| Scale (initial)   | Up to 10,000 users, 100 groups/day  |
+| Requirement | Target | Status |
+|-------------|--------|--------|
+| Load time (mobile) | < 2 seconds on 4G | Achieved |
+| Offline support | PWA cache for read | Not implemented |
+| Availability | 99.5% uptime | Vercel SLA |
+| Data retention | Groups archived after 12mo inactivity | Schema supports, cron not set |
+| Auth | Google OAuth | Implemented |
+| Scale (initial) | Up to 10,000 users | Supabase free tier |
 
 ---
 
 ## 7. Technical Architecture
 
-### 7.1 Architecture Philosophy: Low-Code Backend
-
-Since one non-technical person manages this, the architecture must be:
-1. **Minimal operational overhead** — managed services only
-2. **One codebase for all platforms** — React Native + Expo (iOS, Android, Web)
-3. **Serverless** — no servers to manage
+### 7.1 Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                        CLIENTS                               │
-│   React Native (Expo) App  │  PWA (Mobile Web)  │  WA Bot   │
-└──────────────┬──────────────┴────────────────────┴──────────┘
-               │ HTTPS
+│   Next.js Web App  │  Expo Mobile (iOS/Android)  │  WA Bot  │
+└──────────────┬──────────────┴───────────────────┴──────────┘
+               │ HTTPS (Cookie auth / Bearer token)
 ┌──────────────▼──────────────────────────────────────────────┐
-│                     API LAYER                                │
-│          Next.js API Routes (or Hono on Cloudflare)          │
+│                   API LAYER (Next.js 14)                      │
+│   /api/expenses  /api/groups  /api/users  /api/settlements   │
+│   /api/activity  /api/friends  /api/webhooks                 │
 │                                                              │
-│   /expenses  /groups  /users  /settlements  /webhooks       │
+│   requireAuth → Zod validate → @hisabkitab/services → JSON  │
+└──────────────┬──────────────────────────────────────────────┘
+               │
+┌──────────────▼──────────────────────────────────────────────┐
+│              @hisabkitab/services (Data Layer)                │
+│   queries/groups  queries/expenses  queries/balances         │
+│   queries/settlements  queries/activity  queries/users       │
 └──────────────┬──────────────────────────────────────────────┘
                │
 ┌──────────────▼──────────────────────────────────────────────┐
 │                       Supabase                               │
-│         Database  +  Auth  +  Realtime  +  Storage           │
+│   Postgres (RLS)  +  Auth  +  Realtime  +  Storage          │
 └──────────────────────────────────────────────────────────────┘
 ```
 
-### 7.2 Tech Stack Decisions
+### 7.2 Tech Stack (Implemented)
 
-#### Frontend — React Native + Expo
-- **Why**: Single codebase for iOS, Android, and Web (PWA)
-- **Expo Router**: File-based routing, works on all 3 platforms
-- **NativeWind**: Tailwind CSS for React Native (consistent styling)
-- **React Query / TanStack Query**: Data fetching, caching, optimistic updates
-- **Zustand**: Lightweight global state management
-- **expo-notifications**: Push notifications on iOS/Android
+| Layer | Technology | Version |
+|-------|-----------|---------|
+| **Build** | Turborepo | 2.3.0 |
+| **Runtime** | Node.js | >= 20.x |
+| **Language** | TypeScript | 5.4.5 |
+| **Web Framework** | Next.js (App Router) | 14.2.15 |
+| **Mobile Framework** | React Native + Expo | 0.76.9 / 52.0.0 |
+| **Mobile Navigation** | Expo Router | 4.0.0 |
+| **Mobile Styling** | NativeWind | 4.0.1 |
+| **Web Styling** | TailwindCSS | 3.4.19 |
+| **UI Components** | Radix UI | Various |
+| **State (Mobile)** | Zustand | 4.5.2 |
+| **Data Fetching** | React Query | 5.40.0 |
+| **Validation** | Zod | 3.23.8 |
+| **Database** | Supabase (Postgres) | 2.43.5 |
+| **Auth** | Supabase Auth (Google OAuth) | — |
+| **Web Hosting** | Vercel | — |
+| **Mobile Builds** | Expo EAS + Local (Xcode/Android Studio) | — |
+| **Testing** | Vitest + Playwright | 3.2.4 / 1.58.2 |
+| **Package Manager** | npm | 10.8.2 |
 
-#### Backend — Next.js on Vercel (or Hono on Cloudflare Workers)
-**Option A: Next.js (Recommended for simplicity)**
-- API Routes as backend (serverless functions)
-- Same repo as web frontend
-- Deploy to Vercel (free tier generous, zero-config)
+### 7.3 Monorepo Structure
 
-**Option B: Hono on Cloudflare Workers (Recommended for performance + cost)**
-- Ultra-fast edge runtime
-- Extremely cheap ($0 for most indie apps)
-- Better for latency-sensitive mobile apps
-
-#### Database — Supabase
-- **Why**: Postgres + built-in Auth + Realtime + File Storage + Admin UI
-- The non-tech admin can use Supabase Studio (table editor) to view/fix data
-- Row-Level Security (RLS) for data isolation between groups
-- Realtime subscriptions: balance updates push to all group members instantly
-- Storage: receipt images
-
-#### Activity Feed
-- **In-app**: Group-scoped activity log stored in `activity_log` table
-- **Push (iOS/Android, P1)**: Expo Push Notifications (free, handles both platforms)
-- **WhatsApp (P2)**: Meta Cloud API or Twilio WhatsApp Sandbox
-
-#### Admin Dashboard
-- **Supabase Studio**: Built-in table editor — the non-tech admin can use this directly
-- **Custom dashboard (optional)**: Retool or a simple `/admin` Next.js page with a password
-
----
-
-## 8. Database Schema
-
-```sql
--- Users
-users (
-  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  phone       text UNIQUE,
-  email       text UNIQUE,
-  name        text NOT NULL,
-  avatar_url  text,
-  created_at  timestamptz DEFAULT now()
-)
-
--- Groups
-groups (
-  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  name        text NOT NULL,
-  currency    text DEFAULT 'INR',
-  invite_code text UNIQUE DEFAULT nanoid(),
-  created_by  uuid REFERENCES users(id),
-  archived_at timestamptz,
-  created_at  timestamptz DEFAULT now()
-)
-
--- Group Members
-group_members (
-  group_id    uuid REFERENCES groups(id),
-  user_id     uuid REFERENCES users(id),
-  nickname    text,                      -- display name within group
-  is_admin    boolean DEFAULT false,
-  joined_at   timestamptz DEFAULT now(),
-  PRIMARY KEY (group_id, user_id)
-)
-
--- Expenses
-expenses (
-  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  group_id    uuid REFERENCES groups(id),
-  paid_by     uuid REFERENCES users(id),
-  amount      numeric(12,2) NOT NULL,
-  description text NOT NULL,
-  category    text DEFAULT 'other',
-  receipt_url text,
-  created_by  uuid REFERENCES users(id),
-  created_at  timestamptz DEFAULT now(),
-  deleted_at  timestamptz
-)
-
--- Expense Splits (who owes what for each expense)
-expense_splits (
-  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  expense_id  uuid REFERENCES expenses(id),
-  user_id     uuid REFERENCES users(id),
-  amount      numeric(12,2) NOT NULL     -- amount this user owes for this expense
-)
-
--- Settlements
-settlements (
-  id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  group_id    uuid REFERENCES groups(id),
-  paid_by     uuid REFERENCES users(id),
-  paid_to     uuid REFERENCES users(id),
-  amount      numeric(12,2) NOT NULL,
-  method      text,                      -- 'upi', 'cash', 'bank'
-  note        text,
-  created_at  timestamptz DEFAULT now()
-)
-```
-
----
-
-## 9. Hosting & Infrastructure
-
-### Recommended Stack (Minimal Cost, Zero Ops)
-
-| Component        | Service                  | Cost (Starter)         |
-|------------------|--------------------------|------------------------|
-| Web/API hosting  | Vercel                   | Free (Hobby tier)      |
-| Database + Auth  | Supabase                 | Free (up to 500MB)     |
-| File Storage     | Supabase Storage         | Free (1GB)             |
-| Push Notifs      | Expo Push                | Free                   |
-| App Distribution | Expo EAS                 | Free (limited builds)  |
-| WhatsApp Bot     | Meta Cloud API           | Free (1000 msgs/mo)    |
-| Domain           | Namecheap / Cloudflare   | ~$10/yr                |
-| Monitoring       | Sentry (free tier)       | Free                   |
-
-**Total monthly cost at 0-5k users: ~$0-10/month**
-
-### When to upgrade (at scale)
-- Supabase Pro ($25/mo) at 500MB DB or 50k users
-- Vercel Pro ($20/mo) if bandwidth exceeds free tier
-- Cloudflare Workers (alternative to Vercel, $5/mo flat)
-
----
-
-## 10. Development Approach
-
-### Recommended: Vibe Coding with Claude Code
-Since AI bots handle majority of development:
-
-1. **This spec** → Claude Code generates the entire project scaffold
-2. **Supabase migrations** → AI writes SQL, applies via Supabase CLI
-3. **API routes** → Claude generates CRUD endpoints
-4. **UI components** → Claude generates screens from wireframe descriptions
-5. **Testing** → Claude writes Playwright E2E tests
-
-### Folder Structure
 ```
 hisabkitab/
-├── apps/
-│   ├── mobile/          # React Native + Expo (iOS/Android/Web)
-│   └── web/             # Next.js web app (or combined with mobile via Expo Router)
-├── packages/
-│   ├── db/              # Supabase client, types, queries
-│   └── shared/          # Shared types, utils, constants
-├── supabase/
-│   └── migrations/      # SQL migrations
-└── SPEC.md              # This file
+├── src/
+│   ├── web/              # Next.js 14 (API + web UI)
+│   ├── mobile/           # Expo React Native (iOS + Android)
+│   ├── services/         # @hisabkitab/services — DB queries, types, client
+│   ├── shared/           # @hisabkitab/shared — types, constants, utils
+│   └── supabase/         # SQL migrations (6 files, immutable)
+├── tech-design/          # Architecture decision records
+├── specification/        # This file
+├── docs/                 # HTML reports
+├── .claude/              # AI agent configuration
+├── turbo.json            # Build orchestration
+├── vercel.json           # Deployment config
+└── package.json          # Workspaces: ["src/*"]
 ```
-
-### Monorepo Tool: Turborepo
-- Manages multiple packages in one repo
-- Shared TypeScript types between frontend and backend
-- Parallel builds
 
 ---
 
-## 11. MVP Scope (Ship in 4-6 Weeks)
+## 8. Database Schema (Implemented)
 
-### Week 1-2: Foundation
-- [ ] Supabase setup (auth, schema, RLS policies)
-- [ ] Expo app scaffold with Expo Router
-- [ ] Group creation + invite link
-- [ ] Expense form
-- [ ] Balance calculation logic
+### Core Tables (RLS enabled on all)
 
-### Week 3-4: Core Features
-- [ ] Settlement flow
-- [ ] Direct (friend-to-friend) expenses
-- [ ] Receipt photo upload
-- [ ] Push notifications
+```sql
+users (
+  id           uuid PK, phone text, name text, avatar_url text,
+  upi_id text, default_currency text DEFAULT 'INR',
+  created_at timestamptz, updated_at timestamptz
+)
 
-### Week 5-6: Polish & Ship
-- [ ] PWA configuration for mobile web
-- [ ] Admin dashboard (/admin page + Supabase Studio)
-- [ ] Expo EAS build (iOS TestFlight + Android Play Store internal)
-- [ ] WhatsApp bot (basic version)
+groups (
+  id           uuid PK, name text, description text, currency text DEFAULT 'INR',
+  created_by   uuid FK→users, avatar_url text, is_archived boolean DEFAULT false,
+  created_at timestamptz, updated_at timestamptz
+)
+
+group_members (
+  id           uuid PK, group_id uuid FK→groups, user_id uuid FK→users,
+  role text ('admin'|'member'), joined_at timestamptz, is_active boolean DEFAULT true
+)
+
+expenses (
+  id           uuid PK, group_id uuid FK→groups (nullable for direct),
+  description text, amount numeric(12,2), currency text, paid_by uuid FK→users,
+  category text, split_type text ('equal'|'exact'|'percentage'),
+  receipt_url text, notes text, created_by uuid FK→users,
+  created_at timestamptz, updated_at timestamptz, deleted_at timestamptz
+)
+
+expense_splits (
+  id           uuid PK, expense_id uuid FK→expenses, user_id uuid FK→users,
+  amount numeric(12,2), percentage numeric, settled boolean DEFAULT false,
+  created_at timestamptz
+)
+
+settlements (
+  id           uuid PK, group_id uuid FK→groups (nullable for direct),
+  payer_id uuid FK→users, payee_id uuid FK→users, amount numeric(12,2),
+  currency text, status text ('pending'|'confirmed'|'disputed'),
+  note text, upi_transaction_id text, payment_method text,
+  created_at timestamptz, updated_at timestamptz
+)
+
+activity_log (
+  id           uuid PK, group_id uuid FK→groups (nullable),
+  actor_id uuid FK→users, type text, title text, description text,
+  metadata jsonb, created_at timestamptz
+)
+
+agent_metrics (
+  id           uuid PK, agent_name text, prompt_version text,
+  input_tokens int, output_tokens int, latency_ms int,
+  success boolean, error_message text, group_id uuid, user_id uuid,
+  created_at timestamptz
+)
+
+analytics_daily (
+  id uuid PK, date date, group_id uuid, new_expenses int,
+  total_expense_amount numeric, ai_calls int, ai_tokens_used int,
+  active_users int, created_at timestamptz
+)
+
+admin_audit_log (
+  id uuid PK, actor_id uuid, action text, table_name text,
+  record_id uuid, old_data jsonb, new_data jsonb, ip_address text,
+  created_at timestamptz
+)
+```
+
+---
+
+## 9. API Routes (Implemented)
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| GET | `/api/groups` | List user's groups with balances |
+| POST | `/api/groups` | Create group |
+| GET | `/api/groups/[id]` | Group detail with members |
+| PATCH | `/api/groups/[id]` | Rename or archive group |
+| GET | `/api/groups/[id]/members` | List group members |
+| POST | `/api/groups/[id]/members` | Add member |
+| GET | `/api/groups/[id]/balances` | Compute simplified debts |
+| GET | `/api/expenses` | List expenses (group or direct) |
+| POST | `/api/expenses` | Create expense with splits |
+| DELETE | `/api/expenses/[id]` | Soft-delete expense |
+| GET | `/api/settlements` | List settlements |
+| POST | `/api/settlements` | Record settlement |
+| PATCH | `/api/settlements/[id]` | Update settlement status |
+| GET | `/api/activity` | Activity feed |
+| GET | `/api/users` | Get current user profile |
+| PATCH | `/api/users` | Update user profile |
+| GET | `/api/users/search` | Search users by name/phone |
+| GET | `/api/friends/[userId]` | Friend detail + balance |
+| GET/POST | `/api/webhooks/whatsapp` | WhatsApp webhook |
+
+All routes follow: `requireAuth` → Zod validation → `@hisabkitab/services` → sanitized JSON response.
+
+---
+
+## 10. Hosting & Infrastructure
+
+| Component | Service | Status |
+|-----------|---------|--------|
+| Web/API | Vercel (Hobby) | **Live** — hisabkitab-five.vercel.app |
+| Database + Auth | Supabase (Free) | **Live** |
+| Android Builds | Local + Expo EAS | **Working** |
+| iOS Builds | Local (Xcode) | **Working** (simulator) |
+| WhatsApp Bot | Meta Cloud API | Webhook endpoint exists |
+| Monitoring | Agent metrics table | **Working** |
+
+---
+
+## 11. MVP Status
+
+### Done
+- [x] Supabase setup (auth, schema, RLS policies) — 6 migrations
+- [x] Next.js web app with 19 API routes — deployed on Vercel
+- [x] Expo mobile app with tab navigation — builds on Android + iOS
+- [x] Google OAuth authentication (web + mobile)
+- [x] Group CRUD (create, rename, archive, list, detail)
+- [x] Member management (search, add, list with roles)
+- [x] Expense creation with equal/exact/percentage splits
+- [x] Direct (friend-to-friend) expenses
+- [x] Balance calculation with simplified debt minimization
+- [x] Settlement flow with UPI/Cash/Bank methods
+- [x] Activity feed with day grouping
+- [x] User profile (name, UPI ID, currency, theme)
+- [x] Android app download page with QR code (/mobile)
+- [x] Web landing page with features and CTAs
+- [x] Dark/light theme toggle (mobile)
+- [x] Multi-currency support (INR, USD, EUR, GBP, SGD, AED)
+- [x] 27 unit/integration tests (Vitest)
+- [x] E2E login tests (Playwright)
+- [x] AI agent observability (agent_metrics table)
+
+### Not Yet Implemented
+- [ ] Receipt photo upload (Supabase Storage ready)
+- [ ] AI-powered expense parsing (Claude API integration planned)
+- [ ] Push notifications (expo-notifications configured, not wired)
+- [ ] Phone OTP authentication
+- [ ] Guest mode (no sign-up required)
+- [ ] Admin dashboard (/admin page)
+- [ ] WhatsApp bot (webhook exists, handler not complete)
+- [ ] Offline support / PWA caching
+- [ ] Realtime subscriptions (Supabase Realtime available)
+- [ ] Invite links for groups
+- [ ] iOS TestFlight / Android Play Store distribution
+- [ ] Edit expense (only delete implemented)
 
 ---
 
@@ -335,10 +386,15 @@ hisabkitab/
 
 | Decision | Choice | Reason |
 |----------|--------|--------|
-| One codebase or separate | One (Expo) | Admin is non-technical, fewer repos |
-| SQL or NoSQL | PostgreSQL (Supabase) | Relational data fits expense splits perfectly |
-| REST or GraphQL | REST (simple CRUD) | Simpler, AI can generate easily |
-| Native or Web-first | Expo (both) | Single codebase = less maintenance |
-| Auth method | OTP + Google | No password resets to manage |
-| Currency | INR default, multi-currency later | Target market is India |
-| Offline support | PWA cache for read, queue writes | Mobile users on flaky connections |
+| Monorepo structure | `src/` with Turborepo | Single repo, shared types, parallel builds |
+| Web + API together | Next.js 14 App Router | API routes co-located with web UI |
+| Mobile framework | Expo + React Native | One codebase for iOS + Android |
+| Database | Supabase (Postgres + RLS) | Built-in auth, realtime, admin UI |
+| Auth method | Google OAuth | No password resets, fast onboarding |
+| Package naming | `@hisabkitab/services` | Clear data layer separation |
+| Currency | INR default, multi-currency | India-first, expandable |
+| Split types | Equal/Exact/Percentage | Covers 99% of real-world splits |
+| Soft deletes | `deleted_at` timestamp | Audit trail, undo capability |
+| Agent workflow | Orchestrator + specialists | Consistent, traceable changes |
+| Testing | Vitest + Playwright | Fast unit tests + real E2E flows |
+| Deployment | Vercel (web) + Local (mobile) | Zero-config, fast iterations |
