@@ -4,6 +4,7 @@ import { requireAuth } from '@/lib/auth';
 import { getServerClient, createActivity } from '@hisabkitab/services';
 
 const ALLOWED_TABLES = [
+  'users',
   'groups',
   'group_members',
   'expenses',
