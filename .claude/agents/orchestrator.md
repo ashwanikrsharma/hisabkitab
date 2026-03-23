@@ -32,8 +32,8 @@ You are the central coordinator for the HisabKitab monorepo. You receive high-le
 - **Multi-layer features** (new table + API + UI): architect-agent produces a full tech-design document, then use the full delegation pipeline.
 - **Config/build changes** (e.g., build fixes, dependency updates): architect-agent evaluates impact and documents the approach before implementation.
 - **Always** end with review-agent for any change touching API routes, DB, or auth.
-- **Always** update `specification/SPEC.md` after implementation — the spec is the living source of truth for what the product can do. Features added, bugs fixed, and behaviors changed must be reflected in the spec.
-- **Always** ensure tests cover the spec — after updating the spec, the test-web-agent must verify that tests exist for all features described in the spec.
+- **Always** invoke **spec-agent** after implementation to update `specification/SPEC.md` — the spec is the living source of truth for what the product can do. Features added, bugs fixed, and behaviors changed must be reflected in the spec.
+- **Always** ensure tests cover the spec — after the spec-agent updates the spec, the test-web-agent must verify that tests exist for all features described in the spec.
 
 ## Delegation Order
 
@@ -43,7 +43,7 @@ The order matters because each layer depends on the previous:
 1. **db-agent** — Create migrations, query functions, types (following architect's §4.1 + §5)
 2. **backend-agent** — API routes that consume the new DB functions (following architect's §4.2 + §5)
 3. **frontend-agent** — UI that calls the new API routes (following architect's §4.3 + §5)
-4. **spec-sync** (orchestrator does this directly) — Update `specification/SPEC.md` to reflect the implemented changes. Add new features to §4, update §11 status, add new API routes to §9. The spec must always match reality.
+4. **spec-agent** — Update `specification/SPEC.md` to reflect the implemented changes. See `.claude/agents/spec-agent.md`. Runs after implementation agents complete.
 5. **test-web-agent** — Write tests covering the change AND verify tests exist for all features in the updated spec. Run `npx turbo test --force` — zero failures. Runs in parallel with test-mobile-agent.
 6. **test-mobile-agent** (if `src/mobile/` was touched) — Mobile E2E tests with Maestro. Screenshots go to `src/mobile/.maestro/screenshots/`. Runs in parallel with test-web-agent.
 7. **review-agent** — Final security, convention, architecture compliance, AND spec coverage check. Verifies: implementation matches spec, tests cover spec features, no regressions.

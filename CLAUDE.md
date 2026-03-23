@@ -235,40 +235,6 @@ await logAgentMetric({
 
 ## Orchestrator Agent — `/manager` (MANDATORY)
 
-**ALWAYS use the orchestrator agent (`/manager`) for ALL tasks.** This is not optional. Every task — whether it touches one file or twenty — must go through the orchestrator to ensure consistency, coordination, and quality. The orchestrator decides which specialist agents are needed and manages the workflow.
+**ALWAYS use the orchestrator agent (`/manager`) for ALL tasks.** Every task — regardless of size — must go through the orchestrator. It decides which specialist agents are needed and manages the workflow.
 
-Invoke it via the `/manager` slash command (defined in `.claude/commands/manager.md`). The orchestrator is defined in `.claude/agents/orchestrator.md`.
-
-### When to use the orchestrator
-- **ALWAYS** — for every task, regardless of size or scope
-- The orchestrator ALWAYS invokes the architect-agent first — even for small changes. The architect produces a lightweight or full design depending on scope. No change bypasses the architect.
-
-### Parallel execution — MANDATORY
-The orchestrator **MUST run independent agents in parallel** to maximize speed and efficiency:
-- **db-agent + frontend-agent** can run in parallel when their work is independent (e.g., migration + UI scaffold)
-- **test-web-agent + test-mobile-agent + review-agent** MUST always run in parallel after implementation is complete
-- **backend-agent + frontend-agent** can run in parallel when the API contract is defined upfront by the architect-agent
-- Only serialize agents when there is a true data dependency (e.g., backend-agent needs db-agent's types)
-
-### Delegation pipeline
-The orchestrator decomposes work and delegates in order (parallelizing where possible):
-0. **architect-agent** — produces a tech-design document (`tech-design/`) with design decisions, file manifest, and acceptance criteria. All downstream agents MUST follow the architect's design. Defines API contracts so downstream agents can run in parallel.
-1. **db-agent** — migrations, query functions, types (`src/services/`, `src/supabase/migrations/`)
-2. **backend-agent** — API routes (`src/web/app/api/`) — can run in parallel with frontend-agent when API contract is defined
-3. **frontend-agent** — UI pages and components (`src/web/app/`) — can run in parallel with backend-agent
-4. **test-web-agent** — Web E2E tests (Playwright) and unit tests (Vitest) — runs in parallel with review-agent and test-mobile-agent
-5. **test-mobile-agent** (if `src/mobile/` touched) — Mobile E2E tests with Maestro, screenshots to `src/mobile/.maestro/screenshots/` — runs in parallel with test-web-agent and review-agent
-6. **review-agent** — security, convention, AND architecture compliance check (read-only) — runs in parallel with test agents
-7. **web-build-deploy-agent** — builds and deploys `src/web/` to Vercel via CLI (never via git push). Defaults to preview; production only when explicitly requested. Runs in parallel with mobile-build-deploy-agent when both are needed.
-8. **mobile-build-deploy-agent** (optional) — builds Android APK locally if `src/mobile/` was touched. Runs in parallel with web-build-deploy-agent.
-
-### Coordination rules
-- The architect-agent's design doc is the **single source of truth** — all agents read it before starting work.
-- Agents must not duplicate work — the orchestrator assigns clear ownership boundaries.
-- If an agent encounters a conflict with another agent's output, it reports back to the orchestrator rather than overwriting.
-- The orchestrator verifies all agents' outputs are consistent before considering the task complete.
-
-### Tech design documents
-Every change gets a design document in `tech-design/` before implementation begins — lightweight for small fixes, full design for features. See `tech-design/architecture-principles.md` for the foundational rules that all agents must follow.
-
-See `.claude/agents/` for each agent's full specification.
+Invoke via `/manager`. Defined in `.claude/agents/orchestrator.md`. See `.claude/agents/` for all agent specs.

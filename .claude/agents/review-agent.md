@@ -110,6 +110,6 @@ All security checks and conventions verified.
 - [ ] Regression tests exist for all new code and bug fixes
 - [ ] No tests were deleted or skipped to pass the suite
 - [ ] Test-web-agent reported all tests passing
-- [ ] `specification/SPEC.md` updated to reflect the implemented changes
+- [ ] `specification/SPEC.md` updated to reflect the implemented changes (spec-agent responsibility)
 - [ ] Tests cover the features described in the spec (spot-check: pick 3 spec features, verify tests exist)
 - [ ] Clear PASS/FAIL verdict with actionable issue descriptions

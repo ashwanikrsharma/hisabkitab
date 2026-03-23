@@ -420,7 +420,7 @@
 ├── <span class="fn">specification/</span>        <span class="cmt"># SPEC.md (living product spec)</span>
 ├── <span class="fn">tech-design/</span>          <span class="cmt"># Architecture decision records</span>
 ├── <span class="fn">docs/</span>                 <span class="cmt"># HTML reports (this file)</span>
-├── <span class="fn">.claude/</span>              <span class="cmt"># 10 agent specs, 3 rules, 1 command</span>
+├── <span class="fn">.claude/</span>              <span class="cmt"># 11 agent specs, 3 rules, 1 command</span>
 └── <span class="fn">package.json</span>          <span class="cmt"># workspaces: ["src/*"]</span></code></pre>
 
     <h3>Workspaces</h3>
@@ -470,7 +470,7 @@
       <div class="pipeline-arrow">&#8595;</div>
       <div class="pipeline-step">
         <span class="step-num">4</span>
-        <div><span class="step-label">spec-sync</span><br><span class="step-desc">Update SPEC.md (orchestrator does directly)</span></div>
+        <div><span class="step-label">spec-agent</span><br><span class="step-desc">Update SPEC.md to reflect implemented changes</span></div>
       </div>
       <div class="pipeline-arrow">&#8595;</div>
       <div class="parallel-group">
@@ -862,7 +862,7 @@
         <li>Forgetting <code>requireAuth</code> on API routes</li>
         <li>Writing raw Supabase queries outside <code>src/services/</code></li>
         <li>Committing <code>.env.local</code> or credentials</li>
-        <li>Skipping spec-sync &mdash; SPEC.md must match reality</li>
+        <li>Skipping spec-agent &mdash; SPEC.md must match reality</li>
         <li>Deploying with failing tests &mdash; regression gates are mandatory</li>
         <li>Verifying only web &mdash; all three platforms must be checked</li>
       </ul>
