@@ -49,7 +49,6 @@ jest.mock('../../../lib/local-db', () => ({
   getLocalUser: jest.fn().mockResolvedValue({
     id: 'user-1',
     name: 'Test User',
-    upi_id: 'test@upi',
     default_currency: 'INR',
   }),
 }));
@@ -89,10 +88,52 @@ describe('ProfileScreen', () => {
     });
   });
 
-  it('renders the profile screen', async () => {
+  it('renders the profile screen with Name field', async () => {
     const { getByText } = renderWithProviders(<ProfileScreen />);
     await waitFor(() => {
       expect(getByText('Profile')).toBeTruthy();
+      expect(getByText('Name')).toBeTruthy();
+    });
+  });
+
+  it('does NOT render UPI ID field (regression: removed)', async () => {
+    const { queryByText } = renderWithProviders(<ProfileScreen />);
+    await waitFor(() => {
+      expect(queryByText('Profile')).toBeTruthy();
+    });
+    // UPI ID was removed from the profile screen
+    expect(queryByText('UPI ID')).toBeNull();
+    expect(queryByText(/upi/i)).toBeNull();
+  });
+
+  it('does NOT render currency selector (regression: removed)', async () => {
+    const { queryByText } = renderWithProviders(<ProfileScreen />);
+    await waitFor(() => {
+      expect(queryByText('Profile')).toBeTruthy();
+    });
+    // Currency selector was removed from the profile screen
+    expect(queryByText('Currency')).toBeNull();
+    expect(queryByText('Default Currency')).toBeNull();
+  });
+
+  it('shows Save button when name is edited (dirty state)', async () => {
+    const { queryByText, getByText, getByPlaceholderText } = renderWithProviders(
+      <ProfileScreen />,
+    );
+    await waitFor(() => {
+      expect(getByText('Profile')).toBeTruthy();
+    });
+
+    // Save button should not be visible initially
+    expect(queryByText('Save Changes')).toBeNull();
+
+    // Edit the name using the placeholder to locate the input
+    const nameInput = getByPlaceholderText('Your name');
+    fireEvent.changeText(nameInput, 'New Name');
+
+    // Save button should now be visible
+    await waitFor(() => {
+      expect(queryByText('Save Changes')).toBeTruthy();
     });
   });
 

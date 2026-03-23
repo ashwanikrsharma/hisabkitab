@@ -121,4 +121,107 @@ describe('POST /api/sync/push', () => {
     const data = await res.json();
     expect(data.results).toEqual([]);
   });
+
+  // Regression: 'users' was missing from ALLOWED_TABLES causing 400 on profile sync push
+  it('should accept "users" as a valid table (regression: sync push 400 bug)', async () => {
+    mockMaybeSingle.mockResolvedValueOnce({
+      data: { id: 'user-1', name: 'Old Name', updated_at: '2026-01-01T00:00:00Z' },
+      error: null,
+    });
+    mockUpdateSingle.mockResolvedValueOnce({
+      data: { id: 'user-1', name: 'New Name' },
+      error: null,
+    });
+
+    const res = await POST(makePostRequest({
+      device_id: 'device-1',
+      operations: [{
+        id: 'op-user-1',
+        operation: 'update',
+        table: 'users',
+        record_id: 'user-1',
+        data: { name: 'New Name', default_currency: 'INR' },
+        client_updated_at: new Date().toISOString(),
+      }],
+    }));
+
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.results).toHaveLength(1);
+    expect(data.results[0].status).toBe('ok');
+  });
+
+  it('should succeed for profile update sync push with name and default_currency', async () => {
+    mockMaybeSingle.mockResolvedValueOnce({
+      data: { id: FAKE_USER_ID, name: 'Old Name', default_currency: 'USD', updated_at: '2026-01-01T00:00:00Z' },
+      error: null,
+    });
+    mockUpdateSingle.mockResolvedValueOnce({
+      data: { id: FAKE_USER_ID, name: 'New Name', default_currency: 'INR', updated_at: '2026-03-23T00:00:00Z' },
+      error: null,
+    });
+
+    const res = await POST(makePostRequest({
+      device_id: 'device-profile-1',
+      operations: [{
+        id: 'op-profile-update-1',
+        operation: 'update',
+        table: 'users',
+        record_id: FAKE_USER_ID,
+        data: { name: 'New Name', default_currency: 'INR' },
+        client_updated_at: new Date().toISOString(),
+      }],
+    }));
+
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.results).toHaveLength(1);
+    expect(data.results[0].status).toBe('ok');
+    expect(data.results[0].server_data).toMatchObject({ name: 'New Name', default_currency: 'INR' });
+  });
+
+  it('should accept user update with upi_id for backward compat (stale sync queue entries)', async () => {
+    mockMaybeSingle.mockResolvedValueOnce({
+      data: { id: FAKE_USER_ID, name: 'Test User', upi_id: 'old@upi', updated_at: '2026-01-01T00:00:00Z' },
+      error: null,
+    });
+    mockUpdateSingle.mockResolvedValueOnce({
+      data: { id: FAKE_USER_ID, name: 'Test User', upi_id: 'new@upi', updated_at: '2026-03-23T00:00:00Z' },
+      error: null,
+    });
+
+    const res = await POST(makePostRequest({
+      device_id: 'device-profile-2',
+      operations: [{
+        id: 'op-profile-upi-1',
+        operation: 'update',
+        table: 'users',
+        record_id: FAKE_USER_ID,
+        data: { name: 'Test User', upi_id: 'new@upi' },
+        client_updated_at: new Date().toISOString(),
+      }],
+    }));
+
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.results).toHaveLength(1);
+    expect(data.results[0].status).toBe('ok');
+    expect(data.results[0].server_data).toMatchObject({ upi_id: 'new@upi' });
+  });
+
+  it('should reject tables not in ALLOWED_TABLES', async () => {
+    const res = await POST(makePostRequest({
+      device_id: 'device-1',
+      operations: [{
+        id: 'op-bad-1',
+        operation: 'update',
+        table: 'admin_secrets',
+        record_id: 'rec-1',
+        data: {},
+        client_updated_at: new Date().toISOString(),
+      }],
+    }));
+
+    expect(res.status).toBe(400);
+  });
 });
