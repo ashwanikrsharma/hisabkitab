@@ -2,6 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Light theme (default) ─────────────────────────────────────────────── */
+:root {
+  --color-surface: #FFFFFF;
+  --color-surface-raised: #FFFFFF;
+  --color-surface-sunken: #F5F5F5;
+  --color-ink: #1A1A1A;
+  --color-ink-secondary: #6B6B6B;
+  --color-ink-muted: #9CA3AF;
+  --color-border: #E5E7EB;
+  --color-card-bg: #FFFFFF;
+  --color-shadow-opacity: 0.04;
+  --color-selection-text: #1A1A1A;
+  --color-summary-owe-start: #FFF1F2;
+  --color-summary-owe-end: #FFFFFF;
+  --color-summary-owed-start: #ECFDF5;
+  --color-summary-owed-end: #FFFFFF;
+}
+
+/* ─── Dark theme ────────────────────────────────────────────────────────── */
+.dark {
+  --color-surface: #1a1a2e;
+  --color-surface-raised: #2d2d44;
+  --color-surface-sunken: #16162a;
+  --color-ink: #ffffff;
+  --color-ink-secondary: #a0aec0;
+  --color-ink-muted: #718096;
+  --color-border: #3d3d5c;
+  --color-card-bg: #2d2d44;
+  --color-shadow-opacity: 0.12;
+  --color-selection-text: #ffffff;
+  --color-summary-owe-start: #3b1a1e;
+  --color-summary-owe-end: #2d2d44;
+  --color-summary-owed-start: #1a3b2e;
+  --color-summary-owed-end: #2d2d44;
+}
+
 @layer base {
   * {
     box-sizing: border-box;
@@ -13,7 +49,7 @@
 
   ::selection {
     background-color: rgba(232, 101, 26, 0.15);
-    color: #1A1A1A;
+    color: var(--color-selection-text);
   }
 
   /* Respect reduced motion preference */
@@ -28,7 +64,7 @@
 
 @layer components {
   .card {
-    @apply bg-surface-raised rounded-2xl border border-gray-200/60 shadow-warm;
+    @apply bg-surface-raised rounded-2xl border border-[var(--color-border)] shadow-warm;
     contain: paint;
   }
 
@@ -62,11 +98,12 @@
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-xl border border-gray-200 bg-surface-raised px-5 py-2.5 text-sm font-semibold text-ink transition-all duration-200 ease-out-expo active:scale-[0.97] active:translate-y-px;
+    @apply inline-flex items-center justify-center rounded-xl border border-[var(--color-border)] bg-surface-raised px-5 py-2.5 text-sm font-semibold text-ink transition-all duration-200 ease-out-expo active:scale-[0.97] active:translate-y-px;
     will-change: transform;
   }
   .btn-secondary:hover {
-    @apply bg-surface-sunken border-gray-300;
+    @apply bg-surface-sunken;
+    border-color: var(--color-border);
   }
   .btn-secondary:focus-visible {
     @apply outline-none ring-2 ring-accent ring-offset-2;
@@ -76,7 +113,7 @@
   }
 
   .input-field {
-    @apply w-full rounded-xl border border-gray-200 bg-surface-raised px-4 py-2.5 text-ink placeholder-ink-muted transition-all duration-200 ease-out-expo;
+    @apply w-full rounded-xl border border-[var(--color-border)] bg-surface-raised px-4 py-2.5 text-ink placeholder-ink-muted transition-all duration-200 ease-out-expo;
   }
   .input-field:focus {
     @apply border-accent outline-none ring-2 ring-accent-glow;
@@ -93,7 +130,8 @@
   }
 
   .glass-header {
-    @apply sticky top-0 z-50 border-b border-white/10 bg-ink/95 backdrop-blur-lg;
+    @apply sticky top-0 z-50 border-b border-white/10 backdrop-blur-lg;
+    background-color: color-mix(in srgb, var(--color-ink) 95%, transparent);
   }
 
   .stagger-1 { animation-delay: 0.05s; }
@@ -105,11 +143,11 @@
   /* Summary card with subtle gradient border for visual weight */
   .summary-card-owe {
     @apply card p-5 relative overflow-hidden;
-    background: linear-gradient(135deg, #FFF1F2 0%, #FFFFFF 40%);
+    background: linear-gradient(135deg, var(--color-summary-owe-start) 0%, var(--color-summary-owe-end) 40%);
   }
   .summary-card-owed {
     @apply card p-5 relative overflow-hidden;
-    background: linear-gradient(135deg, #ECFDF5 0%, #FFFFFF 40%);
+    background: linear-gradient(135deg, var(--color-summary-owed-start) 0%, var(--color-summary-owed-end) 40%);
   }
 }
 

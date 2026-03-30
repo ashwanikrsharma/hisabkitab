@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { createClient } from '@/lib/supabase';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 const AVATAR_COLORS = [
   'from-orange-500 to-amber-600',
@@ -182,8 +183,19 @@ export default function ProfilePage() {
           </div>
         </section>
 
+        {/* Appearance */}
+        <section className="opacity-0 animate-fade-up stagger-2">
+          <div className="card p-6">
+            <h2 className="text-sm font-display font-bold text-ink mb-1">Appearance</h2>
+            <p className="text-xs text-ink-secondary mb-4">
+              Choose how HisabKitab looks. System uses your device setting.
+            </p>
+            <ThemeToggle />
+          </div>
+        </section>
+
         {/* Sign out */}
-        <section className="opacity-0 animate-fade-up stagger-2 mt-auto pt-8">
+        <section className="opacity-0 animate-fade-up stagger-3 mt-auto pt-8">
           <div className="card p-6">
             <h2 className="text-sm font-display font-bold text-danger mb-2">Sign Out</h2>
             <p className="text-xs text-ink-secondary mb-4">

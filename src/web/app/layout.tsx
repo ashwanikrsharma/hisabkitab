@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Outfit, DM_Sans } from 'next/font/google';
 import { Toaster } from 'sonner';
 import { BottomNav } from './bottom-nav';
+import { ThemeProvider } from '@/lib/theme';
 import './globals.css';
 
 const outfit = Outfit({
@@ -29,20 +30,34 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${outfit.variable} ${dmSans.variable}`}>
+    <html lang="en" className={`${outfit.variable} ${dmSans.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: `
+          (function() {
+            try {
+              var theme = localStorage.getItem('hk-theme');
+              if (theme === 'dark' || (!theme || theme === 'system') && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                document.documentElement.classList.add('dark');
+              }
+            } catch(e) {}
+          })();
+        `}} />
+      </head>
       <body>
-        {children}
-        <BottomNav />
-        <Toaster
-          position="top-center"
-          richColors
-          toastOptions={{
-            style: {
-              fontFamily: 'var(--font-dm-sans)',
-              borderRadius: '12px',
-            },
-          }}
-        />
+        <ThemeProvider>
+          {children}
+          <BottomNav />
+          <Toaster
+            position="top-center"
+            richColors
+            toastOptions={{
+              style: {
+                fontFamily: 'var(--font-dm-sans)',
+                borderRadius: '12px',
+              },
+            }}
+          />
+        </ThemeProvider>
       </body>
     </html>
   );

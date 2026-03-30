@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
+  darkMode: 'class',
   content: [
     './app/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
@@ -9,14 +10,14 @@ module.exports = {
     extend: {
       colors: {
         surface: {
-          DEFAULT: '#FFFFFF',
-          raised: '#FFFFFF',
-          sunken: '#F5F5F5',
+          DEFAULT: 'var(--color-surface)',
+          raised: 'var(--color-surface-raised)',
+          sunken: 'var(--color-surface-sunken)',
         },
         ink: {
-          DEFAULT: '#1A1A1A',
-          secondary: '#6B6B6B',
-          muted: '#9CA3AF',
+          DEFAULT: 'var(--color-ink)',
+          secondary: 'var(--color-ink-secondary)',
+          muted: 'var(--color-ink-muted)',
         },
         accent: {
           DEFAULT: '#E8651A',
