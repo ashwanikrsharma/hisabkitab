@@ -15,12 +15,13 @@ import {
 import { useLocalSearchParams, router } from 'expo-router';
 import { type SplitType, type ExpenseCategory } from '@hisabkitab/shared';
 import { useAuthStore } from '../../../../store/auth';
-import { useCreateExpense } from '../../../../hooks/use-api';
+import { useCreateExpense, useGroupDetail } from '../../../../hooks/use-api';
 import { useTheme, RADIUS } from '../../../../lib/theme';
 import type { ColorTokens } from '../../../../lib/theme';
 import { ScreenHeader } from '../../../../components/screen-header';
 import { CategoryPicker } from '../../../../components/category-picker';
 import { SplitTypePicker } from '../../../../components/split-type-picker';
+import { SplitDetailInput } from '../../../../components/split-detail-input';
 
 export default function AddExpenseScreen() {
   const { id, currency: groupCurrency } = useLocalSearchParams<{
@@ -38,6 +39,14 @@ export default function AddExpenseScreen() {
   const [splitType, setSplitType] = useState<SplitType>('equal');
   const [category, setCategory] = useState<ExpenseCategory>('other');
   const [notes, setNotes] = useState('');
+  const [splitAmounts, setSplitAmounts] = useState<Record<string, string>>({});
+  const [splitError, setSplitError] = useState('');
+
+  const { data: group } = useGroupDetail(id);
+  const members = useMemo(
+    () => (group?.members ?? []).map((m) => ({ id: m.id, name: m.name })),
+    [group?.members],
+  );
 
   const createExpense = useCreateExpense();
   const submitting = createExpense.isPending;
@@ -61,6 +70,40 @@ export default function AddExpenseScreen() {
       return;
     }
 
+    // Validate splits for exact/percentage
+    setSplitError('');
+    let splits: Array<{ userId: string; amount: number; percentage?: number }> | undefined;
+
+    if (splitType === 'exact') {
+      splits = members.map((m) => ({
+        userId: m.id,
+        amount: parseFloat(splitAmounts[m.id] ?? '0'),
+      }));
+      const sum = splits.reduce((a, b) => a + b.amount, 0);
+      if (Math.abs(sum - parsedAmount) > 0.01) {
+        setSplitError(
+          `Amounts must sum to ${parsedAmount.toFixed(2)} (currently ${sum.toFixed(2)})`,
+        );
+        return;
+      }
+    } else if (splitType === 'percentage') {
+      splits = members.map((m) => {
+        const pct = parseFloat(splitAmounts[m.id] ?? '0');
+        return {
+          userId: m.id,
+          amount: Math.round((parsedAmount * pct) / 100 * 100) / 100,
+          percentage: pct,
+        };
+      });
+      const totalPct = splits.reduce((a, b) => a + (b.percentage ?? 0), 0);
+      if (Math.abs(totalPct - 100) > 0.01) {
+        setSplitError(
+          `Percentages must sum to 100% (currently ${totalPct.toFixed(1)}%)`,
+        );
+        return;
+      }
+    }
+
     createExpense.mutate(
       {
         groupId: id,
@@ -72,6 +115,7 @@ export default function AddExpenseScreen() {
         category,
         createdBy: userId,
         ...(notes.trim() ? { notes: notes.trim() } : {}),
+        ...(splits ? { splits } : {}),
       },
       {
         onSuccess: () => router.back(),
@@ -146,6 +190,29 @@ export default function AddExpenseScreen() {
                 disabled={submitting}
               />
             </View>
+
+            {/* Split Details */}
+            {members.length > 0 && (
+              <View style={styles.fieldGroup}>
+                <Text style={styles.label}>
+                  {splitType === 'equal'
+                    ? 'Per Person'
+                    : splitType === 'exact'
+                      ? 'Custom Amounts'
+                      : 'Percentages'}
+                </Text>
+                <SplitDetailInput
+                  members={members}
+                  splitType={splitType}
+                  totalAmount={parseFloat(amount) || 0}
+                  currency={currency}
+                  splits={splitAmounts}
+                  onChange={setSplitAmounts}
+                  error={splitError}
+                  disabled={submitting}
+                />
+              </View>
+            )}
 
             {/* Notes */}
             <View style={styles.fieldGroup}>

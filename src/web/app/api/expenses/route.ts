@@ -1,7 +1,8 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { requireAuth } from '@/lib/auth';
-import { getGroupExpenses, getDirectExpenses, createExpense, createActivity } from '@hisabkitab/services';
+import { sendPushNotifications } from '@/lib/push-sender';
+import { getGroupExpenses, getDirectExpenses, createExpense, createActivity, getGroupById } from '@hisabkitab/services';
 
 const CreateExpenseSchema = z.object({
   groupId: z.string().uuid().optional(),
@@ -119,9 +120,42 @@ export async function POST(req: NextRequest) {
       metadata: { expense_id: expense.id, amount: parsed.data.amount, currency: parsed.data.currency, category: parsed.data.category },
     }).catch((err) => console.error('[activity expense_added]', err));
 
+    // Non-blocking push notification to group members
+    if (parsed.data.groupId) {
+      notifyGroupMembersOfExpense(
+        parsed.data.groupId,
+        user.id,
+        user.user_metadata?.name as string | undefined,
+        parsed.data.description,
+        parsed.data.amount,
+      ).catch((err) => console.error('[push expense_added]', err));
+    }
+
     return Response.json({ expense }, { status: 201 });
   } catch (err) {
     console.error('[POST /api/expenses]', err);
     return Response.json({ error: 'Failed to create expense' }, { status: 500 });
   }
+}
+
+async function notifyGroupMembersOfExpense(
+  groupId: string,
+  creatorId: string,
+  creatorName: string | undefined,
+  description: string,
+  amount: number,
+) {
+  const group = await getGroupById(groupId);
+  const memberIds = group.members
+    .filter((m) => m.user_id !== creatorId && m.is_active)
+    .map((m) => m.user_id);
+
+  if (memberIds.length === 0) return;
+
+  await sendPushNotifications({
+    userIds: memberIds,
+    title: 'New Expense',
+    body: `${creatorName || 'Someone'} added "${description}" — \u20B9${amount}`,
+    data: { type: 'expense_added', groupId },
+  });
 }

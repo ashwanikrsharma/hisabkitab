@@ -24,6 +24,7 @@ import { CategoryPicker } from '../../../components/category-picker';
 import { SplitTypePicker } from '../../../components/split-type-picker';
 import { UserSearch } from '../../../components/user-search';
 import { Avatar } from '../../../components/avatar';
+import { SplitDetailInput } from '../../../components/split-detail-input';
 import type { UserSearchResult } from '../../../hooks/use-api';
 
 export default function NewDirectExpenseScreen() {
@@ -44,6 +45,8 @@ export default function NewDirectExpenseScreen() {
   const [category, setCategory] = useState<ExpenseCategory>('other');
   const [notes, setNotes] = useState('');
   const [includeSelf, setIncludeSelf] = useState(true);
+  const [splitAmounts, setSplitAmounts] = useState<Record<string, string>>({});
+  const [splitError, setSplitError] = useState('');
 
   // Friends involved
   const [friends, setFriends] = useState<UserSearchResult[]>(
@@ -54,6 +57,15 @@ export default function NewDirectExpenseScreen() {
 
   const createExpense = useCreateExpense();
   const submitting = createExpense.isPending;
+
+  // Build members list for split detail input (friends + optionally self)
+  const splitMembers = useMemo(() => {
+    const result = friends.map((f) => ({ id: f.id, name: f.name }));
+    if (includeSelf && userId) {
+      result.unshift({ id: userId, name: 'You' });
+    }
+    return result;
+  }, [friends, includeSelf, userId]);
 
   const handleAddFriend = (user: UserSearchResult) => {
     if (!friends.find((f) => f.id === user.id)) {
@@ -84,6 +96,40 @@ export default function NewDirectExpenseScreen() {
       return;
     }
 
+    // Validate splits for exact/percentage
+    setSplitError('');
+    let splits: Array<{ userId: string; amount: number; percentage?: number }> | undefined;
+
+    if (splitType === 'exact') {
+      splits = splitMembers.map((m) => ({
+        userId: m.id,
+        amount: parseFloat(splitAmounts[m.id] ?? '0'),
+      }));
+      const sum = splits.reduce((a, b) => a + b.amount, 0);
+      if (Math.abs(sum - parsedAmount) > 0.01) {
+        setSplitError(
+          `Amounts must sum to ${parsedAmount.toFixed(2)} (currently ${sum.toFixed(2)})`,
+        );
+        return;
+      }
+    } else if (splitType === 'percentage') {
+      splits = splitMembers.map((m) => {
+        const pct = parseFloat(splitAmounts[m.id] ?? '0');
+        return {
+          userId: m.id,
+          amount: Math.round((parsedAmount * pct) / 100 * 100) / 100,
+          percentage: pct,
+        };
+      });
+      const totalPct = splits.reduce((a, b) => a + (b.percentage ?? 0), 0);
+      if (Math.abs(totalPct - 100) > 0.01) {
+        setSplitError(
+          `Percentages must sum to 100% (currently ${totalPct.toFixed(1)}%)`,
+        );
+        return;
+      }
+    }
+
     createExpense.mutate(
       {
         description: description.trim(),
@@ -96,6 +142,7 @@ export default function NewDirectExpenseScreen() {
         splitWith: friends.map((f) => f.id),
         includeSelf,
         ...(notes.trim() ? { notes: notes.trim() } : {}),
+        ...(splits ? { splits } : {}),
       },
       {
         onSuccess: () => router.back(),
@@ -201,6 +248,29 @@ export default function NewDirectExpenseScreen() {
               <Text style={styles.label}>Split Type</Text>
               <SplitTypePicker selected={splitType} onSelect={setSplitType} disabled={submitting} />
             </View>
+
+            {/* Split Details */}
+            {splitMembers.length > 0 && (
+              <View style={styles.fieldGroup}>
+                <Text style={styles.label}>
+                  {splitType === 'equal'
+                    ? 'Per Person'
+                    : splitType === 'exact'
+                      ? 'Custom Amounts'
+                      : 'Percentages'}
+                </Text>
+                <SplitDetailInput
+                  members={splitMembers}
+                  splitType={splitType}
+                  totalAmount={parseFloat(amount) || 0}
+                  currency="INR"
+                  splits={splitAmounts}
+                  onChange={setSplitAmounts}
+                  error={splitError}
+                  disabled={submitting}
+                />
+              </View>
+            )}
 
             {/* Notes */}
             <View style={styles.fieldGroup}>
