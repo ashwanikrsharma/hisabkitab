@@ -3,7 +3,7 @@
 > AI-first group expense splitter for the Indian market.
 > "Hisab" = account/calculation, "Kitab" = book — Your expense book.
 
-**Last updated:** 2026-03-23
+**Last updated:** 2026-03-30
 **Status:** MVP shipped, iterating
 
 ---
@@ -61,18 +61,21 @@ HisabKitab is a lightweight expense-splitting app for friend groups, trips, room
 ### 4.4 Expenses
 - **Group expenses**: Add expense within a group, auto-split among members
 - **Direct expenses**: Add expense between two friends (no group required)
-- **Split types**: Equal (default), Exact amounts, Percentage
+- **Split types**: Equal (default), Exact amounts, Percentage — all three types supported on both web and mobile
+- **Per-member split inputs (mobile)**: When "Exact" or "Percentage" split is selected, an inline `SplitDetailInput` component renders below the split type picker showing per-member amount or percentage fields; validation ensures amounts sum to total (0.01 tolerance) and percentages sum to 100; for "Equal" split, computed per-person amount is shown read-only
 - **Categories**: Food, Transport, Accommodation, Entertainment, Utilities, Shopping, Health, Travel, Groceries, Other
 - **Soft delete** expenses (only by creator)
 - **Pagination** support for expense lists
-- *Not implemented: Receipt photo upload, AI-powered expense parsing, edit expense*
+- **AI Smart Input (mobile)**: Collapsible "Smart Input" section at the top of add-expense screens; user types natural language (e.g., "dinner with Rahul 500") and the app calls POST /api/ai/parse-expense; on success, auto-fills description, amount, category, and split type; failure is non-fatal — manual form remains fully usable
+- *Not implemented: Receipt photo upload (camera button in AI input is Phase 2 — text only currently), edit expense*
 
 ### 4.5 Balances & Settlements
 - Per-member balance within a group (who owes whom, how much)
 - **Simplified debt minimization** — minimize number of transactions
 - Direct (friend-to-friend) bilateral balances across all groups
 - **Record settlement** with payment method (Cash, Bank Transfer, Other)
-- **Settlement status**: Pending, Confirmed, Disputed
+- **Settlement status**: Pending, Confirmed, Disputed — tracked on both web and mobile
+- **Settlement status workflow (mobile)**: Settlement history section on the settle screen shows each settlement with a colored status badge (pending=gold, confirmed=green, disputed=red); users who are a party to a settlement (payer or payee) can tap to confirm or dispute via an ActionSheet; non-party settlements show status badge only; status changes call PATCH /api/settlements/[id] and invalidate balances + settlements queries
 - Settlement history with timestamps
 - Mark expense splits as settled upon settlement
 - *UPI payment method and UPI transaction ID tracking removed from the settlement UI; the `upi_transaction_id` column remains in the database for future use*
@@ -87,6 +90,8 @@ HisabKitab is a lightweight expense-splitting app for friend groups, trips, room
 ### 4.7 User Profile
 - Edit display name
 - Dark/light theme toggle (mobile)
+- **Appearance toggle (web)**: Profile page includes a Light/Dark/System toggle; preference is persisted to localStorage under the key `hk-theme`; a flash-prevention script in `<head>` reads localStorage before first paint so the correct theme applies immediately with no flash of wrong theme
+- **Sync conflict review (mobile)**: When unacknowledged sync conflicts exist, a "Sync Conflicts (N)" row appears on the profile screen; tapping navigates to a conflicts list screen showing each conflict's table name, record ID, timestamp, and auto-applied resolution; each card can be expanded to view a diff of local vs server data; "Acknowledge" button clears the conflict from the count; empty state shown when none exist
 - Sign out with confirmation dialog and redirect to login screen
 - *UPI ID field and currency selection removed from profile UI; `upi_id` and `default_currency` columns remain in the database for future use*
 
@@ -123,6 +128,25 @@ HisabKitab is a lightweight expense-splitting app for friend groups, trips, room
 - `analytics_daily` table for aggregated metrics
 - Admin audit log for data changes
 
+### 4.12 Push Notifications (Mobile)
+- Mobile app requests notification permissions on first launch after authentication
+- Expo push token is obtained via `Notifications.getExpoPushTokenAsync()` and registered via POST /api/push-tokens
+- Token is deactivated via DELETE /api/push-tokens on logout
+- Multiple devices per user are supported; tokens are stored in the `push_tokens` table with device-level granularity
+- **Notification triggers**: new expense in a group (notifies all group members), new settlement received (notifies payee), new member joins a group (notifies existing members)
+- Push sends are non-blocking (`sendPushNotification(...).catch(console.error)`) and never affect the main API response
+- Server uses the Expo Push API (`https://exp.host/--/api/v2/push/send`) for delivery
+- Invalid/expired tokens are marked inactive; duplicate token registration is handled via upsert
+- App works fully without notification permission granted (graceful degradation)
+
+### 4.13 Web Dark Mode
+- Web supports Light, Dark, and System (follows `prefers-color-scheme`) theme modes
+- Theme is toggled on the profile page and persisted in localStorage under `hk-theme`
+- A flash-prevention inline script in `<head>` applies the correct theme class before first paint
+- Implemented via Tailwind `darkMode: 'class'` with CSS custom properties for surface/ink color tokens
+- Brand/accent colors (orange) remain static across themes for consistency
+- Dark color tokens approximately match the mobile `DARK_COLORS` palette for brand coherence across platforms
+
 ---
 
 ## 5. User Flows
@@ -150,6 +174,24 @@ Home tab → Tap "+" FAB → Tap "Group Expense" (Within a group)
 ```
 Group detail → "You owe Priya ₹850" → Tap "Settle"
 → Enter amount, method (Cash/Bank Transfer/Other), note → Record → Activity logged
+```
+
+### Settlement Confirm/Dispute Flow (Mobile)
+```
+Group detail → Settle tab → Settlement History section
+→ Tap a settlement where user is payer or payee
+→ ActionSheet: "Confirm" or "Dispute"
+→ PATCH /api/settlements/[id] → UI refreshes with new status badge
+```
+
+### AI Expense Parsing Flow (Mobile)
+```
+Add Expense screen → Tap "Smart Input" section
+→ Type natural language: "dinner with Rahul 500"
+→ Tap sparkle icon → Loading state
+→ POST /api/ai/parse-expense → Claude parses text
+→ Description, amount, category, split type auto-filled in form
+→ User reviews and submits (or edits manually)
 ```
 
 ### New Group Flow
@@ -191,6 +233,7 @@ Group detail → "Add Member" button → Search by name/phone → Tap user → A
 │                   API LAYER (Next.js 14)                      │
 │   /api/expenses  /api/groups  /api/users  /api/settlements   │
 │   /api/activity  /api/friends  /api/webhooks                 │
+│   /api/ai/parse-expense  /api/push-tokens                    │
 │                                                              │
 │   requireAuth → Zod validate → @hisabkitab/services → JSON  │
 └──────────────┬──────────────────────────────────────────────┘
@@ -239,7 +282,7 @@ hisabkitab/
 │   ├── mobile/           # Expo React Native (iOS + Android)
 │   ├── services/         # @hisabkitab/services — DB queries, types, client
 │   ├── shared/           # @hisabkitab/shared — types, constants, utils
-│   └── supabase/         # SQL migrations (6 files, immutable)
+│   └── supabase/         # SQL migrations (7 files, immutable)
 ├── tech-design/          # Architecture decision records
 ├── specification/        # This file
 ├── docs/                 # HTML reports
@@ -270,7 +313,8 @@ groups (
 
 group_members (
   id           uuid PK, group_id uuid FK→groups, user_id uuid FK→users,
-  role text ('admin'|'member'), joined_at timestamptz, is_active boolean DEFAULT true
+  role text ('admin'|'member'), joined_at timestamptz, is_active boolean DEFAULT true,
+  updated_at timestamptz
 )
 
 expenses (
@@ -319,6 +363,14 @@ admin_audit_log (
   record_id uuid, old_data jsonb, new_data jsonb, ip_address text,
   created_at timestamptz
 )
+
+push_tokens (
+  id           uuid PK, user_id uuid FK→users ON DELETE CASCADE,
+  token text NOT NULL, platform text ('ios'|'android'|'web'),
+  device_id text, is_active boolean DEFAULT true,
+  created_at timestamptz, updated_at timestamptz,
+  UNIQUE(user_id, token)
+)
 ```
 
 ---
@@ -346,8 +398,19 @@ admin_audit_log (
 | GET | `/api/users/search` | Search users by name/phone |
 | GET | `/api/friends/[userId]` | Friend detail + balance |
 | GET/POST | `/api/webhooks/whatsapp` | WhatsApp webhook |
+| POST | `/api/ai/parse-expense` | Parse natural language into structured expense data via Claude |
+| POST | `/api/push-tokens` | Register or update an Expo push notification token |
+| DELETE | `/api/push-tokens` | Deactivate a push token (on logout) |
 
 All routes follow: `requireAuth` → Zod validation → `@hisabkitab/services` → sanitized JSON response.
+
+### AI Parse Route Details (POST /api/ai/parse-expense)
+- Input: `{ text: string (max 2000 chars), groupMembers?: [{ id, name }], currency?: string }`
+- Response: `{ description, amount, currency, category, splitType, paidByName, splitWith[], confidence }`
+- Claude model called with `prompt_version: 'expense-parser-v1.0'`, `agent_name: 'expense-parser'`
+- Claude output validated with Zod before returning to client
+- User text placed in human turn only (prompt injection guard)
+- Token usage logged to `agent_metrics` via `logAgentMetric`
 
 ---
 
@@ -367,8 +430,8 @@ All routes follow: `requireAuth` → Zod validation → `@hisabkitab/services` �
 ## 11. MVP Status
 
 ### Done
-- [x] Supabase setup (auth, schema, RLS policies) — 6 migrations
-- [x] Next.js web app with 19 API routes — deployed on Vercel
+- [x] Supabase setup (auth, schema, RLS policies) — 7 migrations
+- [x] Next.js web app with 22 API routes — deployed on Vercel
 - [x] Expo mobile app with tab navigation — builds on Android + iOS
 - [x] Google OAuth authentication (web + mobile)
 - [x] Group CRUD (create, rename, archive, list, detail)
@@ -390,11 +453,15 @@ All routes follow: `requireAuth` → Zod validation → `@hisabkitab/services` �
 - [x] 233 unit/integration tests (Vitest) + Maestro E2E flows
 - [x] E2E login tests (Playwright)
 - [x] AI agent observability (agent_metrics table)
+- [x] Exact & percentage split inputs on mobile (SplitDetailInput component, per-member fields, validation)
+- [x] Settlement status workflow on mobile (status badges, confirm/dispute via ActionSheet, PATCH integration)
+- [x] Dark mode on web (CSS variables, ThemeProvider, flash-prevention script, Light/Dark/System toggle)
+- [x] Sync conflict resolution UI on mobile (conflicts screen in profile, diff view, acknowledge)
+- [x] AI expense parsing on mobile (Smart Input component, POST /api/ai/parse-expense, Claude integration)
+- [x] Push notifications on mobile (push_tokens table, token registration/deactivation, Expo Push API, triggers on expense/settlement/member events)
 
 ### Not Yet Implemented
-- [ ] Receipt photo upload (Supabase Storage ready)
-- [ ] AI-powered expense parsing (Claude API integration planned)
-- [ ] Push notifications (expo-notifications configured, not wired)
+- [ ] Receipt photo upload (Supabase Storage ready; camera button in AI input is wired for Phase 2)
 - [ ] Phone OTP authentication
 - [ ] Guest mode (no sign-up required)
 - [ ] Admin dashboard (/admin page)
@@ -404,6 +471,7 @@ All routes follow: `requireAuth` → Zod validation → `@hisabkitab/services` �
 - [ ] Invite links for groups
 - [ ] iOS TestFlight / Android Play Store distribution
 - [ ] Edit expense (only delete implemented)
+- [ ] Sync conflict manual override — "keep local" option (Phase 2; current UI is read-only acknowledge)
 
 ---
 
@@ -423,3 +491,8 @@ All routes follow: `requireAuth` → Zod validation → `@hisabkitab/services` �
 | Agent workflow | Orchestrator + specialists | Consistent, traceable changes |
 | Testing | Vitest + Playwright | Fast unit tests + real E2E flows |
 | Deployment | Vercel (web) + Local (mobile) | Zero-config, fast iterations |
+| AI parsing architecture | Server-side API route (not client-side) | API key protection, prompt versioning, token logging mandated by CLAUDE.md |
+| Dark mode strategy | Tailwind `darkMode: 'class'` + CSS custom properties | Manual toggle + system default; flash prevented by inline `<head>` script |
+| Push token storage | Dedicated `push_tokens` table (not column on users) | Multi-device support; stale tokens can be pruned without touching users table |
+| Sync conflict resolution | Read-only acknowledge (Phase 1); server wins auto-resolve | Prevents accidental data loss; "keep local" override planned for Phase 2 |
+| Mobile split inputs | Inline expandable section (not bottom sheet or separate screen) | Matches web UX model; keeps expense creation in single screen |

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -11,12 +11,14 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../../store/auth';
 import { useUserProfile, useUpdateProfile } from '../../../hooks/use-api';
-import { useTheme, RADIUS } from '../../../lib/theme';
+import { useTheme, RADIUS, SPACING, FONT_SIZE } from '../../../lib/theme';
 import type { ColorTokens } from '../../../lib/theme';
 import { Avatar } from '../../../components/avatar';
+import { getConflictCount } from '../../../lib/local-db';
 
 export default function ProfileScreen() {
   const { colors, mode, toggle } = useTheme();
@@ -30,12 +32,23 @@ export default function ProfileScreen() {
 
   const [name, setName] = useState('');
   const [dirty, setDirty] = useState(false);
+  const [conflictCount, setConflictCount] = useState(0);
 
   useEffect(() => {
     if (profile) {
       setName(profile.name ?? '');
     }
   }, [profile]);
+
+  useFocusEffect(
+    useCallback(() => {
+      getConflictCount()
+        .then(setConflictCount)
+        .catch((err: unknown) => {
+          console.error('[profile] Failed to get conflict count:', err);
+        });
+    }, []),
+  );
 
   const handleSave = () => {
     updateProfile.mutate(
@@ -131,6 +144,27 @@ export default function ProfileScreen() {
             </View>
           </View>
         </View>
+
+        {/* Sync Conflicts */}
+        {conflictCount > 0 && (
+          <TouchableOpacity
+            style={styles.conflictsRow}
+            onPress={() => router.push('/(tabs)/profile/conflicts' as any)}
+            activeOpacity={0.7}
+            testID="sync-conflicts-row"
+          >
+            <View style={styles.conflictsRowLeft}>
+              <Ionicons name="git-compare-outline" size={20} color={colors.warning} />
+              <Text style={styles.conflictsRowText}>Sync Conflicts</Text>
+            </View>
+            <View style={styles.conflictsRowRight}>
+              <View style={styles.conflictsBadge}>
+                <Text style={styles.conflictsBadgeText}>{conflictCount}</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+            </View>
+          </TouchableOpacity>
+        )}
 
         {/* Save */}
         <TouchableOpacity
@@ -250,6 +284,48 @@ const createStyles = (colors: ColorTokens) => StyleSheet.create({
     color: colors.textSecondary,
   },
   appearanceOptionTextSelected: {
+    color: '#ffffff',
+  },
+  conflictsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: colors.card,
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.md,
+    marginTop: SPACING.xxl,
+    minHeight: 52,
+  },
+  conflictsRowLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.md,
+  },
+  conflictsRowText: {
+    fontSize: FONT_SIZE.lg,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  conflictsRowRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.sm,
+  },
+  conflictsBadge: {
+    backgroundColor: colors.warning,
+    borderRadius: RADIUS.full,
+    minWidth: 24,
+    height: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+  },
+  conflictsBadgeText: {
+    fontSize: FONT_SIZE.xs,
+    fontWeight: '700',
     color: '#ffffff',
   },
   saveButton: {

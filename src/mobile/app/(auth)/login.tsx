@@ -82,8 +82,8 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        email: 'testuser@gmail.com',
-        password: 'Test@1234',
+        email: 'test@hisabkitab.app',
+        password: 'test1234',
       });
       if (error) throw error;
       router.replace('/(tabs)');
