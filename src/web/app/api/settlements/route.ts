@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { requireAuth } from '@/lib/auth';
+import { sendPushNotifications } from '@/lib/push-sender';
 import { getGroupSettlements, getDirectSettlements, createSettlement, getUserProfile, createActivity } from '@hisabkitab/services';
 
 const CreateSettlementSchema = z.object({
@@ -81,6 +82,14 @@ export async function POST(req: NextRequest) {
     // Log activity (non-blocking)
     logSettlementActivity(parsed.data.groupId, payerId, parsed.data.payeeId, parsed.data.amount, parsed.data.currency)
       .catch((err) => console.error('[activity settlement_created]', err));
+
+    // Non-blocking push notification to payee
+    sendPushNotifications({
+      userIds: [parsed.data.payeeId],
+      title: 'Settlement Received',
+      body: `${user.user_metadata?.name || 'Someone'} paid you \u20B9${parsed.data.amount}`,
+      data: { type: 'settlement_created', groupId: parsed.data.groupId },
+    }).catch((err) => console.error('[push settlement_created]', err));
 
     return Response.json({ settlement }, { status: 201 });
   } catch (err) {
