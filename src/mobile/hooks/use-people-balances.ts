@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 import { useQueries } from '@tanstack/react-query';
 import { useGroups } from './use-api';
 import type { GroupListItem, Debt } from './use-api';
+import { computeGroupDebts } from './use-offline-api';
 import { useAuthStore } from '../store/auth';
 import { apiClient } from '../lib/api-client';
 
@@ -52,6 +53,10 @@ export function usePeopleBalances() {
     queries: groupList.map((g) => ({
       queryKey: ['balances', g.id] as const,
       queryFn: async (): Promise<Debt[]> => {
+        // Try local DB first (offline-capable)
+        const localDebts = await computeGroupDebts(g.id);
+        if (localDebts.length > 0) return localDebts;
+        // Fallback to API if local DB has no data yet
         const data = await apiClient<{ debts: Debt[] }>(
           `/api/groups/${g.id}/balances`,
         );

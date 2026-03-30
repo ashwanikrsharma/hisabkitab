@@ -46,10 +46,12 @@ CREATE TABLE IF NOT EXISTS local_group_members (
   role TEXT DEFAULT 'member',
   joined_at TEXT NOT NULL,
   is_active INTEGER DEFAULT 1,
+  updated_at TEXT,
   _sync_status TEXT DEFAULT 'synced' CHECK(_sync_status IN ('synced','pending','error')),
   _local_id TEXT,
   _last_synced_at TEXT,
-  FOREIGN KEY (group_id) REFERENCES local_groups(id)
+  FOREIGN KEY (group_id) REFERENCES local_groups(id),
+  UNIQUE(group_id, user_id)
 );
 
 CREATE TABLE IF NOT EXISTS local_expenses (

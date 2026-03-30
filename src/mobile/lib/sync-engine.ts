@@ -40,6 +40,15 @@ type PushResult = {
 let _status: SyncStatus = 'idle';
 let _timer: ReturnType<typeof setInterval> | null = null;
 let _syncInProgress = false;
+let _onPullComplete: (() => void) | null = null;
+
+/**
+ * Register a callback to be invoked after every successful pull.
+ * Used by _layout.tsx to invalidate React Query cache when local DB changes.
+ */
+export function setOnPullComplete(cb: () => void): void {
+  _onPullComplete = cb;
+}
 
 const SYNC_INTERVAL_MS = 30_000;
 
@@ -296,6 +305,9 @@ async function pullChanges(): Promise<void> {
       [timestamp],
     );
   });
+
+  // Notify React Query that local DB has new data
+  _onPullComplete?.();
 }
 
 /**
@@ -315,7 +327,7 @@ async function upsertLocalRecord(
   const allowedTables: Record<string, string[]> = {
     local_users: ['id', 'phone', 'name', 'avatar_url', 'upi_id', 'default_currency', 'created_at', 'updated_at'],
     local_groups: ['id', 'name', 'description', 'currency', 'created_by', 'avatar_url', 'is_archived', 'created_at', 'updated_at'],
-    local_group_members: ['id', 'group_id', 'user_id', 'role', 'joined_at', 'is_active'],
+    local_group_members: ['id', 'group_id', 'user_id', 'role', 'joined_at', 'is_active', 'updated_at'],
     local_expenses: ['id', 'group_id', 'description', 'amount', 'currency', 'paid_by', 'category', 'split_type', 'receipt_url', 'notes', 'created_by', 'created_at', 'updated_at', 'deleted_at'],
     local_expense_splits: ['id', 'expense_id', 'user_id', 'amount', 'percentage', 'settled', 'created_at'],
     local_settlements: ['id', 'group_id', 'payer_id', 'payee_id', 'amount', 'currency', 'status', 'note', 'upi_transaction_id', 'payment_method', 'created_at', 'updated_at'],

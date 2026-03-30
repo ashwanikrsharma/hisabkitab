@@ -4,6 +4,7 @@ import { requireAuth } from '@/lib/auth';
 import { getServerClient } from '@hisabkitab/services';
 
 const ALLOWED_TABLES = [
+  'users',
   'groups',
   'group_members',
   'expenses',
@@ -100,6 +101,53 @@ async function queryTableChanges(
   groupIds: string[],
 ): Promise<Record<string, unknown>[]> {
   switch (table) {
+    case 'users': {
+      // Fetch user profiles for all members of the user's groups + the user themselves
+      if (groupIds.length === 0) {
+        // Only fetch the user's own profile
+        const { data, error } = await db
+          .from('users')
+          .select('*')
+          .eq('id', userId)
+          .gt('updated_at', since);
+
+        if (error) {
+          console.error(`[sync/pull] users (self) query failed:`, error.message);
+          return [];
+        }
+        return (data ?? []) as Record<string, unknown>[];
+      }
+
+      // Fetch all users who are members of the user's groups
+      const { data: memberUserIds, error: memberError } = await db
+        .from('group_members')
+        .select('user_id')
+        .in('group_id', groupIds);
+
+      if (memberError) {
+        console.error(`[sync/pull] users member lookup failed:`, memberError.message);
+        return [];
+      }
+
+      const userIds = [...new Set((memberUserIds ?? []).map((m) => m.user_id))];
+      // Always include the current user
+      if (!userIds.includes(userId)) {
+        userIds.push(userId);
+      }
+
+      const { data, error } = await db
+        .from('users')
+        .select('*')
+        .in('id', userIds)
+        .gt('updated_at', since);
+
+      if (error) {
+        console.error(`[sync/pull] users query failed:`, error.message);
+        return [];
+      }
+      return (data ?? []) as Record<string, unknown>[];
+    }
+
     case 'groups': {
       if (groupIds.length === 0) return [];
 
@@ -123,17 +171,13 @@ async function queryTableChanges(
         .from('group_members')
         .select('*')
         .in('group_id', groupIds)
-        .gt('joined_at', since);
+        .gt('updated_at', since);
 
       if (error) {
         console.error(`[sync/pull] group_members query failed:`, error.message);
         return [];
       }
 
-      // group_members does not have updated_at, so we use joined_at as the
-      // change timestamp. Also include rows where is_active changed (deactivated
-      // members). Since we cannot filter by updated_at, we return all members for
-      // the user's groups when this is the first sync (since is epoch).
       return (data ?? []) as Record<string, unknown>[];
     }
 

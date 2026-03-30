@@ -457,75 +457,82 @@ export function useOfflineGroupExpenses(groupId: string) {
   });
 }
 
-export function useOfflineGroupBalances(groupId: string) {
-  const session = useAuthStore((s) => s.session);
+/**
+ * Compute simplified debts for a group from local SQLite data.
+ * Exported so usePeopleBalances can reuse the same logic without duplicating it.
+ */
+export async function computeGroupDebts(groupId: string): Promise<Debt[]> {
+  const database = getDb();
 
+  // Get all active members of this group
+  const members = await database.getAllAsync<{ user_id: string }>(
+    `SELECT user_id FROM local_group_members WHERE group_id = ? AND is_active = 1`,
+    [groupId],
+  );
+
+  if (members.length === 0) return [];
+
+  // Compute net balance per user: positive = owed money, negative = owes money
+  const balances: Record<string, number> = {};
+  for (const m of members) {
+    balances[m.user_id] = await computeUserBalance(groupId, m.user_id);
+  }
+
+  // Simplify debts: users with negative balance owe users with positive balance
+  const creditors: Array<{ userId: string; amount: number }> = [];
+  const debtors: Array<{ userId: string; amount: number }> = [];
+
+  for (const [uid, bal] of Object.entries(balances)) {
+    if (bal > 0.01) {
+      creditors.push({ userId: uid, amount: bal });
+    } else if (bal < -0.01) {
+      debtors.push({ userId: uid, amount: -bal });
+    }
+  }
+
+  // Sort descending so largest debts are settled first
+  creditors.sort((a, b) => b.amount - a.amount);
+  debtors.sort((a, b) => b.amount - a.amount);
+
+  const debts: Debt[] = [];
+  let ci = 0;
+  let di = 0;
+
+  while (ci < creditors.length && di < debtors.length) {
+    const creditor = creditors[ci]!;
+    const debtor = debtors[di]!;
+    const settleAmount = Math.min(creditor.amount, debtor.amount);
+
+    if (settleAmount > 0.01) {
+      const fromName = await getLocalUserName(debtor.userId);
+      const toName = await getLocalUserName(creditor.userId);
+
+      debts.push({
+        fromUserId: debtor.userId,
+        fromName,
+        toUserId: creditor.userId,
+        toName,
+        amount: Math.round(settleAmount * 100) / 100,
+        currency: 'INR',
+      });
+    }
+
+    creditor.amount -= settleAmount;
+    debtor.amount -= settleAmount;
+
+    if (creditor.amount < 0.01) ci++;
+    if (debtor.amount < 0.01) di++;
+  }
+
+  return debts;
+}
+
+export function useOfflineGroupBalances(groupId: string) {
   return useQuery<Debt[]>({
     queryKey: ['balances', groupId],
     queryFn: async () => {
-      const database = getDb();
-
-      // Get all active members of this group
-      const members = await database.getAllAsync<{ user_id: string }>(
-        `SELECT user_id FROM local_group_members WHERE group_id = ? AND is_active = 1`,
-        [groupId],
-      );
-
-      if (members.length > 0) {
-        // Compute net balance per user: positive = owed money, negative = owes money
-        const balances: Record<string, number> = {};
-        for (const m of members) {
-          balances[m.user_id] = await computeUserBalance(groupId, m.user_id);
-        }
-
-        // Simplify debts: users with negative balance owe users with positive balance
-        const creditors: Array<{ userId: string; amount: number }> = [];
-        const debtors: Array<{ userId: string; amount: number }> = [];
-
-        for (const [uid, bal] of Object.entries(balances)) {
-          if (bal > 0.01) {
-            creditors.push({ userId: uid, amount: bal });
-          } else if (bal < -0.01) {
-            debtors.push({ userId: uid, amount: -bal });
-          }
-        }
-
-        // Sort descending so largest debts are settled first
-        creditors.sort((a, b) => b.amount - a.amount);
-        debtors.sort((a, b) => b.amount - a.amount);
-
-        const debts: Debt[] = [];
-        let ci = 0;
-        let di = 0;
-
-        while (ci < creditors.length && di < debtors.length) {
-          const creditor = creditors[ci];
-          const debtor = debtors[di];
-          const settleAmount = Math.min(creditor.amount, debtor.amount);
-
-          if (settleAmount > 0.01) {
-            const fromName = await getLocalUserName(debtor.userId);
-            const toName = await getLocalUserName(creditor.userId);
-
-            debts.push({
-              fromUserId: debtor.userId,
-              fromName,
-              toUserId: creditor.userId,
-              toName,
-              amount: Math.round(settleAmount * 100) / 100,
-              currency: 'INR',
-            });
-          }
-
-          creditor.amount -= settleAmount;
-          debtor.amount -= settleAmount;
-
-          if (creditor.amount < 0.01) ci++;
-          if (debtor.amount < 0.01) di++;
-        }
-
-        return debts;
-      }
+      const debts = await computeGroupDebts(groupId);
+      if (debts.length > 0) return debts;
 
       // Fallback: fetch from server API
       try {
@@ -770,7 +777,7 @@ export function useOfflineAddMember() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (body: { groupId: string; userId: string }) => {
+    mutationFn: async (body: { groupId: string; userId: string; userName?: string; userPhone?: string }) => {
       const database = getDb();
       const now = new Date().toISOString();
 
@@ -779,10 +786,19 @@ export function useOfflineAddMember() {
 
       await database.withTransactionAsync(async () => {
         await database.runAsync(
-          `INSERT INTO local_group_members (id, group_id, user_id, role, joined_at, is_active, _sync_status, _local_id)
+          `INSERT OR IGNORE INTO local_group_members (id, group_id, user_id, role, joined_at, is_active, _sync_status, _local_id)
            VALUES (?, ?, ?, 'member', ?, 1, 'pending', ?)`,
           [id, body.groupId, body.userId, now, id],
         );
+
+        // Seed the user profile so getLocalUserName() can resolve their name
+        if (body.userName) {
+          await database.runAsync(
+            `INSERT OR IGNORE INTO local_users (id, name, phone, created_at, updated_at, _sync_status)
+             VALUES (?, ?, ?, ?, ?, 'synced')`,
+            [body.userId, body.userName, body.userPhone ?? null, now, now],
+          );
+        }
 
         await database.runAsync(
           `INSERT INTO sync_queue (operation, table_name, record_id, payload, created_at)

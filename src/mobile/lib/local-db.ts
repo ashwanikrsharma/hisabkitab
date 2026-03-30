@@ -190,6 +190,28 @@ export async function initLocalDb(): Promise<void> {
     // Column already exists — ignore "duplicate column" error
   }
 
+  // Migrate: add updated_at to local_group_members if missing
+  try {
+    await db.execAsync(`ALTER TABLE local_group_members ADD COLUMN updated_at TEXT`);
+  } catch {
+    // Column already exists — ignore
+  }
+
+  // Migrate: clean up duplicate group_members and add unique index
+  try {
+    // Remove duplicate (group_id, user_id) rows, keeping the first inserted
+    await db.execAsync(`
+      DELETE FROM local_group_members WHERE rowid NOT IN (
+        SELECT MIN(rowid) FROM local_group_members GROUP BY group_id, user_id
+      )
+    `);
+    await db.execAsync(
+      `CREATE UNIQUE INDEX IF NOT EXISTS idx_local_group_members_unique ON local_group_members(group_id, user_id)`,
+    );
+  } catch {
+    // Index may already exist or table may use UNIQUE constraint from schema
+  }
+
   // Store schema version in sync_metadata
   await db.runAsync(
     `INSERT OR REPLACE INTO sync_metadata (key, value) VALUES ('db_version', ?)`,
@@ -250,7 +272,7 @@ function nowISO(): string {
 export async function getLocalGroups(userId: string): Promise<LocalGroup[]> {
   const database = getDb();
   return database.getAllAsync<LocalGroup>(
-    `SELECT g.* FROM local_groups g
+    `SELECT DISTINCT g.* FROM local_groups g
      INNER JOIN local_group_members m ON m.group_id = g.id
      WHERE m.user_id = ? AND m.is_active = 1 AND g.is_archived = 0
      ORDER BY g.updated_at DESC`,
@@ -532,9 +554,12 @@ export async function getLocalActivity(userId: string): Promise<LocalActivity[]>
     `SELECT a.* FROM local_activity_log a
      INNER JOIN local_group_members m ON m.group_id = a.group_id
      WHERE m.user_id = ? AND m.is_active = 1
-     ORDER BY a.created_at DESC
+     UNION
+     SELECT a.* FROM local_activity_log a
+     WHERE a.group_id IS NULL AND a.actor_id = ?
+     ORDER BY created_at DESC
      LIMIT 100`,
-    [userId],
+    [userId, userId],
   );
 }
 
@@ -619,6 +644,21 @@ export async function acknowledgeConflict(id: number): Promise<void> {
   await database.runAsync(
     `UPDATE sync_conflicts SET acknowledged = 1 WHERE id = ?`,
     [id],
+  );
+}
+
+export async function getConflictCount(): Promise<number> {
+  const database = getDb();
+  const result = await database.getFirstAsync<{ count: number }>(
+    `SELECT COUNT(*) as count FROM sync_conflicts WHERE acknowledged = 0`,
+  );
+  return result?.count ?? 0;
+}
+
+export async function acknowledgeAllConflicts(): Promise<void> {
+  const database = getDb();
+  await database.runAsync(
+    `UPDATE sync_conflicts SET acknowledged = 1 WHERE acknowledged = 0`,
   );
 }
 
