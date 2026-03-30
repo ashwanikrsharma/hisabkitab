@@ -123,6 +123,7 @@
       <nav>
         <a href="ai-agents.html"><span class="nav-icon">🤖</span> AI Agent Workflow</a>
         <a href="claude-plugins-skills.html"><span class="nav-icon">🔧</span> Claude Plugins &amp; Skills</a>
+        <a href="repo-report.html"><span class="nav-icon">📊</span> Repository Report</a>
       </nav>
     </div>
   </aside>
@@ -393,6 +394,77 @@
           <p><code>q</code> — search term</p>
           <div class="endpoint-label">Response</div>
           <pre><code>{ "data": User[] }</code></pre>
+        </div>
+
+        <hr>
+
+        <h2>Push Tokens</h2>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method method-post">POST</span>
+            <span class="endpoint-path">/api/push-tokens</span>
+          </div>
+          <p class="endpoint-desc">Register or update an Expo push token for the authenticated user.</p>
+          <div class="endpoint-label">Body</div>
+          <pre><code>{
+  "token": "ExponentPushToken[...]",
+  "platform": "ios" | "android" | "web",
+  "deviceId": "string" (optional)
+}</code></pre>
+          <div class="endpoint-label">Response</div>
+          <pre><code>{ "pushToken": PushToken }</code></pre>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method method-delete">DELETE</span>
+            <span class="endpoint-path">/api/push-tokens</span>
+          </div>
+          <p class="endpoint-desc">Deactivate a push token (e.g., on sign-out).</p>
+          <div class="endpoint-label">Body</div>
+          <pre><code>{ "token": "ExponentPushToken[...]" }</code></pre>
+        </div>
+
+        <hr>
+
+        <h2>Sync</h2>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method method-post">POST</span>
+            <span class="endpoint-path">/api/sync/pull</span>
+          </div>
+          <p class="endpoint-desc">Pull changes from the server since a given timestamp. Used by the mobile sync engine for offline-first data synchronization.</p>
+          <div class="endpoint-label">Body</div>
+          <pre><code>{
+  "lastSyncedAt": "2024-01-01T00:00:00Z",
+  "tables": ["users", "groups", "group_members", "expenses", "expense_splits", "settlements", "activity_log"]
+}</code></pre>
+          <div class="endpoint-label">Response</div>
+          <pre><code>{
+  "changes": {
+    "users": [...],
+    "groups": [...],
+    "group_members": [...],
+    ...
+  },
+  "timestamp": "2024-03-30T12:00:00Z"
+}</code></pre>
+        </div>
+
+        <div class="endpoint">
+          <div class="endpoint-header">
+            <span class="method method-post">POST</span>
+            <span class="endpoint-path">/api/sync/push</span>
+          </div>
+          <p class="endpoint-desc">Push locally queued changes to the server. Returns conflicts if any records were modified server-side since the local change.</p>
+          <div class="endpoint-label">Body</div>
+          <pre><code>{
+  "changes": [
+    { "operation": "create|update|delete", "table": "string", "recordId": "uuid", "payload": {...} }
+  ]
+}</code></pre>
         </div>
 
         <hr>

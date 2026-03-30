@@ -122,6 +122,7 @@
       <nav>
         <a href="ai-agents.html"><span class="nav-icon">🤖</span> AI Agent Workflow</a>
         <a href="claude-plugins-skills.html" class="active"><span class="nav-icon">🔧</span> Claude Plugins &amp; Skills</a>
+        <a href="repo-report.html"><span class="nav-icon">📊</span> Repository Report</a>
       </nav>
     </div>
   </aside>
@@ -306,6 +307,7 @@
               <tr><td><span class="skill-badge">vercel:bootstrap</span></td><td>Project bootstrapping — preflight checks, integration provisioning, env key verification</td></tr>
               <tr><td><span class="skill-badge">vercel:vercel-services</span></td><td>Multiple services in one project — monorepo backends + frontends on same domain</td></tr>
               <tr><td><span class="skill-badge">vercel:cron-jobs</span></td><td>Cron job configuration and best practices in <code>vercel.json</code></td></tr>
+              <tr><td><span class="skill-badge">vercel:vercel-agent</span></td><td>Vercel Agent — AI-powered code review, incident investigation, SDK installation</td></tr>
             </tbody>
           </table>
         </div>
@@ -315,17 +317,14 @@
           <table>
             <thead><tr><th>Skill</th><th>Purpose</th></tr></thead>
             <tbody>
-              <tr><td><span class="skill-badge">vercel:nextjs</span></td><td>Next.js App Router — routing, Server Components, Server Actions, caching, middleware</td></tr>
+              <tr><td><span class="skill-badge">vercel:nextjs</span></td><td>Next.js App Router — routing, Server Components, Server Actions, caching, middleware/proxy</td></tr>
+              <tr><td><span class="skill-badge">vercel:next-upgrade</span></td><td>Upgrade Next.js to the latest version following official migration guides and codemods</td></tr>
+              <tr><td><span class="skill-badge">vercel:next-cache-components</span></td><td>Next.js 16 Cache Components — PPR, <code>'use cache'</code>, cacheLife, cacheTag, updateTag</td></tr>
               <tr><td><span class="skill-badge">vercel:react-best-practices</span></td><td>React TSX quality reviewer — component structure, hooks, a11y, performance, TypeScript</td></tr>
               <tr><td><span class="skill-badge">vercel:shadcn</span></td><td>shadcn/ui — CLI, component installation, theming, custom registries, Tailwind integration</td></tr>
-              <tr><td><span class="skill-badge">vercel:swr</span></td><td>SWR data fetching — caching, revalidation, mutations, optimistic UI</td></tr>
               <tr><td><span class="skill-badge">vercel:routing-middleware</span></td><td>Routing Middleware — request interception before cache, rewrites, redirects, personalization</td></tr>
               <tr><td><span class="skill-badge">vercel:vercel-functions</span></td><td>Serverless Functions, Edge Functions, Fluid Compute, streaming, Cron Jobs, runtime config</td></tr>
               <tr><td><span class="skill-badge">vercel:runtime-cache</span></td><td>Per-region key-value cache with tag-based invalidation across Functions and Middleware</td></tr>
-              <tr><td><span class="skill-badge">vercel:satori</span></td><td>Satori — HTML/CSS to SVG conversion for dynamic OG images in Next.js</td></tr>
-              <tr><td><span class="skill-badge">vercel:geist</span></td><td>Geist font family — typography system for Next.js interfaces</td></tr>
-              <tr><td><span class="skill-badge">vercel:geistdocs</span></td><td>Geistdocs — documentation template with Next.js + Fumadocs, MDX, AI chat, i18n</td></tr>
-              <tr><td><span class="skill-badge">vercel:micro</span></td><td>Micro — lightweight async HTTP microservices framework</td></tr>
             </tbody>
           </table>
         </div>
@@ -338,7 +337,6 @@
               <tr><td><span class="skill-badge">vercel:ai-sdk</span></td><td>AI SDK — chat interfaces, text generation, structured output, tool calling, agents</td></tr>
               <tr><td><span class="skill-badge">vercel:ai-gateway</span></td><td>AI Gateway — model routing, provider failover, cost tracking, OIDC auth</td></tr>
               <tr><td><span class="skill-badge">vercel:ai-elements</span></td><td>AI Elements — pre-built React components for chat UIs, message rendering, tool displays</td></tr>
-              <tr><td><span class="skill-badge">vercel:ai-generation-persistence</span></td><td>AI generation persistence — unique IDs, URLs, database storage, cost tracking per generation</td></tr>
               <tr><td><span class="skill-badge">vercel:chat-sdk</span></td><td>Chat SDK — multi-platform bots (Slack, Telegram, Teams, Discord, Google Chat, GitHub, Linear)</td></tr>
               <tr><td><span class="skill-badge">vercel:workflow</span></td><td>Workflow DevKit — durable workflows, long-running tasks, pause/resume, DurableAgent</td></tr>
               <tr><td><span class="skill-badge">vercel:json-render</span></td><td>AI chat response rendering — UIMessage parts, tool call displays, streaming states</td></tr>
@@ -368,7 +366,6 @@
             <tbody>
               <tr><td><span class="skill-badge">vercel:auth</span></td><td>Authentication — Clerk, Descope, Auth0 setup for Next.js (middleware, route protection)</td></tr>
               <tr><td><span class="skill-badge">vercel:sign-in-with-vercel</span></td><td>Sign in with Vercel — OAuth 2.0/OIDC identity provider for user auth</td></tr>
-              <tr><td><span class="skill-badge">vercel:vercel-firewall</span></td><td>Firewall — DDoS protection, WAF rules, rate limiting, bot filtering, IP allow/block</td></tr>
             </tbody>
           </table>
         </div>
@@ -379,9 +376,6 @@
             <thead><tr><th>Skill</th><th>Purpose</th></tr></thead>
             <tbody>
               <tr><td><span class="skill-badge">vercel:marketplace</span></td><td>Discover and install Marketplace integrations (databases, CMS, auth, payments)</td></tr>
-              <tr><td><span class="skill-badge">vercel:payments</span></td><td>Stripe — Marketplace setup, checkout sessions, webhooks, subscription billing</td></tr>
-              <tr><td><span class="skill-badge">vercel:email</span></td><td>Resend — email sending with React Email templates, transactional email</td></tr>
-              <tr><td><span class="skill-badge">vercel:cms</span></td><td>Headless CMS — Sanity, Contentful, DatoCMS, Storyblok, Builder.io</td></tr>
             </tbody>
           </table>
         </div>
@@ -541,7 +535,14 @@
               <tr><td><span class="skill-badge">keybindings-help</span></td><td>Customize keyboard shortcuts, rebind keys, add chord bindings</td></tr>
               <tr><td><span class="skill-badge">simplify</span></td><td>Review changed code for reuse, quality, and efficiency — then fix issues found</td></tr>
               <tr><td><span class="skill-badge">loop</span></td><td>Run a prompt or slash command on a recurring interval (e.g., <code>/loop 5m /foo</code>)</td></tr>
+              <tr><td><span class="skill-badge">schedule</span></td><td>Create, update, list, or run scheduled remote agents (triggers) on a cron schedule</td></tr>
               <tr><td><span class="skill-badge">claude-api</span></td><td>Build apps with the Claude API or Anthropic SDK</td></tr>
+              <tr><td><span class="skill-badge">mobile</span></td><td>iOS (Swift), Android (Kotlin), React Native, Flutter, and cross-platform mobile development</td></tr>
+              <tr><td><span class="skill-badge">explain-repo</span></td><td>Generate a comprehensive, self-contained HTML report for the current repository</td></tr>
+              <tr><td><span class="skill-badge">skill-creator</span></td><td>Create new skills, modify existing skills, run evals, and benchmark performance</td></tr>
+              <tr><td><span class="skill-badge">plugin-creator</span></td><td>Scaffold new AI coding agent plugins for Claude Code and Cursor</td></tr>
+              <tr><td><span class="skill-badge">capability-plugin-creator</span></td><td>Create plugins that package enterprise capabilities with skills, MCP declarations, and docs</td></tr>
+              <tr><td><span class="skill-badge">plugin-security-scanner</span></td><td>Scan plugins, skills, MCP declarations, and config files for security vulnerabilities</td></tr>
             </tbody>
           </table>
         </div>
@@ -554,7 +555,6 @@
           <table>
             <thead><tr><th>Skill</th><th>Purpose</th></tr></thead>
             <tbody>
-              <tr><td><span class="skill-badge">repo-report</span></td><td>Generate a comprehensive HTML report for any repository — covers architecture, tech stack, agents, conventions</td></tr>
               <tr><td><span class="skill-badge">polish-slack-message</span></td><td>Improve language, grammar, formatting, and conciseness of Slack messages</td></tr>
               <tr><td><span class="skill-badge">pdx-launched-announcement</span></td><td>Generate polished Slack announcements for product launches and milestones</td></tr>
               <tr><td><span class="skill-badge">parsing-slack-support</span></td><td>Parse Slack support channels — extract issues, feature requests, generate PM insights</td></tr>

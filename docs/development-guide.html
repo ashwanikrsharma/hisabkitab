@@ -116,6 +116,7 @@
       <nav>
         <a href="ai-agents.html"><span class="nav-icon">🤖</span> AI Agent Workflow</a>
         <a href="claude-plugins-skills.html"><span class="nav-icon">🔧</span> Claude Plugins &amp; Skills</a>
+        <a href="repo-report.html"><span class="nav-icon">📊</span> Repository Report</a>
       </nav>
     </div>
   </aside>
@@ -243,7 +244,7 @@ page.tsx         &#x2192; page.test.tsx</code></pre>
         </ul>
 
         <h3>E2E Tests (Playwright)</h3>
-        <pre><code>cd apps/web
+        <pre><code>cd src/web
 npx playwright test</code></pre>
         <p>Playwright config is at <code>src/web/playwright.config.ts</code>. E2E tests live in <code>src/web/e2e/</code>.</p>
 
@@ -258,7 +259,7 @@ npx playwright test</code></pre>
 vercel --prod   # production deployment</code></pre>
 
         <h3>Mobile (Android APK)</h3>
-        <pre><code>cd apps/mobile
+        <pre><code>cd src/mobile
 export JAVA_HOME=/opt/homebrew/Cellar/openjdk@21/21.0.8/libexec/openjdk.jdk/Contents/Home
 export ANDROID_HOME=$HOME/Library/Android/sdk
 eas build --platform android --profile preview --local</code></pre>

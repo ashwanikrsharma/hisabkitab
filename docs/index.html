@@ -469,6 +469,7 @@
       <nav>
         <a href="ai-agents.html"><span class="nav-icon">🤖</span> AI Agent Workflow</a>
         <a href="claude-plugins-skills.html"><span class="nav-icon">🔧</span> Claude Plugins &amp; Skills</a>
+        <a href="repo-report.html"><span class="nav-icon">📊</span> Repository Report</a>
       </nav>
     </div>
   </aside>
@@ -534,6 +535,18 @@
           </ol>
           <p style="margin-top:1rem">See the <a href="development-guide.html">Development Guide</a> for full setup instructions.</p>
         </div>
+
+        <h2>Development Process</h2>
+        <p>HisabKitab uses an <strong>AI-first development workflow</strong> powered by Claude Code with 11 specialist agents:</p>
+        <ol>
+          <li>Every task goes through the <strong>orchestrator</strong> (<code>/manager</code>) which triages and delegates</li>
+          <li>The <strong>architect agent</strong> produces a tech-design document before implementation begins</li>
+          <li>Specialist agents (<strong>db</strong>, <strong>backend</strong>, <strong>frontend</strong>) implement in parallel where possible</li>
+          <li><strong>Test agents</strong> (web + mobile) and the <strong>review agent</strong> run in parallel for verification</li>
+          <li><strong>Build/deploy agents</strong> handle Vercel (web) and EAS (mobile) deployments</li>
+          <li>The <strong>spec agent</strong> keeps <code>specification/SPEC.md</code> in sync with implemented changes</li>
+        </ol>
+        <p>Recent features built with this process: dark mode, push notifications, settlement history, custom expense splits, sync conflict resolution, and offline-first data sync.</p>
 
         <h2>For AI Agents</h2>
 

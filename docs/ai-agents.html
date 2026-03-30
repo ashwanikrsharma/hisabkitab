@@ -128,6 +128,7 @@
       <nav>
         <a href="ai-agents.html" class="active"><span class="nav-icon">🤖</span> AI Agent Workflow</a>
         <a href="claude-plugins-skills.html"><span class="nav-icon">🔧</span> Claude Plugins &amp; Skills</a>
+        <a href="repo-report.html"><span class="nav-icon">📊</span> Repository Report</a>
       </nav>
     </div>
   </aside>
@@ -139,7 +140,7 @@
         <p class="page-subtitle">How AI agents operate in the HisabKitab repository: lifecycle, the agent roster, orchestration, and mandatory constraints.</p>
 
         <h2>Overview</h2>
-        <p>HisabKitab uses <strong>Claude Code</strong> as its AI development assistant, with a system of 9 specialist agents that each own a specific domain of the codebase. A central orchestrator decomposes tasks, delegates to the right agents, and verifies the results.</p>
+        <p>HisabKitab uses <strong>Claude Code</strong> as its AI development assistant, with a system of 11 specialist agents that each own a specific domain of the codebase. A central orchestrator decomposes tasks, delegates to the right agents, and verifies the results.</p>
         <div class="callout">
           <p><strong>Key principle:</strong> Every task — regardless of size — must go through the orchestrator (<code>/manager</code>). The orchestrator determines the right level of effort (skip the architect for a typo fix, engage the full pipeline for a new feature).</p>
         </div>
