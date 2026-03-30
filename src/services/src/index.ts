@@ -17,6 +17,8 @@ export type {
   AuditAction,
   Activity,
   ActivityType,
+  PushToken,
+  PushTokenPlatform,
 } from './types';
 
 // ─── Queries ──────────────────────────────────────────────────────────────────
@@ -27,8 +29,11 @@ export {
   archiveGroup,
   updateGroup,
   addGroupMember,
+  isGroupMember,
+  getGroupMembers,
+  getGroupMemberUserIds,
 } from './queries/groups';
-export type { GroupWithMembers } from './queries/groups';
+export type { GroupWithMembers, GroupMemberWithUser } from './queries/groups';
 
 export {
   getGroupExpenses,
@@ -69,3 +74,9 @@ export type { CreateActivityInput } from './queries/activity';
 
 export { logAgentMetric } from './queries/agent-metrics';
 export type { LogAgentMetricInput } from './queries/agent-metrics';
+
+export {
+  registerPushToken,
+  deactivatePushToken,
+  getActiveTokensForUsers,
+} from './queries/push-tokens';

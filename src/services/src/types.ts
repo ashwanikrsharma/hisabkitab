@@ -129,6 +129,21 @@ export type AnalyticsDaily = {
   created_at: string;
 };
 
+// ─── Push Tokens ─────────────────────────────────────────────────────────────
+
+export type PushTokenPlatform = 'ios' | 'android' | 'web';
+
+export type PushToken = {
+  id: string;
+  user_id: string;
+  token: string;
+  platform: PushTokenPlatform;
+  device_id: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
 // ─── Agent Metrics ───────────────────────────────────────────────────────────
 
 export type AgentMetric = {
@@ -246,6 +261,14 @@ type AgentMetricInsert = {
   user_id?: string | null;
 };
 
+type PushTokenInsert = {
+  user_id: string;
+  token: string;
+  platform: PushTokenPlatform;
+  device_id?: string | null;
+  is_active?: boolean;
+};
+
 type AnalyticsDailyInsert = {
   date: string;
   group_id?: string | null;
@@ -268,6 +291,7 @@ export type Database = {
       activity_log: TableDef<Activity, ActivityInsert, Partial<Activity>>;
       admin_audit_log: TableDef<AdminAuditLog, AdminAuditLogInsert, never>;
       agent_metrics: TableDef<AgentMetric, AgentMetricInsert, never>;
+      push_tokens: TableDef<PushToken, PushTokenInsert, Partial<PushToken>>;
       analytics_daily: TableDef<AnalyticsDaily, AnalyticsDailyInsert, Partial<AnalyticsDaily>>;
     };
     Views: Record<string, never>;

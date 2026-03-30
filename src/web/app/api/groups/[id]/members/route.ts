@@ -1,31 +1,21 @@
 import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { requireAuth } from '@/lib/auth';
-import { addGroupMember, getUserProfile, createActivity, getServerClient } from '@hisabkitab/services';
-import type { GroupMember } from '@hisabkitab/services';
-
-type MemberWithUser = GroupMember & {
-  users: { id: string; name: string; avatar_url: string | null; phone: string } | null;
-};
+import { sendPushNotifications } from '@/lib/push-sender';
+import {
+  addGroupMember,
+  getUserProfile,
+  createActivity,
+  isGroupMember,
+  getGroupMembers,
+  getGroupMemberUserIds,
+} from '@hisabkitab/services';
 
 const ParamsSchema = z.object({ id: z.string().uuid() });
 
 const AddMemberSchema = z.object({
   userId: z.string().uuid(),
 });
-
-async function verifyGroupMembership(groupId: string, userId: string): Promise<boolean> {
-  const db = getServerClient();
-  const { data } = await db
-    .from('group_members')
-    .select('id')
-    .eq('group_id', groupId)
-    .eq('user_id', userId)
-    .eq('is_active', true)
-    .limit(1)
-    .single();
-  return !!data;
-}
 
 export async function GET(
   req: NextRequest,
@@ -39,21 +29,12 @@ export async function GET(
   }
 
   try {
-    const isMember = await verifyGroupMembership(paramsParsed.data.id, user.id);
+    const isMember = await isGroupMember(paramsParsed.data.id, user.id);
     if (!isMember) {
       return Response.json({ error: 'Not a member of this group' }, { status: 403 });
     }
 
-    const db = getServerClient();
-    const { data, error } = await db
-      .from('group_members')
-      .select('*, users(id, name, avatar_url, phone)')
-      .eq('group_id', paramsParsed.data.id)
-      .eq('is_active', true);
-
-    if (error) throw new Error(`getGroupMembers: ${error.message}`);
-
-    const members = (data ?? []) as unknown as MemberWithUser[];
+    const members = await getGroupMembers(paramsParsed.data.id);
     return Response.json({ members });
   } catch (err) {
     console.error('[GET /api/groups/[id]/members]', err);
@@ -82,13 +63,13 @@ export async function POST(
 
   try {
     // Verify the requesting user is a member of the group
-    const isMember = await verifyGroupMembership(groupId, user.id);
+    const isMember = await isGroupMember(groupId, user.id);
     if (!isMember) {
       return Response.json({ error: 'Not a member of this group' }, { status: 403 });
     }
 
     // Check if target user is already a member
-    const alreadyMember = await verifyGroupMembership(groupId, parsed.data.userId);
+    const alreadyMember = await isGroupMember(groupId, parsed.data.userId);
     if (alreadyMember) {
       return Response.json({ error: 'User is already a member of this group' }, { status: 409 });
     }
@@ -101,6 +82,10 @@ export async function POST(
     // Log activity (non-blocking)
     logMemberAddedActivity(groupId, user.id, parsed.data.userId)
       .catch((err) => console.error('[activity member_joined]', err));
+
+    // Non-blocking push notification to existing group members
+    notifyMembersOfNewJoin(groupId, user.id, parsed.data.userId)
+      .catch((err) => console.error('[push member_joined]', err));
 
     return Response.json({ membership }, { status: 201 });
   } catch (err) {
@@ -124,5 +109,29 @@ async function logMemberAddedActivity(
     title: 'Member added',
     description: `Added ${memberName} to the group`,
     metadata: { new_member_id: newMemberId },
+  });
+}
+
+async function notifyMembersOfNewJoin(
+  groupId: string,
+  actorId: string,
+  newMemberId: string,
+) {
+  // Use service function instead of raw Supabase query
+  const memberUserIds = await getGroupMemberUserIds(groupId);
+
+  const existingMemberIds = memberUserIds
+    .filter((id) => id !== actorId && id !== newMemberId);
+
+  if (existingMemberIds.length === 0) return;
+
+  const newMember = await getUserProfile(newMemberId);
+  const newMemberName = newMember?.name || 'Someone';
+
+  await sendPushNotifications({
+    userIds: existingMemberIds,
+    title: 'New Member',
+    body: `${newMemberName} joined the group`,
+    data: { type: 'member_joined', groupId },
   });
 }

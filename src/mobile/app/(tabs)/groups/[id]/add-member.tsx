@@ -32,7 +32,7 @@ export default function AddMemberScreen() {
 
   const handleSelect = (user: UserSearchResult) => {
     addMember.mutate(
-      { groupId: id, userId: user.id },
+      { groupId: id, userId: user.id, userName: user.name, userPhone: user.phone },
       {
         onSuccess: () => {
           setAdded((prev) => [...prev, user]);

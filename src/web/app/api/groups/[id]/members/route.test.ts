@@ -11,49 +11,25 @@ const mockRequireAuth = vi.hoisted(() => vi.fn());
 const mockAddGroupMember = vi.hoisted(() => vi.fn());
 const mockGetUserProfile = vi.hoisted(() => vi.fn());
 const mockCreateActivity = vi.hoisted(() => vi.fn());
-// Track membership check call count to differentiate requester vs target
-const mockDbSingle = vi.hoisted(() => vi.fn());
-const mockDbMembers = vi.hoisted(() => vi.fn());
+const mockIsGroupMember = vi.hoisted(() => vi.fn());
+const mockGetGroupMembers = vi.hoisted(() => vi.fn());
+const mockGetGroupMemberUserIds = vi.hoisted(() => vi.fn());
 
 vi.mock('@/lib/auth', () => ({
   requireAuth: mockRequireAuth,
+}));
+
+vi.mock('@/lib/push-sender', () => ({
+  sendPushNotifications: vi.fn().mockResolvedValue(undefined),
 }));
 
 vi.mock('@hisabkitab/services', () => ({
   addGroupMember: mockAddGroupMember,
   getUserProfile: mockGetUserProfile,
   createActivity: mockCreateActivity,
-  getServerClient: () => ({
-    from: (table: string) => {
-      if (table === 'group_members') {
-        return {
-          select: (cols: string) => {
-            if (cols === 'id') {
-              // membership check
-              return {
-                eq: () => ({
-                  eq: () => ({
-                    eq: () => ({
-                      limit: () => ({
-                        single: mockDbSingle,
-                      }),
-                    }),
-                  }),
-                }),
-              };
-            }
-            // members list query
-            return {
-              eq: () => ({
-                eq: () => mockDbMembers(),
-              }),
-            };
-          },
-        };
-      }
-      return { select: () => ({ eq: () => ({ eq: () => ({ eq: () => ({ limit: () => ({ single: mockDbSingle }) }) }) }) }) };
-    },
-  }),
+  isGroupMember: mockIsGroupMember,
+  getGroupMembers: mockGetGroupMembers,
+  getGroupMemberUserIds: mockGetGroupMemberUserIds,
 }));
 
 import { GET, POST } from './route';
@@ -80,11 +56,11 @@ beforeEach(() => {
   mockGetUserProfile.mockResolvedValue({ id: FRIEND_ID, name: 'Friend' });
   mockCreateActivity.mockResolvedValue({ id: 'activity-1' });
   // Default: user IS a member
-  mockDbSingle.mockResolvedValue({ data: { id: 'member-1' }, error: null });
-  mockDbMembers.mockReturnValue({
-    data: [{ id: 'member-1', user_id: FAKE_USER_ID, users: { id: FAKE_USER_ID, name: 'Test', avatar_url: null, phone: '1234567890' } }],
-    error: null,
-  });
+  mockIsGroupMember.mockResolvedValue(true);
+  mockGetGroupMembers.mockResolvedValue([
+    { id: 'member-1', user_id: FAKE_USER_ID, name: 'Test', avatar_url: null, phone: '1234567890' },
+  ]);
+  mockGetGroupMemberUserIds.mockResolvedValue([FAKE_USER_ID]);
 });
 
 describe('GET /api/groups/[id]/members', () => {
@@ -94,7 +70,7 @@ describe('GET /api/groups/[id]/members', () => {
   });
 
   it('should return 403 when user is not a member', async () => {
-    mockDbSingle.mockResolvedValueOnce({ data: null, error: null });
+    mockIsGroupMember.mockResolvedValueOnce(false);
 
     const res = await GET(makeGetRequest(), routeParams);
     expect(res.status).toBe(403);
@@ -122,7 +98,7 @@ describe('POST /api/groups/[id]/members', () => {
   });
 
   it('should return 403 when requester is not a member', async () => {
-    mockDbSingle.mockResolvedValueOnce({ data: null, error: null });
+    mockIsGroupMember.mockResolvedValueOnce(false);
 
     const res = await POST(makePostRequest({ userId: FRIEND_ID }), routeParams);
     expect(res.status).toBe(403);
@@ -130,9 +106,9 @@ describe('POST /api/groups/[id]/members', () => {
 
   it('should return 409 when target user is already a member', async () => {
     // First call: requester IS a member. Second call: target IS a member too.
-    mockDbSingle
-      .mockResolvedValueOnce({ data: { id: 'member-1' }, error: null })
-      .mockResolvedValueOnce({ data: { id: 'member-2' }, error: null });
+    mockIsGroupMember
+      .mockResolvedValueOnce(true)
+      .mockResolvedValueOnce(true);
 
     const res = await POST(makePostRequest({ userId: FRIEND_ID }), routeParams);
     expect(res.status).toBe(409);
@@ -143,9 +119,9 @@ describe('POST /api/groups/[id]/members', () => {
 
   it('should return 201 on success', async () => {
     // First call: requester IS a member. Second call: target is NOT a member.
-    mockDbSingle
-      .mockResolvedValueOnce({ data: { id: 'member-1' }, error: null })
-      .mockResolvedValueOnce({ data: null, error: null });
+    mockIsGroupMember
+      .mockResolvedValueOnce(true)
+      .mockResolvedValueOnce(false);
 
     const res = await POST(makePostRequest({ userId: FRIEND_ID }), routeParams);
     expect(res.status).toBe(201);

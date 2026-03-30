@@ -130,6 +130,62 @@ export async function addGroupMember(input: {
 }
 
 /**
+ * Checks whether a user is an active member of a group.
+ */
+export async function isGroupMember(groupId: string, userId: string): Promise<boolean> {
+  const db = getServerClient();
+
+  const { data } = await db
+    .from('group_members')
+    .select('id')
+    .eq('group_id', groupId)
+    .eq('user_id', userId)
+    .eq('is_active', true)
+    .limit(1)
+    .single();
+
+  return !!data;
+}
+
+export type GroupMemberWithUser = GroupMember & {
+  users: { id: string; name: string; avatar_url: string | null; phone: string } | null;
+};
+
+/**
+ * Returns all active members of a group, including joined user profile data.
+ */
+export async function getGroupMembers(groupId: string): Promise<GroupMemberWithUser[]> {
+  const db = getServerClient();
+
+  const { data, error } = await db
+    .from('group_members')
+    .select('*, users(id, name, avatar_url, phone)')
+    .eq('group_id', groupId)
+    .eq('is_active', true);
+
+  if (error) throw new Error(`getGroupMembers: ${error.message}`);
+
+  return (data ?? []) as unknown as GroupMemberWithUser[];
+}
+
+/**
+ * Returns active member user IDs for a group.
+ */
+export async function getGroupMemberUserIds(groupId: string): Promise<string[]> {
+  const db = getServerClient();
+
+  const { data, error } = await db
+    .from('group_members')
+    .select('user_id')
+    .eq('group_id', groupId)
+    .eq('is_active', true);
+
+  if (error) throw new Error(`getGroupMemberUserIds: ${error.message}`);
+
+  return (data ?? []).map((m) => m.user_id);
+}
+
+/**
  * Updates a group's name and/or description.
  */
 export async function updateGroup(
